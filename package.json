@@ -1,0 +1,32 @@
+{
+  "name": "synthetics-sdk",
+  "version": "1.0.0",
+  "description": "NodeJS SDK for integrating with the Google Cloud Monitoring Synthetics product.",
+  "main": "build/src/index.js",
+  "scripts": {
+    "test": "ts-mocha -p tsconfig.json ./test/**/*.spec.ts",
+    "build": "npm run clean && npm run compile",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "watch": "npm run compile -- --watch",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "lint": "gts lint",
+    "posttest": "npm run lint"
+  },
+  "author": "Google Inc.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.3",
+    "gts": "^3.1.1",
+    "ts-mocha": "^10.0.0",
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "mocha": "^10.2.0"
+  }
+}

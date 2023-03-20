@@ -1,0 +1,3 @@
+build/
+test/example_test_files/
+prettierrc.js
