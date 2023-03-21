@@ -24,13 +24,13 @@ import {
 } from './proto/synthetic_response';
 
 const {
-  EVENT_RUN_END,
+  EVENT_RUN_BEGIN,
+  EVENT_SUITE_BEGIN,
   EVENT_TEST_BEGIN,
   EVENT_TEST_PASS,
   EVENT_TEST_FAIL,
-  EVENT_SUITE_BEGIN,
   EVENT_TEST_PENDING,
-  EVENT_RUN_BEGIN,
+  EVENT_RUN_END,
 } = Mocha.Runner.constants;
 
 interface GcmSyntheticsReporterOptions {
@@ -45,10 +45,10 @@ class GcmSyntheticsReporter {
    * @class GcmSyntheticsReporter
    * @memberof Mocha.reporters
    * @param {!Runner} runner - Instance triggers reporter actions.
-   * @param {?Object=} options - runner options
-   * @param {?string=} options.output - If not provided, output is logged to
-   *                   stdout. If provided, file location location where output
-   *                   is written.
+   * @param {?GcmSyntheticsReporterOptions=} options - runner options
+   * @param {?string=} options.reporterOption.output - If not provided, output
+   *                   is logged to stdout. If provided, file location where
+   *                   output is written.
    */
   constructor(runner: Mocha.Runner, options: GcmSyntheticsReporterOptions) {
     const output = options?.reporterOption?.output;
@@ -119,10 +119,10 @@ class GcmSyntheticsReporter {
 /**
  * Serializes test results to relevant results for uptime to process.
  * @param {!Test} test - Test that was ran by mocha, pass & duration stats
- *     being
- *                      relevant.
- * @param {?Error} err - Error thrown when a test fails.
- * @return {!Object} Serialized results relevant for reporting by uptime.
+ *                       being relevant.
+ * @param {?ErrnoException} err - Error thrown when a test fails.
+ * @return {!MochaTestResult} Serialized results relevant for reporting by
+ *                            Cloud Monitoring.
  */
 export function serializeTest(
   test: Mocha.Test,
@@ -130,11 +130,11 @@ export function serializeTest(
 ): MochaTestResult {
   const now = Date.now();
   return {
-    // Relevant for current uptime metrics
+    // Relevant for uptime metrics
     test_passed: !err,
     test_start_time: new Date(now - (test.duration ?? 0)).toISOString(),
     test_end_time: new Date(now).toISOString(),
-    // Additional metadata for logging
+    // metadata for logging
     title: test.title,
     title_paths: test.titlePath(),
     error: err
@@ -151,7 +151,7 @@ export function serializeTest(
  * Serializes a NodeJs error stack into a collection of consumable objects.
  * @param {string} errStack The stack property on a NodeJs Error.
  * @return {!array} Serialized error stack frames which include properties
- *                  functionName, fileName, lineNumber, columnNumber
+ *                  functionName, fileName, lineNumber, columnNumber.
  */
 function serializeStack(
   errStack: string
@@ -161,12 +161,11 @@ function serializeStack(
   }
 
   const stack = errStack.split('\n');
-  stack.shift(); // removes first line with redundant error message, already
+  // removes first line with redundant error message, already
   // captured in err.message
+  stack.shift();
 
   return stack.map((frameStr: string) => {
-    // const stackFrame = {};
-
     const frame = frameStr.split('at ')[1];
     if (!frame) {
       // Frame is in an invalid format, this is defensive.
