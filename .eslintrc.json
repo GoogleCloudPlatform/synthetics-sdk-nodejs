@@ -3,7 +3,10 @@
     "rules": {
         "prettier/prettier": ["error", { "singleQuote": true }],
         "node/no-unpublished-import": ["error", {
-            "allowModules": ["chai"]
+            "allowModules": ["chai", "@google-cloud/gcm-synthetics"]
+        }],
+        "node/no-unpublished-require": ["error", {
+            "allowModules": ["@google-cloud/gcm-synthetics"]
         }]
     }
 }  
