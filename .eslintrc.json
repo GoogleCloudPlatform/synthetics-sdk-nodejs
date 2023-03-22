@@ -3,10 +3,18 @@
     "rules": {
         "prettier/prettier": ["error", { "singleQuote": true }],
         "node/no-unpublished-import": ["error", {
-            "allowModules": ["chai", "@google-cloud/gcm-synthetics"]
+            "allowModules": [
+                "chai",
+                "supertest",
+                "@google-cloud/gcm-synthetics",
+                "@google-cloud/functions-framework"
+            ]
         }],
         "node/no-unpublished-require": ["error", {
-            "allowModules": ["@google-cloud/gcm-synthetics"]
+            "allowModules": [
+                "@google-cloud/gcm-synthetics",
+                "@google-cloud/functions-framework"
+            ]
         }]
     }
-}  
+}

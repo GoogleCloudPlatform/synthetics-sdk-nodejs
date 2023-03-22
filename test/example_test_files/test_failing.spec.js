@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-it('is a native function error ', () => {
+it('is a native function error', () => {
   throw new Error('This test throws an error');
 });
   
