@@ -21,7 +21,7 @@ import {
   MochaSuiteResult,
   MochaTestResult,
   MochaTestResult_TestError_StackFrame,
-} from './proto/synthetic_response';
+} from 'synthetics-sdk-api';
 
 const {
   EVENT_RUN_BEGIN,

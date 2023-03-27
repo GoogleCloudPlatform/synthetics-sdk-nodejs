@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const functions = require('@google-cloud/functions-framework');
-const GcmSynthetics = require('@google-cloud/gcm-synthetics');
+const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
 /*
  * This is the server template that is required to run a synthetic monitor in
@@ -22,7 +22,7 @@ const GcmSynthetics = require('@google-cloud/gcm-synthetics');
 
 functions.http('SyntheticOk', async (req, res) => {
   res.send(
-    await GcmSynthetics.mocha({
+    await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_passing.spec.js',
     })
   );
@@ -30,7 +30,7 @@ functions.http('SyntheticOk', async (req, res) => {
 
 functions.http('SyntheticNotOk', async (req, res) => {
   res.send(
-    await GcmSynthetics.mocha({
+    await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_failing.spec.js',
     })
   );
@@ -38,7 +38,7 @@ functions.http('SyntheticNotOk', async (req, res) => {
 
 functions.http('SyntheticMultiple', async (req, res) => {
   res.send(
-    await GcmSynthetics.mocha({
+    await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_multiple.spec.js',
     })
   );
@@ -46,7 +46,7 @@ functions.http('SyntheticMultiple', async (req, res) => {
 
 functions.http('SyntheticFailsToRun', async (req, res) => {
   res.send(
-    await GcmSynthetics.mocha({
+    await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_fails_to_run.spec.js',
     })
   );

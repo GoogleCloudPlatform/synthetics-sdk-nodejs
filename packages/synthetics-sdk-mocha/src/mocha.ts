@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 import { spawn } from 'child_process';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
@@ -19,7 +20,7 @@ import {
   GenericResultV1,
   MochaResultV1,
   SyntheticResult,
-} from './proto/synthetic_response';
+} from 'synthetics-sdk-api';
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 export interface SyntheticMochaOptions {
@@ -48,8 +49,7 @@ export function mocha(
 
   return new Promise((resolve) => {
     const childProcess = spawn(
-      `./node_modules/mocha/bin/mocha.js ${spec} ` +
-        `${file ? `--file ${file}` : ''} ` +
+      `mocha ${spec} ${file ? `--file ${file}` : ''} ` +
         `--reporter ${__dirname}/gcm_synthetics_mocha_reporter.js ` +
         `--reporter-options output=${uniqueFileName}`,
       {

@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as Mocha from 'mocha';
 import * as path from 'path';
 
-import { MochaResultV1 } from '../../src/proto/synthetic_response';
+import { MochaResultV1 } from 'synthetics-sdk-api';
 
 const reporterPath = path.join(
   __dirname,

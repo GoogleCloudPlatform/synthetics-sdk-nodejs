@@ -13,17 +13,16 @@
 // limitations under the License.
 
 import { expect } from 'chai';
-const GcmSynthetics = require('@google-cloud/gcm-synthetics');
-import { MochaResultV1 } from '../../src/proto/synthetic_response';
+const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
 describe('GCM Synthetics Mocha', async () => {
   it('runs passing tests in a file at the provided path', async () => {
-    const syntheticMochaResults = await GcmSynthetics.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_passing.spec.js',
     });
 
-    const { suite_result, test_results }: MochaResultV1 =
-      syntheticMochaResults.synthetic_mocha_result;
+    const { suite_result, test_results } =
+      syntheticMochaResults.synthetic_mocha_result || {};
     const { runtime_metadata } = syntheticMochaResults;
 
     expect(suite_result?.suite_count).to.equal(1);
@@ -39,12 +38,12 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs failing tests in a file at the provided path', async () => {
-    const syntheticMochaResults = await GcmSynthetics.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_failing.spec.js',
     });
 
     const { suite_result, test_results } =
-      syntheticMochaResults.synthetic_mocha_result;
+      syntheticMochaResults.synthetic_mocha_result || {};
 
     expect(suite_result?.suite_count).to.equal(1);
     expect(suite_result?.test_count).to.equal(1);
@@ -57,12 +56,12 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs multiple files of tests at the provided path', async () => {
-    const syntheticMochaResults = await GcmSynthetics.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_passing.spec.js ./test/example_test_files/test_failing.spec.js',
     });
 
     const { suite_result, test_results } =
-      syntheticMochaResults.synthetic_mocha_result;
+      syntheticMochaResults.synthetic_mocha_result || {};
 
     expect(suite_result?.suite_count).to.equal(1);
     expect(suite_result?.test_count).to.equal(2);
@@ -74,27 +73,26 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('returns an error when a the test file doesnt exist', async () => {
-    const { synthetic_generic_result } = await GcmSynthetics.mocha({
+    const { synthetic_generic_result } = await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_does_not_exist.spec.js',
     });
 
-    console.log(synthetic_generic_result);
-    expect(synthetic_generic_result.is_ok).to.be.false;
-    expect(synthetic_generic_result.error.name).to.equal('Error');
-    expect(synthetic_generic_result.error.message).to.equal(
+    expect(synthetic_generic_result?.is_ok).to.be.false;
+    expect(synthetic_generic_result?.error?.name).to.equal('Error');
+    expect(synthetic_generic_result?.error?.message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
   });
 
   it('returns a GenericResult, when the test file fails to run', async () => {
     const { synthetic_generic_result, runtime_metadata } =
-      await GcmSynthetics.mocha({
+      await SyntheticsSdkMocha.mocha({
         spec: './test/example_test_files/test_does_not_exist.spec.js',
       });
 
-    expect(synthetic_generic_result.is_ok).to.be.false;
-    expect(synthetic_generic_result.error.name).to.equal('Error');
-    expect(synthetic_generic_result.error.message).to.equal(
+    expect(synthetic_generic_result?.is_ok).to.be.false;
+    expect(synthetic_generic_result?.error?.name).to.equal('Error');
+    expect(synthetic_generic_result?.error?.message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
 

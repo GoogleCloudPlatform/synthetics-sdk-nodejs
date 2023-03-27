@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const { getTestServer } = require('@google-cloud/functions-framework/testing');
-require('./integration_server.js');
-
-import { SyntheticResult } from '../../src/proto/synthetic_response';
+import { SyntheticResult } from 'synthetics-sdk-api';
 
 import { expect } from 'chai';
 import * as supertest from 'supertest';
+
+require('../../test/example_test_files/integration_server.js');
+const { getTestServer } = require('@google-cloud/functions-framework/testing');
 
 describe('CloudFunctionV2 Running Synthetics', () => {
   it('runs a passing mocha_tests suite', async () => {
