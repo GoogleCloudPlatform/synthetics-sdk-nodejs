@@ -1,5 +1,5 @@
 {
-  "name": "synthetics-sdk-mocha",
+  "name": "@google-cloud/synthetics-sdk-mocha",
   "version": "1.0.0",
   "description": "NodeJS SDK for integrating with the Google Cloud Monitoring Synthetics product.",
   "main": "./build/src/index.js",
@@ -15,6 +15,10 @@
     "posttest": "npm run lint",
     "mocha": "mocha"
   },
+  "files": [
+    "build/src/**/*.js",
+    "build/src/**/*.d.ts"
+  ],
   "author": "Google Inc.",
   "license": "Apache-2.0",
   "devDependencies": {
@@ -25,10 +29,10 @@
     "@types/supertest": "^2.0.12",
     "chai": "^4.3.7",
     "supertest": "^6.3.3",
-    "synthetics-sdk-mocha": "^1.0.0"
+    "synthetics-sdk-mocha": "file:./"
   },
   "dependencies": {
-    "synthetics-sdk-api": "^1.0.0",
+    "@google-cloud/synthetics-sdk-api": "^1.0.0",
     "mocha": "^10.2.0"
   }
 }

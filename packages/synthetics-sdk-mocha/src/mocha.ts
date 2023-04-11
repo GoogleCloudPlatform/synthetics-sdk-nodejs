@@ -20,7 +20,7 @@ import {
   GenericResultV1,
   MochaResultV1,
   SyntheticResult,
-} from 'synthetics-sdk-api';
+} from '@google-cloud/synthetics-sdk-api';
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 export interface SyntheticMochaOptions {

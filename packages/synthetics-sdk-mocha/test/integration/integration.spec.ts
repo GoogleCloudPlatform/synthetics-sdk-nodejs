@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SyntheticResult } from 'synthetics-sdk-api';
+import { SyntheticResult } from '@google-cloud/synthetics-sdk-api';
 
 import { expect } from 'chai';
 import * as supertest from 'supertest';

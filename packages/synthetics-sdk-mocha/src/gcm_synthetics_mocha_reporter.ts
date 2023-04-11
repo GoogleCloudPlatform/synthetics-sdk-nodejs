@@ -21,7 +21,7 @@ import {
   MochaSuiteResult,
   MochaTestResult,
   MochaTestResult_TestError_StackFrame,
-} from 'synthetics-sdk-api';
+} from '@google-cloud/synthetics-sdk-api';
 
 const {
   EVENT_RUN_BEGIN,

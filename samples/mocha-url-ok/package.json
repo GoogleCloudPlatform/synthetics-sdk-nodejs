@@ -1,0 +1,18 @@
+{
+  "name": "mocha-url-ok",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "mocha": "^10.0.0",
+    "@google-cloud/synthetics-sdk-mocha": "file:../../packages/synthetics-sdk-mocha",
+    "chai": "^4.3.0",
+    "node-fetch": "^2.6.0",
+    "@google-cloud/functions-framework": "^3.1.2"
+  },
+  "author": "",
+  "license": "ISC"
+}
