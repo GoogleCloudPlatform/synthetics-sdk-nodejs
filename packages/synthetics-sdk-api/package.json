@@ -12,7 +12,8 @@
     "watch": "npm run compile -- --watch",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "lint": "eslint **/*.ts"
+    "lint": "eslint **/*.ts",
+    "regenerate_proto": "sh ./regenerate_proto_ts.sh"
   },
   "dependencies": {
     "ts-proto": "^1.143.0"

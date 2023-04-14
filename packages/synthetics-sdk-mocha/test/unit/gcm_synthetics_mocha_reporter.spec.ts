@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as Mocha from 'mocha';
 import * as path from 'path';
 
-import { MochaResultV1 } from '@google-cloud/synthetics-sdk-api';
+import { TestFrameworkResultV1 } from '@google-cloud/synthetics-sdk-api';
 
 const reporterPath = path.join(
   __dirname,
@@ -53,7 +53,7 @@ describe('gcm_synthetic_reporter', () => {
     pendingTest = new Mocha.Test('pending test');
   });
 
-  const readOutputFile = (): MochaResultV1 => {
+  const readOutputFile = (): TestFrameworkResultV1 => {
     const output = fs.readFileSync(testResultFile, { encoding: 'utf-8' });
     fs.unlinkSync(testResultFile);
     return JSON.parse(output);
@@ -63,20 +63,20 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(passingTest);
 
     mocha.run(() => {
-      const { suite_result, test_results } = readOutputFile();
+      const testFrameworkResult = readOutputFile();
       try {
-        expect(suite_result?.suite_count).to.equal(1);
-        expect(suite_result?.test_count).to.equal(1);
-        expect(suite_result?.passing_test_count).to.equal(1);
-        expect(suite_result?.pending_test_count).to.equal(0);
-        expect(suite_result?.failing_test_count).to.equal(0);
+        expect(testFrameworkResult?.suite_count).to.equal(1);
+        expect(testFrameworkResult?.test_count).to.equal(1);
+        expect(testFrameworkResult?.passing_test_count).to.equal(1);
+        expect(testFrameworkResult?.pending_test_count).to.equal(0);
+        expect(testFrameworkResult?.failing_test_count).to.equal(0);
 
-        expect(test_results).to.have.length(1);
-        expect(test_results?.[0]?.test_passed).to.be.true;
-        expect(test_results?.[0]?.title).to.equal('passing test');
-        expect(test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
+        expect(testFrameworkResult?.test_results).to.have.length(1);
+        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.true;
+        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('passing test');
+        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
 
-        expect(test_results?.[0]?.error).to.be.undefined;
+        expect(testFrameworkResult?.test_results?.[0]?.error).to.be.undefined;
         done();
       } catch (e) {
         done(e);
@@ -88,22 +88,22 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(failingTest);
 
     mocha.run(() => {
-      const { suite_result, test_results } = readOutputFile();
+      const testFrameworkResult = readOutputFile();
       try {
-        expect(suite_result?.suite_count).to.equal(1);
-        expect(suite_result?.test_count).to.equal(1);
-        expect(suite_result?.passing_test_count).to.equal(0);
-        expect(suite_result?.pending_test_count).to.equal(0);
-        expect(suite_result?.failing_test_count).to.equal(1);
+        expect(testFrameworkResult?.suite_count).to.equal(1);
+        expect(testFrameworkResult?.test_count).to.equal(1);
+        expect(testFrameworkResult?.passing_test_count).to.equal(0);
+        expect(testFrameworkResult?.pending_test_count).to.equal(0);
+        expect(testFrameworkResult?.failing_test_count).to.equal(1);
 
-        expect(test_results).to.have.length(1);
-        expect(test_results?.[0]?.test_passed).to.be.false;
-        expect(test_results?.[0]?.title).to.equal('failing test');
-        expect(test_results?.[0]?.title_paths).to.deep.equal(['failing test']);
+        expect(testFrameworkResult?.test_results).to.have.length(1);
+        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.false;
+        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('failing test');
+        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['failing test']);
 
-        const error = test_results?.[0]?.error;
-        expect(error?.name).to.equal('Error');
-        expect(error?.message).to.equal('this test has failed');
+        const error = testFrameworkResult?.test_results?.[0]?.error;
+        expect(error?.error_name).to.equal('Error');
+        expect(error?.error_message).to.equal('this test has failed');
 
         expect(error?.stack_frames?.[0]?.function_name).to.equal('innerFn');
         expect(error?.stack_frames?.[0]?.file_name).to.equal(
@@ -140,15 +140,15 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(pendingTest);
 
     mocha.run(() => {
-      const { suite_result, test_results } = readOutputFile();
+      const testFrameworkResult = readOutputFile();
       try {
-        expect(suite_result?.suite_count).to.equal(1);
-        expect(suite_result?.test_count).to.equal(0);
-        expect(suite_result?.passing_test_count).to.equal(0);
-        expect(suite_result?.pending_test_count).to.equal(1);
-        expect(suite_result?.failing_test_count).to.equal(0);
+        expect(testFrameworkResult?.suite_count).to.equal(1);
+        expect(testFrameworkResult?.test_count).to.equal(0);
+        expect(testFrameworkResult?.passing_test_count).to.equal(0);
+        expect(testFrameworkResult?.pending_test_count).to.equal(1);
+        expect(testFrameworkResult?.failing_test_count).to.equal(0);
 
-        expect(test_results).to.have.length(0);
+        expect(testFrameworkResult?.test_results).to.have.length(0);
         done();
       } catch (e) {
         done(e);
@@ -165,27 +165,27 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addSuite(subSuite);
 
     mocha.run(() => {
-      const { suite_result, test_results } = readOutputFile();
+      const testFrameworkResult = readOutputFile();
       try {
-        expect(suite_result?.suite_count).to.equal(2);
-        expect(suite_result?.test_count).to.equal(3);
-        expect(suite_result?.passing_test_count).to.equal(2);
-        expect(suite_result?.pending_test_count).to.equal(1);
-        expect(suite_result?.failing_test_count).to.equal(1);
+        expect(testFrameworkResult?.suite_count).to.equal(2);
+        expect(testFrameworkResult?.test_count).to.equal(3);
+        expect(testFrameworkResult?.passing_test_count).to.equal(2);
+        expect(testFrameworkResult?.pending_test_count).to.equal(1);
+        expect(testFrameworkResult?.failing_test_count).to.equal(1);
 
-        expect(test_results).to.have.length(3);
+        expect(testFrameworkResult?.test_results).to.have.length(3);
 
-        expect(test_results?.[0]?.test_passed).to.be.true;
-        expect(test_results?.[0]?.title).to.equal('passing test');
-        expect(test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
+        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.true;
+        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('passing test');
+        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
 
-        expect(test_results?.[1]?.test_passed).to.be.false;
-        expect(test_results?.[1]?.title).to.equal('failing test');
-        expect(test_results?.[1]?.title_paths).to.deep.equal(['failing test']);
+        expect(testFrameworkResult?.test_results?.[1]?.test_passed).to.be.false;
+        expect(testFrameworkResult?.test_results?.[1]?.title).to.equal('failing test');
+        expect(testFrameworkResult?.test_results?.[1]?.title_paths).to.deep.equal(['failing test']);
 
-        expect(test_results?.[2]?.test_passed).to.be.true;
-        expect(test_results?.[2]?.title).to.equal('passing test 2');
-        expect(test_results?.[2]?.title_paths).to.deep.equal([
+        expect(testFrameworkResult?.test_results?.[2]?.test_passed).to.be.true;
+        expect(testFrameworkResult?.test_results?.[2]?.title).to.equal('passing test 2');
+        expect(testFrameworkResult?.test_results?.[2]?.title_paths).to.deep.equal([
           'sub suite',
           'passing test 2',
         ]);
@@ -203,17 +203,17 @@ describe('gcm_synthetic_reporter', () => {
     mocha.run(() => {
       const end = new Date();
 
-      const { suite_result, test_results } = readOutputFile();
-      const suiteStart = new Date(suite_result?.suite_start_time ?? '');
-      const suiteEnd = new Date(suite_result?.suite_end_time ?? '');
+      const testFrameworkResult = readOutputFile();
+      const suiteStart = new Date(testFrameworkResult?.suite_start_time ?? '');
+      const suiteEnd = new Date(testFrameworkResult?.suite_end_time ?? '');
 
       try {
         expect(suiteStart >= start).to.be.true;
         expect(suiteEnd <= end).to.be.true;
 
-        expect(new Date(test_results?.[0].test_start_time ?? '') >= suiteStart)
+        expect(new Date(testFrameworkResult?.test_results?.[0].test_start_time ?? '') >= suiteStart)
           .to.be.true;
-        expect(new Date(test_results?.[0]?.test_end_time ?? '') <= suiteEnd).to
+        expect(new Date(testFrameworkResult?.test_results?.[0]?.test_end_time ?? '') <= suiteEnd).to
           .be.true;
         done();
       } catch (e) {

@@ -15,4 +15,4 @@
 /**
  * @public
  */
-export * from './generated/synthetic_response';
+export * from './generated/proto/synthetic_response';

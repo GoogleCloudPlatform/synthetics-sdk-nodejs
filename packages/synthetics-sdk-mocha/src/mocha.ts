@@ -18,7 +18,7 @@ import * as fs from 'fs';
 
 import {
   GenericResultV1,
-  MochaResultV1,
+  TestFrameworkResultV1,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
@@ -62,11 +62,10 @@ export function mocha(
 
       try {
         const output = fs.readFileSync(uniqueFileName, { encoding: 'utf-8' });
-        const synthetic_mocha_result: MochaResultV1 = MochaResultV1.fromJSON(
-          JSON.parse(output)
-        );
+        const test_framework_result: TestFrameworkResultV1 =
+          TestFrameworkResultV1.fromJSON(JSON.parse(output));
         const synthetic_result: SyntheticResult = {
-          synthetic_mocha_result,
+          synthetic_test_framework_result_v1: test_framework_result,
           runtime_metadata: runtimeMetadata,
         };
         resolve(synthetic_result);
@@ -76,17 +75,17 @@ export function mocha(
           process.stderr.write(err.message);
         }
 
-        const name = 'Error';
-        const message =
+        const error_name = 'Error';
+        const error_message =
           'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.';
 
         const synthetic_generic_result: GenericResultV1 = {
           is_ok: false,
-          error: { name, message },
+          error: { error_name, error_message },
         };
 
         resolve({
-          synthetic_generic_result,
+          synthetic_generic_result_v1: synthetic_generic_result,
           runtime_metadata: runtimeMetadata,
         });
       }

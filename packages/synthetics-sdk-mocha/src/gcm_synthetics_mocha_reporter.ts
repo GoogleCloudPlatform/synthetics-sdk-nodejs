@@ -17,10 +17,9 @@ import * as Mocha from 'mocha';
 import * as path from 'path';
 
 import {
-  MochaResultV1,
-  MochaSuiteResult,
-  MochaTestResult,
-  MochaTestResult_TestError_StackFrame,
+  TestFrameworkResultV1,
+  TestResult,
+  TestResult_TestError_StackFrame,
 } from '@google-cloud/synthetics-sdk-api';
 
 const {
@@ -53,7 +52,7 @@ class GcmSyntheticsReporter {
   constructor(runner: Mocha.Runner, options: GcmSyntheticsReporterOptions) {
     const output = options?.reporterOption?.output;
 
-    const suiteResults: MochaSuiteResult = {
+    const testFrameworkResult: TestFrameworkResultV1 = {
       suite_count: 0,
       test_count: 0,
       passing_test_count: 0,
@@ -61,43 +60,45 @@ class GcmSyntheticsReporter {
       failing_test_count: 0,
       suite_start_time: '',
       suite_end_time: '',
+      test_results: [],
     };
-    const testResults: MochaTestResult[] = [];
 
     runner
       .on(EVENT_RUN_BEGIN, () => {
-        suiteResults.suite_start_time = new Date().toISOString();
+        testFrameworkResult.suite_start_time = new Date().toISOString();
       })
       .on(EVENT_SUITE_BEGIN, (suite: Mocha.Suite) => {
         // Only add root suite when it has tests directly in it.
         if (!suite.root || suite.tests.length > 0) {
-          suiteResults.suite_count = (suiteResults.suite_count ?? 0) + 1;
+          testFrameworkResult.suite_count =
+            (testFrameworkResult.suite_count ?? 0) + 1;
         }
       })
       .on(EVENT_TEST_BEGIN, () => {
-        suiteResults.test_count = (suiteResults.test_count ?? 0) + 1;
+        testFrameworkResult.test_count =
+          (testFrameworkResult.test_count ?? 0) + 1;
       })
       .on(EVENT_TEST_PASS, (test: Mocha.Test) => {
-        testResults.push(serializeTest(test, undefined));
-        suiteResults.passing_test_count =
-          (suiteResults.passing_test_count ?? 0) + 1;
+        testFrameworkResult.test_results.push(serializeTest(test, undefined));
+        testFrameworkResult.passing_test_count =
+          (testFrameworkResult.passing_test_count ?? 0) + 1;
       })
       .on(EVENT_TEST_FAIL, (test: Mocha.Test, err: Error) => {
-        testResults.push(serializeTest(test, err));
-        suiteResults.failing_test_count =
-          (suiteResults.failing_test_count ?? 0) + 1;
+        testFrameworkResult.test_results.push(serializeTest(test, err));
+        testFrameworkResult.failing_test_count =
+          (testFrameworkResult.failing_test_count ?? 0) + 1;
       })
       .on(EVENT_TEST_PENDING, () => {
-        suiteResults.pending_test_count =
-          (suiteResults.pending_test_count ?? 0) + 1;
+        testFrameworkResult.pending_test_count =
+          (testFrameworkResult.pending_test_count ?? 0) + 1;
       })
       .on(EVENT_RUN_END, () => {
-        suiteResults.suite_end_time = new Date().toISOString();
-        const mochaResult: MochaResultV1 = {
-          suite_result: suiteResults,
-          test_results: testResults,
-        };
-        const json = JSON.stringify(MochaResultV1.toJSON(mochaResult), null, 2);
+        testFrameworkResult.suite_end_time = new Date().toISOString();
+        const json = JSON.stringify(
+          TestFrameworkResultV1.toJSON(testFrameworkResult),
+          null,
+          2
+        );
         if (output) {
           try {
             fs.mkdirSync(path.dirname(output), { recursive: true });
@@ -121,13 +122,13 @@ class GcmSyntheticsReporter {
  * @param {!Test} test - Test that was ran by mocha, pass & duration stats
  *                       being relevant.
  * @param {?ErrnoException} err - Error thrown when a test fails.
- * @return {!MochaTestResult} Serialized results relevant for reporting by
+ * @return {!TestResult} Serialized results relevant for reporting by
  *                            Cloud Monitoring.
  */
 export function serializeTest(
   test: Mocha.Test,
   err: NodeJS.ErrnoException | undefined
-): MochaTestResult {
+): TestResult {
   const now = Date.now();
   return {
     // Relevant for uptime metrics
@@ -139,8 +140,8 @@ export function serializeTest(
     title_paths: test.titlePath(),
     error: err
       ? {
-          name: err.name,
-          message: err.message,
+          error_name: err.name,
+          error_message: err.message,
           stack_frames: serializeStack(err.stack || ''),
         }
       : undefined,
@@ -153,9 +154,7 @@ export function serializeTest(
  * @return {!array} Serialized error stack frames which include properties
  *                  functionName, fileName, lineNumber, columnNumber.
  */
-function serializeStack(
-  errStack: string
-): MochaTestResult_TestError_StackFrame[] {
+function serializeStack(errStack: string): TestResult_TestError_StackFrame[] {
   if (!errStack) {
     return [];
   }

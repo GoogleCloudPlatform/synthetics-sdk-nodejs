@@ -32,17 +32,17 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
-    const suite_result = output?.synthetic_mocha_result?.suite_result;
-    const test_results = output?.synthetic_mocha_result?.test_results;
+    const test_framework_result = output?.synthetic_test_framework_result_v1;
+    const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
 
-    expect(suite_result?.suite_count).to.equal(1);
-    expect(suite_result?.test_count).to.equal(1);
-    expect(suite_result?.passing_test_count).to.equal(1);
-    expect(suite_result?.failing_test_count).to.equal(0);
-    expect(suite_result?.pending_test_count).to.equal(0);
-    expect(suite_result?.suite_start_time).to.be.a.string;
-    expect(suite_result?.suite_end_time).to.be.a.string;
+    expect(test_framework_result?.suite_count).to.equal(1);
+    expect(test_framework_result?.test_count).to.equal(1);
+    expect(test_framework_result?.passing_test_count).to.equal(1);
+    expect(test_framework_result?.failing_test_count).to.equal(0);
+    expect(test_framework_result?.pending_test_count).to.equal(0);
+    expect(test_framework_result?.suite_start_time).to.be.a.string;
+    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
@@ -67,17 +67,17 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
-    const suite_result = output?.synthetic_mocha_result?.suite_result;
-    const test_results = output?.synthetic_mocha_result?.test_results;
+    const test_framework_result = output?.synthetic_test_framework_result_v1;
+    const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
 
-    expect(suite_result?.suite_count).to.equal(1);
-    expect(suite_result?.test_count).to.equal(1);
-    expect(suite_result?.passing_test_count).to.equal(0);
-    expect(suite_result?.failing_test_count).to.equal(1);
-    expect(suite_result?.pending_test_count).to.equal(0);
-    expect(suite_result?.suite_start_time).to.be.a.string;
-    expect(suite_result?.suite_end_time).to.be.a.string;
+    expect(test_framework_result?.suite_count).to.equal(1);
+    expect(test_framework_result?.test_count).to.equal(1);
+    expect(test_framework_result?.passing_test_count).to.equal(0);
+    expect(test_framework_result?.failing_test_count).to.equal(1);
+    expect(test_framework_result?.pending_test_count).to.equal(0);
+    expect(test_framework_result?.suite_start_time).to.be.a.string;
+    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
@@ -104,17 +104,17 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
-    const suite_result = output?.synthetic_mocha_result?.suite_result;
-    const test_results = output?.synthetic_mocha_result?.test_results;
+    const test_framework_result = output?.synthetic_test_framework_result_v1;
+    const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
 
-    expect(suite_result?.suite_count).to.equal(2);
-    expect(suite_result?.test_count).to.equal(3);
-    expect(suite_result?.passing_test_count).to.equal(1);
-    expect(suite_result?.failing_test_count).to.equal(2);
-    expect(suite_result?.pending_test_count).to.equal(1);
-    expect(suite_result?.suite_start_time).to.be.a.string;
-    expect(suite_result?.suite_end_time).to.be.a.string;
+    expect(test_framework_result?.suite_count).to.equal(2);
+    expect(test_framework_result?.test_count).to.equal(3);
+    expect(test_framework_result?.passing_test_count).to.equal(1);
+    expect(test_framework_result?.failing_test_count).to.equal(2);
+    expect(test_framework_result?.pending_test_count).to.equal(1);
+    expect(test_framework_result?.suite_start_time).to.be.a.string;
+    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(3);
     expect(runtime_metadata).to.not.be.undefined;
@@ -131,12 +131,12 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
-    const synthetic_generic_result = output?.synthetic_generic_result;
+    const synthetic_generic_result = output?.synthetic_generic_result_v1;
     const runtime_metadata = output?.runtime_metadata;
 
     expect(synthetic_generic_result?.is_ok).to.be.false;
-    expect(synthetic_generic_result?.error?.name).to.equal('Error');
-    expect(synthetic_generic_result?.error?.message).to.equal(
+    expect(synthetic_generic_result?.error?.error_name).to.equal('Error');
+    expect(synthetic_generic_result?.error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
 

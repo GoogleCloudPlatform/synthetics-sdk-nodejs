@@ -2,105 +2,100 @@ syntax = "proto3";
 
 package cloud_monitoring_uptime_proto;
 
-message MochaSuiteResult {
-  // the number of total test suites ran.
-  optional int64 suite_count = 1;
-  // the number of total tests that we're ran.
-  optional int64 test_count = 2;
-  // the number of total tests that passed.
-  optional int64 passing_test_count = 3;
-  // the number of total tests that failed eg 1.
-  optional int64 failing_test_count = 4;
-  // the number of total tests that did not run for some reason.
-  optional int64 pending_test_count = 5;
-  // the start time of the test suite in iso format.
-  optional string suite_start_time = 6;
-  // the end time of the test suite in iso format.
-  optional string suite_end_time = 7;
+message TestResult {
+ // The name of the test in this suite, "pings my website". Multiple tests can
+ // have the same title & title_path.
+ optional string title = 1;
+ // whether or not the test passed
+ optional bool test_passed = 2;
+ // The full path of names from the name of the suite, to the name of the test.
+ // Tests may be nested under multiple suites. Eg. ["my suite name", "pings my
+ // website", "three times"]
+ repeated string title_paths = 3;
+ // the start time of the test in iso format.
+ optional string test_start_time = 4;
+ // the end time of the test suite in iso format.
+ optional string test_end_time = 5;
+
+ // Information on an error that occurred.
+ message TestError {
+   // The class of error.
+   optional string error_name = 1;
+   // The full error message. Eg. "The url that you are fetching failed DNS
+   // lookup"
+   optional string error_message = 2;
+
+   // An individual stack frame that represents a line of code within a file.
+   message StackFrame {
+     // The name of the function that reported the error
+     optional string function_name = 1;
+     // The name of the file that reported the error
+     optional string file_name = 2;
+     // Line number that reported the error
+     optional int64 line = 3;
+     // Column number that reported the error
+     optional int64 column = 4;
+   }
+
+   // A list of StackFrame messages that indicate a single trace of code.
+   repeated StackFrame stack_frames = 3;
+ }
+
+ // The error that was the result of a test failure.
+ optional TestError error = 6;
 }
 
-message MochaTestResult {
-  // The name of the test in this suite, "pings my website". Multiple tests can
-  // have the same title & title_path.
-  optional string title = 1;
-  // whether or not the test passed
-  optional bool test_passed = 2;
-  // The full path of names from the name of the suite, to the name of the test.
-  // Tests may be nested under multiple suites. Eg. ["my suite name", "pings my
-  // website", “three times”]
-  repeated string title_paths = 3;
-  // the start time of the test in iso format.
-  optional string test_start_time = 4;
-  // the end time of the test suite in iso format.
-  optional string test_end_time = 5;
-
-  // Information on an error that occurred.
-  message TestError {
-    // The class of error.
-    optional string name = 1;
-    // The full error message. Eg. "The url that you are fetching failed DNS
-    // lookup"
-    optional string message = 2;
-
-    // An individual stack frame that represents a line of code within a file.
-    message StackFrame {
-      // The name of the function that reported the error
-      optional string function_name = 1;
-      // The name of the file that reported the error
-      optional string file_name = 2;
-      // Line number that reported the error
-      optional int64 line = 3;
-      // Column number that reported the error
-      optional int64 column = 4;
-    }
-
-    // A list of StackFrame messages that indicate a single trace of code.
-    repeated StackFrame stack_frames = 3;
-  }
-
-  // The error that was the result of a test failure.
-  optional TestError error = 6;
-}
-
-message MochaResultV1 {
-  // An aggregation of test results from a given synthetic's mocha suite run
-  optional MochaSuiteResult suite_result = 1;
-
-  // A collection of individual test results from a given synthetic's mocha
-  // suite
-  repeated MochaTestResult test_results = 2;
+message TestFrameworkResultV1 {
+ // the number of total test suites ran.
+ optional int64 suite_count = 1;
+ // the number of total tests that ran as a part of the suite run
+ optional int64 test_count = 2;
+ // the number of total tests that passed as a part of the suite run
+ optional int64 passing_test_count = 3;
+ // the number of total tests that failed as a prt of the suite run
+ optional int64 failing_test_count = 4;
+ // the number of total tests that remain pending after the suite run
+ optional int64 pending_test_count = 5;
+ // the start time of the test suite in iso format.
+ optional string suite_start_time = 6;
+ // the end time of the test suite in iso format.
+ optional string suite_end_time = 7;
+ // A collection of individual test results from a given synthetic's test
+ // suite
+ repeated TestResult test_results = 8;
 }
 
 message GenericResultV1 {
-  // Whether or not the synthetic is considered to have passed
-  optional bool is_ok = 1;
+ // Whether or not the synthetic is considered to have passed
+ optional bool is_ok = 1;
 
-  message GenericError {
-    // The class of error.
-    optional string name = 1;
-    // The full error message. Eg. "The url that you are fetching failed DNS
-    // lookup"
-    optional string message = 2;
+ message GenericError {
+   // The class of error.
+   optional string error_name = 1;
+   // The full error message. Eg. "The url that you are fetching failed DNS
+   // lookup"
+   optional string error_message = 2;
 
-    optional string function_name = 3;
-    // The name of the file that reported the error
-    optional string file_name = 4;
-    // Line number that reported the error
-    optional int64 line = 5;
-  }
+   optional string function_name = 3;
+   // The name of the file that reported the error
+   optional string file_name = 4;
+   // Line number that reported the error
+   optional int64 line = 5;
+ }
 
-  GenericError error = 2;
+ optional GenericError error = 2;
 }
 
 message SyntheticResult {
-  oneof result {
-    MochaResultV1 synthetic_mocha_result = 1;
-    // Not Implemented Yet, see Future Work section
-    GenericResultV1 synthetic_generic_result = 2;
-  }
+ optional string execution_id = 1;
 
-  // Used to determine information about the runtime environment that the
-  // synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
-  // SYNTHETIC_SDK_PACKAGE_VERSION for nodejs package
-  map<string, string> runtime_metadata = 3;
+ oneof result {
+   TestFrameworkResultV1 synthetic_test_framework_result_v1 = 2;
+   GenericResultV1 synthetic_generic_result_v1 = 3;
+ }
+
+ // Used to determine information about the runtime environment that the
+ // synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
+ // SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package
+ map<string, string> runtime_metadata = 4;
 }
