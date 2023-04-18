@@ -25,8 +25,6 @@ describe('GCM Synthetics Mocha', async () => {
       syntheticMochaResults.synthetic_test_framework_result_v1 || {};
     const { runtime_metadata } = syntheticMochaResults;
 
-    console.log(testFrameworkResult)
-
     expect(testFrameworkResult?.suite_count).to.equal(1);
     expect(testFrameworkResult?.test_count).to.equal(1);
     expect(testFrameworkResult?.passing_test_count).to.equal(1);
@@ -79,7 +77,7 @@ describe('GCM Synthetics Mocha', async () => {
       spec: './test/example_test_files/test_does_not_exist.spec.js',
     });
 
-    expect(synthetic_generic_result_v1?.is_ok).to.be.false;
+    expect(synthetic_generic_result_v1?.ok).to.be.false;
     expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
     expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
@@ -92,7 +90,7 @@ describe('GCM Synthetics Mocha', async () => {
         spec: './test/example_test_files/test_does_not_exist.spec.js',
       });
 
-    expect(synthetic_generic_result_v1?.is_ok).to.be.false;
+    expect(synthetic_generic_result_v1?.ok).to.be.false;
     expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
     expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'

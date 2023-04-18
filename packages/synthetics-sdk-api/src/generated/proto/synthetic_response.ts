@@ -107,7 +107,7 @@ export interface TestFrameworkResultV1 {
 
 export interface GenericResultV1 {
   /** Whether or not the synthetic is considered to have passed */
-  is_ok?: boolean | undefined;
+  ok?: boolean | undefined;
   error?: GenericResultV1_GenericError | undefined;
 }
 
@@ -641,13 +641,13 @@ export const TestFrameworkResultV1 = {
 };
 
 function createBaseGenericResultV1(): GenericResultV1 {
-  return { is_ok: undefined, error: undefined };
+  return { ok: undefined, error: undefined };
 }
 
 export const GenericResultV1 = {
   encode(message: GenericResultV1, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.is_ok !== undefined) {
-      writer.uint32(8).bool(message.is_ok);
+    if (message.ok !== undefined) {
+      writer.uint32(8).bool(message.ok);
     }
     if (message.error !== undefined) {
       GenericResultV1_GenericError.encode(message.error, writer.uint32(18).fork()).ldelim();
@@ -667,7 +667,7 @@ export const GenericResultV1 = {
             break;
           }
 
-          message.is_ok = reader.bool();
+          message.ok = reader.bool();
           continue;
         case 2:
           if (tag != 18) {
@@ -687,14 +687,14 @@ export const GenericResultV1 = {
 
   fromJSON(object: any): GenericResultV1 {
     return {
-      is_ok: isSet(object.is_ok) ? Boolean(object.is_ok) : undefined,
+      ok: isSet(object.ok) ? Boolean(object.ok) : undefined,
       error: isSet(object.error) ? GenericResultV1_GenericError.fromJSON(object.error) : undefined,
     };
   },
 
   toJSON(message: GenericResultV1): unknown {
     const obj: any = {};
-    message.is_ok !== undefined && (obj.is_ok = message.is_ok);
+    message.ok !== undefined && (obj.ok = message.ok);
     message.error !== undefined &&
       (obj.error = message.error ? GenericResultV1_GenericError.toJSON(message.error) : undefined);
     return obj;
@@ -706,7 +706,7 @@ export const GenericResultV1 = {
 
   fromPartial<I extends Exact<DeepPartial<GenericResultV1>, I>>(object: I): GenericResultV1 {
     const message = createBaseGenericResultV1();
-    message.is_ok = object.is_ok ?? undefined;
+    message.ok = object.ok ?? undefined;
     message.error = (object.error !== undefined && object.error !== null)
       ? GenericResultV1_GenericError.fromPartial(object.error)
       : undefined;

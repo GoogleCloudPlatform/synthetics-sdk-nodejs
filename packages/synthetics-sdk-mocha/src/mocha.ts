@@ -80,7 +80,7 @@ export function mocha(
           'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.';
 
         const synthetic_generic_result: GenericResultV1 = {
-          is_ok: false,
+          ok: false,
           error: { error_name, error_message },
         };
 
