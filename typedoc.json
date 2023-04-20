@@ -1,0 +1,6 @@
+{
+    "entryPoints": ["packages/*"],
+    "name": "Synthetics SDK",
+    "entryPointStrategy": "packages",
+    "includeVersion": true
+  }

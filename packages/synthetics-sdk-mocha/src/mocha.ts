@@ -24,7 +24,9 @@ import {
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 export interface SyntheticMochaOptions {
+  /** One or more files, directories, or globs to test */
   spec: string;
+  /** One or more files that will be loaded prior to running the mocha tests */
   file?: string;
 }
 
@@ -35,10 +37,8 @@ export interface SyntheticMochaOptions {
  * it to metrics, logs, and traces.
  *
  * @public
- * @static
- * @param {?Object} options - mocha options
- * @param {string} [options.spec="test"] - One or more files, directories,
- *                   or globs to test.
+ * @param options - Options for running the mocha suite
+ * @returns Results of the mocha test run, complying with the Synthetics SDK API
  */
 export function mocha(
   options: SyntheticMochaOptions

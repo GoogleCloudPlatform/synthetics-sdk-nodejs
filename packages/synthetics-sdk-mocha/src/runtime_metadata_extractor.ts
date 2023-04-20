@@ -22,6 +22,8 @@ const list_of_env_variables = [
 ];
 
 /**
+ * @public
+ *
  * NOTE: This funciton should only be called inside of test files, or within
  * this file directly.
  * This function repopulates the global runtime_metadata object.
@@ -42,8 +44,8 @@ reloadMetadata();
 /**
  * Retrieves all runtime metadata relevant to GCM Synthetics and Cloud
  * Monitoring
- * @return {Object.<string, number>} Runtime metadata relevant to Cloud
- *                                   Monitoring
+ *
+ * @returns Runtime metadata relevant to Cloud Monitoring
  */
 export function getRuntimeMetadata() {
   return runtime_metadata;

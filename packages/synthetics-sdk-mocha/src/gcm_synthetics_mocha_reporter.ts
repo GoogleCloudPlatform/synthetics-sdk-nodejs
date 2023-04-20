@@ -33,6 +33,9 @@ const {
 } = Mocha.Runner.constants;
 
 interface GcmSyntheticsReporterOptions {
+  /**  If provided, file location where output is written. If not provided,
+   * output is logged to stdout.
+   */
   reporterOption: { output: string | null };
 }
 
@@ -43,11 +46,8 @@ class GcmSyntheticsReporter {
    * @public
    * @class GcmSyntheticsReporter
    * @memberof Mocha.reporters
-   * @param {!Runner} runner - Instance triggers reporter actions.
-   * @param {?GcmSyntheticsReporterOptions=} options - runner options
-   * @param {?string=} options.reporterOption.output - If not provided, output
-   *                   is logged to stdout. If provided, file location where
-   *                   output is written.
+   * @param runner - Mocha runner that triggers reporter actions.
+   * @param GcmSyntheticsReporterOptions - Options for the reporter
    */
   constructor(runner: Mocha.Runner, options: GcmSyntheticsReporterOptions) {
     const output = options?.reporterOption?.output;
@@ -119,10 +119,10 @@ class GcmSyntheticsReporter {
 
 /**
  * Serializes test results to relevant results for uptime to process.
- * @param {!Test} test - Test that was ran by mocha, pass & duration stats
+ * @param test - Test that was ran by mocha, pass & duration stats
  *                       being relevant.
- * @param {?ErrnoException} err - Error thrown when a test fails.
- * @return {!TestResult} Serialized results relevant for reporting by
+ * @param err - Error thrown when a test fails.
+ * @returns Serialized results relevant for reporting by
  *                            Cloud Monitoring.
  */
 export function serializeTest(
@@ -150,9 +150,9 @@ export function serializeTest(
 
 /**
  * Serializes a NodeJs error stack into a collection of consumable objects.
- * @param {string} errStack The stack property on a NodeJs Error.
- * @return {!array} Serialized error stack frames which include properties
- *                  functionName, fileName, lineNumber, columnNumber.
+ * @param errStack - The stack property on a NodeJs Error.
+ * @returns Serialized error stack frames which include properties
+ *          functionName, fileName, lineNumber, columnNumber.
  */
 function serializeStack(errStack: string): TestResult_TestError_StackFrame[] {
   if (!errStack) {
@@ -196,8 +196,8 @@ function serializeStack(errStack: string): TestResult_TestError_StackFrame[] {
  * * <transport-protocol>:///url/to/module/file.mjs:line:column, if the frame
  *   represents a call in a user program (using ES module system), or its
  *   dependencies.
- * @param {string} location String location at which an error occurred.
- * @return {!Object} serializedLocation the serialized location that includes
+ * @param location String location at which an error occurred.
+ * @returns serializedLocation the serialized location that includes
  *                   fileName, lineNumber, and columnNumber.
  */
 function serializeLocation(location: string) {
