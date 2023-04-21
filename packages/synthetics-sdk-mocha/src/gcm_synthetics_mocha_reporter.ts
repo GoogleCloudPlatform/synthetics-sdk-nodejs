@@ -33,7 +33,8 @@ const {
 } = Mocha.Runner.constants;
 
 interface GcmSyntheticsReporterOptions {
-  /**  If provided, file location where output is written. If not provided,
+  /**
+   * If provided, file location where output is written. If not provided,
    * output is logged to stdout.
    */
   reporterOption: { output: string | null };
