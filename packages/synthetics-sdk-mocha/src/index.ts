@@ -13,4 +13,5 @@
 // limitations under the License.
 
 export * from './mocha';
+export * from './handlers';
 export * from '@google-cloud/synthetics-sdk-api';

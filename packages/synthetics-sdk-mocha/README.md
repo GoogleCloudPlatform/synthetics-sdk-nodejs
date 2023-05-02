@@ -36,11 +36,9 @@ const GcmSynthetics = require('@google-cloud/synthetics-sdk-mocha');
  * Google Cloud Functions.
  */
 
-functions.http('SyntheticMochaSuite', async (req, res) => {
-  res.send(
-    await GcmSynthetics.mocha({spec: `${__dirname}/mocha_tests.spec.js`})
-  );
-});
+functions.http('SyntheticMochaSuite', GcmSynthetics.mochaHandler({
+    spec: `${__dirname}/mocha_tests.spec.js}`
+}));
 ```
 
 `./mocha_tests.spec.js`

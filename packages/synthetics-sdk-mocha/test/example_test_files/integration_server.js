@@ -51,3 +51,11 @@ functions.http('SyntheticFailsToRun', async (req, res) => {
     })
   );
 });
+
+functions.http('SyntheticHandlerOk', SyntheticsSdkMocha.mochaHandler({
+  spec: './test/example_test_files/test_passing.spec.js',
+}));
+
+functions.http('SyntheticHandlerNotOk', SyntheticsSdkMocha.mochaHandler({
+  spec: './test/example_test_files/test_failing.spec.js',
+}));

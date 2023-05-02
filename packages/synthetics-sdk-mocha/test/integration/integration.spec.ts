@@ -142,4 +142,76 @@ describe('CloudFunctionV2 Running Synthetics', () => {
 
     expect(runtime_metadata).to.not.be.undefined;
   });
+
+  it('runs a passing mocha_test suite using the mochaHandler', async () => {
+    const server = getTestServer('SyntheticHandlerOk');
+
+    // invoke SyntheticMochaSuite with SuperTest
+    const response = await supertest(server)
+      .get('/')
+      .send()
+      .set('Content-Type', 'application/json')
+      .expect(200);
+
+    const output: SyntheticResult = response.body as SyntheticResult;
+    const test_framework_result = output?.synthetic_test_framework_result_v1;
+    const test_results = output?.synthetic_test_framework_result_v1?.test_results;
+    const runtime_metadata = output?.runtime_metadata;
+
+    expect(test_framework_result?.suite_count).to.equal(1);
+    expect(test_framework_result?.test_count).to.equal(1);
+    expect(test_framework_result?.passing_test_count).to.equal(1);
+    expect(test_framework_result?.failing_test_count).to.equal(0);
+    expect(test_framework_result?.pending_test_count).to.equal(0);
+    expect(test_framework_result?.suite_start_time).to.be.a.string;
+    expect(test_framework_result?.suite_end_time).to.be.a.string;
+
+    expect(test_results).to.have.length(1);
+
+    const test_result = test_results?.[0];
+    expect(test_result?.title).to.equal('is ok');
+    expect(test_result?.test_passed).to.equal(true);
+    expect(test_result?.title_paths).to.deep.equal(['is ok']);
+    expect(test_result?.test_start_time).to.be.a.string;
+    expect(test_result?.test_end_time).to.be.a.string;
+
+    expect(runtime_metadata).to.not.be.undefined;
+  });
+
+  it('runs a failing mocha_test suite using the mochaHandler', async () => {
+    const server = getTestServer('SyntheticHandlerNotOk');
+
+    // invoke SyntheticMochaSuite with SuperTest
+    const response = await supertest(server)
+      .get('/')
+      .send()
+      .set('Content-Type', 'application/json')
+      .expect(200);
+
+    const output: SyntheticResult = response.body as SyntheticResult;
+    const test_framework_result = output?.synthetic_test_framework_result_v1;
+    const test_results = output?.synthetic_test_framework_result_v1?.test_results;
+    const runtime_metadata = output?.runtime_metadata;
+
+    expect(test_framework_result?.suite_count).to.equal(1);
+    expect(test_framework_result?.test_count).to.equal(1);
+    expect(test_framework_result?.passing_test_count).to.equal(0);
+    expect(test_framework_result?.failing_test_count).to.equal(1);
+    expect(test_framework_result?.pending_test_count).to.equal(0);
+    expect(test_framework_result?.suite_start_time).to.be.a.string;
+    expect(test_framework_result?.suite_end_time).to.be.a.string;
+
+    expect(test_results).to.have.length(1);
+
+    const test_result = test_results?.[0];
+    expect(test_result?.title).to.equal('is a native function error');
+    expect(test_result?.test_passed).to.equal(false);
+    expect(test_result?.title_paths).to.deep.equal([
+      'is a native function error',
+    ]);
+    expect(test_result?.test_start_time).to.be.a.string;
+    expect(test_result?.test_end_time).to.be.a.string;
+
+    expect(runtime_metadata).to.not.be.undefined;
+  });
 });

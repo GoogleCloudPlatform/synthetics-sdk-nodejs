@@ -38,7 +38,7 @@ cd packages/synthetics-sdk-mocha/
 ```
 "dependencies": {
     ...
-    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-1.0.0.tgz"
+    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz"
     ...
 }
 ```
@@ -58,7 +58,7 @@ cd samples/mocha-url-ok/
 ```
 "dependencies": {
     ...
-    "@google-cloud/synthetics-sdk-mocha": "google-cloud-synthetics-sdk-mocha-1.0.0.tgz"
+    "@google-cloud/synthetics-sdk-mocha": "google-cloud-synthetics-sdk-mocha-0.1.0.tgz"
     ...
 }
 ```
