@@ -16,6 +16,20 @@ import { expect } from 'chai';
 const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
 describe('GCM Synthetics Mocha', async () => {
+  it('returns a GenericResult, when no test spec is provided', async () => {
+    const { synthetic_generic_result_v1, runtime_metadata } = await SyntheticsSdkMocha.mocha({
+      spec: '',
+    });
+
+    expect(synthetic_generic_result_v1?.ok).to.be.false;
+    expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
+    expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
+      'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
+    );
+
+    expect(runtime_metadata).to.not.be.undefined;
+  });
+
   it('runs passing tests in a file at the provided path', async () => {
     const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
       spec: './test/example_test_files/test_passing.spec.js',
@@ -70,6 +84,24 @@ describe('GCM Synthetics Mocha', async () => {
     expect(testFrameworkResult?.failing_test_count).to.equal(1);
 
     expect(testFrameworkResult?.test_results).to.have.length(2);
+  });
+
+  it('runs mocha suite with additional flagged parameters', async () => {
+    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
+      spec: './test/example_test_files/test_passing.spec.js ./test/example_test_files/test_failing.spec.js',
+      mochaOptions: '--fgrep error' // Only runs tests with "error" in their name
+    });
+
+    const testFrameworkResult =
+    syntheticMochaResults.synthetic_test_framework_result_v1 || {};
+
+    expect(testFrameworkResult?.suite_count).to.equal(1);
+    expect(testFrameworkResult?.test_count).to.equal(1);
+    expect(testFrameworkResult?.passing_test_count).to.equal(0);
+    expect(testFrameworkResult?.pending_test_count).to.equal(0);
+    expect(testFrameworkResult?.failing_test_count).to.equal(1);
+
+    expect(testFrameworkResult?.test_results).to.have.length(1);
   });
 
   it('returns an error when a the test file doesnt exist', async () => {

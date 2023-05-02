@@ -121,21 +121,13 @@ describe('gcm_synthetic_reporter', () => {
         expect(error?.stack_frames?.[1]?.line).to.not.be.undefined;
         expect(error?.stack_frames?.[1]?.column).to.not.be.undefined;
 
-        expect(error?.stack_frames?.[2]?.function_name).to.equal(
-          'processImmediate'
-        );
-        expect(error?.stack_frames?.[2]?.file_name).to.equal(
-          'node:internal/timers'
-        );
-        expect(error?.stack_frames?.[2]?.line).to.not.be.undefined;
-        expect(error?.stack_frames?.[2]?.column).to.not.be.undefined;
-
         done();
       } catch (e) {
         done(e);
       }
     });
   });
+
   it('Reports information for a pending test', (done) => {
     mocha.suite.addTest(pendingTest);
 

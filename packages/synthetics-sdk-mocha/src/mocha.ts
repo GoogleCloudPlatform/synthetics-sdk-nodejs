@@ -24,11 +24,28 @@ import {
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 export interface SyntheticMochaOptions {
-  /** One or more files, directories, or globs to test */
+  /**
+   * One or more files, directories, or globs to test, in a format typically provided to the mocha cli.
+   * These specs should be relative to the root of the application that is running the Synthetics SDK.
+   * @example: `${__dirname}/mocha_tests.spec.js`
+   */
   spec: string;
-  /** One or more files that will be loaded prior to running the mocha tests */
-  file?: string;
+
+  /**
+   * One or more arguments as they would otherwise be provided to the mocha cli.
+   * @example: "--file ${__dirname}/preload.js --forbid-pending"
+   */
+  mochaOptions?: string;
 }
+
+const defaultError: GenericResultV1 = {
+  ok: false,
+  error: {
+    error_name: 'Error',
+    error_message:
+      'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.',
+  },
+};
 
 /**
  * Runs a mocha spec in a child process, returning a json object that complies
@@ -38,18 +55,28 @@ export interface SyntheticMochaOptions {
  *
  * @public
  * @param options - Options for running the mocha suite
- * @returns Results of the mocha test run, complying with the Synthetics SDK API
+ * @returns Results of the mocha test run, complying with the Synthetics SDK API.
+ *          Errors within this function reolve, with further information within the
+ *          returned object's synthetic_generic_result_v1.
  */
 export function mocha(
   options: SyntheticMochaOptions
 ): Promise<SyntheticResult> {
   const uniqueFileName = `/tmp/${crypto.randomUUID()}`;
-  const spec = options.spec;
-  const file = options?.file;
+  const runtimeMetadata = getRuntimeMetadata();
 
   return new Promise((resolve) => {
+    if (!options.spec) {
+      process.stderr.write('No test spec was provided');
+
+      resolve({
+        synthetic_generic_result_v1: defaultError,
+        runtime_metadata: runtimeMetadata,
+      });
+    }
+
     const childProcess = spawn(
-      `mocha ${spec} ${file ? `--file ${file}` : ''} ` +
+      `mocha ${options.spec} ${options.mochaOptions ?? ''} ` +
         `--reporter ${__dirname}/gcm_synthetics_mocha_reporter.js ` +
         `--reporter-options output=${uniqueFileName}`,
       {
@@ -58,8 +85,6 @@ export function mocha(
       }
     );
     childProcess.on('exit', () => {
-      const runtimeMetadata = getRuntimeMetadata();
-
       try {
         const output = fs.readFileSync(uniqueFileName, { encoding: 'utf-8' });
         const test_framework_result: TestFrameworkResultV1 =
@@ -75,17 +100,8 @@ export function mocha(
           process.stderr.write(err.message);
         }
 
-        const error_name = 'Error';
-        const error_message =
-          'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.';
-
-        const synthetic_generic_result: GenericResultV1 = {
-          ok: false,
-          error: { error_name, error_message },
-        };
-
         resolve({
-          synthetic_generic_result_v1: synthetic_generic_result,
+          synthetic_generic_result_v1: defaultError,
           runtime_metadata: runtimeMetadata,
         });
       }
