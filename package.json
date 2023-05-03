@@ -1,5 +1,5 @@
 {
-  "name": "synthetics-sdk-core",
+  "name": "synthetics-sdk-node",
   "devDependencies": {
     "eslint": "^7.32.0",
     "gts": "^3.1.1",
