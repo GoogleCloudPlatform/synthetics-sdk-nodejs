@@ -18,7 +18,6 @@ import * as fs from 'fs';
 
 import {
   GenericResultV1,
-  TestFrameworkResultV1,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import { getRuntimeMetadata } from './runtime_metadata_extractor';
@@ -47,6 +46,13 @@ const defaultError: GenericResultV1 = {
   },
 };
 
+const getGenericSyntheticResult = (startTime: string): SyntheticResult => ({
+  synthetic_generic_result_v1: defaultError,
+  runtime_metadata: getRuntimeMetadata(),
+  start_time: startTime,
+  end_time: new Date().toISOString(),
+});
+
 /**
  * Runs a mocha spec in a child process, returning a json object that complies
  * with the response body required by GCM Synthetics' API contract.
@@ -64,15 +70,13 @@ export function mocha(
 ): Promise<SyntheticResult> {
   const uniqueFileName = `/tmp/${crypto.randomUUID()}`;
   const runtimeMetadata = getRuntimeMetadata();
+  const genericStartTime = new Date().toISOString();
 
   return new Promise((resolve) => {
     if (!options.spec) {
       process.stderr.write('No test spec was provided');
 
-      resolve({
-        synthetic_generic_result_v1: defaultError,
-        runtime_metadata: runtimeMetadata,
-      });
+      resolve(getGenericSyntheticResult(genericStartTime));
     }
 
     const childProcess = spawn(
@@ -87,23 +91,19 @@ export function mocha(
     childProcess.on('exit', () => {
       try {
         const output = fs.readFileSync(uniqueFileName, { encoding: 'utf-8' });
-        const test_framework_result: TestFrameworkResultV1 =
-          TestFrameworkResultV1.fromJSON(JSON.parse(output));
-        const synthetic_result: SyntheticResult = {
-          synthetic_test_framework_result_v1: test_framework_result,
-          runtime_metadata: runtimeMetadata,
-        };
-        resolve(synthetic_result);
+        const syntheticResult: SyntheticResult = SyntheticResult.fromJSON(
+          JSON.parse(output)
+        );
+
+        syntheticResult.runtime_metadata = runtimeMetadata;
+        resolve(syntheticResult);
         fs.unlinkSync(uniqueFileName);
       } catch (err: unknown) {
         if (err instanceof Error) {
           process.stderr.write(err.message);
         }
 
-        resolve({
-          synthetic_generic_result_v1: defaultError,
-          runtime_metadata: runtimeMetadata,
-        });
+        resolve(getGenericSyntheticResult(genericStartTime));
       }
     });
   });

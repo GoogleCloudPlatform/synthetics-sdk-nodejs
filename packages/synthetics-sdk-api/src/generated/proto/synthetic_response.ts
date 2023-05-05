@@ -11,8 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 /* eslint-disable */
+
 import * as Long from "long";
 import * as _m0 from "protobufjs/minimal";
 
@@ -26,21 +26,21 @@ export interface TestResult {
   title?:
     | string
     | undefined;
-  /** whether or not the test passed */
+  /** Whether or not the test passed. */
   test_passed?:
     | boolean
     | undefined;
   /**
    * The full path of names from the name of the suite, to the name of the test.
    * Tests may be nested under multiple suites. Eg. ["my suite name", "pings my
-   * website", "three times"]
+   * website", "three times"].
    */
   title_paths: string[];
-  /** the start time of the test in iso format. */
+  /** The start time of the test in iso format. */
   test_start_time?:
     | string
     | undefined;
-  /** the end time of the test suite in iso format. */
+  /** The end time of the test suite in iso format. */
   test_end_time?:
     | string
     | undefined;
@@ -56,7 +56,7 @@ export interface TestResult_TestError {
     | undefined;
   /**
    * The full error message. Eg. "The url that you are fetching failed DNS
-   * lookup"
+   * lookup".
    */
   error_message?:
     | string
@@ -67,61 +67,56 @@ export interface TestResult_TestError {
 
 /** An individual stack frame that represents a line of code within a file. */
 export interface TestResult_TestError_StackFrame {
-  /** The name of the function that reported the error */
+  /** The name of the function that reported the error. */
   function_name?:
     | string
     | undefined;
-  /** The name of the file that reported the error */
+  /** The name of the file that reported the error. */
   file_name?:
     | string
     | undefined;
-  /** Line number that reported the error */
+  /** Line number that reported the error. */
   line?:
     | number
     | undefined;
-  /** Column number that reported the error */
+  /** Column number that reported the error. */
   column?: number | undefined;
 }
 
 export interface TestFrameworkResultV1 {
-  /** the number of total test suites ran. */
+  /** The number of total test suites ran. */
   suite_count?:
     | number
     | undefined;
-  /** the number of total tests that ran as a part of the suite run */
+  /** The number of total tests that ran as a part of the suite run. */
   test_count?:
     | number
     | undefined;
-  /** the number of total tests that passed as a part of the suite run */
+  /** The number of total tests that passed as a part of the suite run. */
   passing_test_count?:
     | number
     | undefined;
-  /** the number of total tests that failed as a prt of the suite run */
+  /** The number of total tests that failed as a prt of the suite run. */
   failing_test_count?:
     | number
     | undefined;
-  /** the number of total tests that remain pending after the suite run */
+  /** The number of total tests that remain pending after the suite run. */
   pending_test_count?:
     | number
     | undefined;
-  /** the start time of the test suite in iso format. */
-  suite_start_time?:
-    | string
-    | undefined;
-  /** the end time of the test suite in iso format. */
-  suite_end_time?:
-    | string
-    | undefined;
   /**
    * A collection of individual test results from a given synthetic's test
-   * suite
+   * suite.
    */
   test_results: TestResult[];
 }
 
 export interface GenericResultV1 {
-  /** Whether or not the synthetic is considered to have passed */
-  ok?: boolean | undefined;
+  /** Whether or not the synthetic is considered to have passed. */
+  ok?:
+    | boolean
+    | undefined;
+  /** An error */
   error?: GenericResultV1_GenericError | undefined;
 }
 
@@ -132,22 +127,24 @@ export interface GenericResultV1_GenericError {
     | undefined;
   /**
    * The full error message. Eg. "The url that you are fetching failed DNS
-   * lookup"
+   * lookup".
    */
-  error_message?: string | undefined;
+  error_message?:
+    | string
+    | undefined;
+  /** The name of the function where the error occurred */
   function_name?:
     | string
     | undefined;
-  /** The name of the file that reported the error */
+  /** The name of the file that reported the error. */
   file_name?:
     | string
     | undefined;
-  /** Line number that reported the error */
+  /** Line number that reported the error. */
   line?: number | undefined;
 }
 
 export interface SyntheticResult {
-  execution_id?: string | undefined;
   synthetic_test_framework_result_v1?: TestFrameworkResultV1 | undefined;
   synthetic_generic_result_v1?:
     | GenericResultV1
@@ -155,9 +152,15 @@ export interface SyntheticResult {
   /**
    * Used to determine information about the runtime environment that the
    * synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
-   * SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package
+   * SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
    */
   runtime_metadata: { [key: string]: string };
+  /** The start time of synthetic in iso format. */
+  start_time?:
+    | string
+    | undefined;
+  /** The end time of the synthetic in iso format. */
+  end_time?: string | undefined;
 }
 
 export interface SyntheticResult_RuntimeMetadataEntry {
@@ -497,8 +500,6 @@ function createBaseTestFrameworkResultV1(): TestFrameworkResultV1 {
     passing_test_count: undefined,
     failing_test_count: undefined,
     pending_test_count: undefined,
-    suite_start_time: undefined,
-    suite_end_time: undefined,
     test_results: [],
   };
 }
@@ -520,14 +521,8 @@ export const TestFrameworkResultV1 = {
     if (message.pending_test_count !== undefined) {
       writer.uint32(40).int64(message.pending_test_count);
     }
-    if (message.suite_start_time !== undefined) {
-      writer.uint32(50).string(message.suite_start_time);
-    }
-    if (message.suite_end_time !== undefined) {
-      writer.uint32(58).string(message.suite_end_time);
-    }
     for (const v of message.test_results) {
-      TestResult.encode(v!, writer.uint32(66).fork()).ldelim();
+      TestResult.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -579,20 +574,6 @@ export const TestFrameworkResultV1 = {
             break;
           }
 
-          message.suite_start_time = reader.string();
-          continue;
-        case 7:
-          if (tag != 58) {
-            break;
-          }
-
-          message.suite_end_time = reader.string();
-          continue;
-        case 8:
-          if (tag != 66) {
-            break;
-          }
-
           message.test_results.push(TestResult.decode(reader, reader.uint32()));
           continue;
       }
@@ -611,8 +592,6 @@ export const TestFrameworkResultV1 = {
       passing_test_count: isSet(object.passing_test_count) ? Number(object.passing_test_count) : undefined,
       failing_test_count: isSet(object.failing_test_count) ? Number(object.failing_test_count) : undefined,
       pending_test_count: isSet(object.pending_test_count) ? Number(object.pending_test_count) : undefined,
-      suite_start_time: isSet(object.suite_start_time) ? String(object.suite_start_time) : undefined,
-      suite_end_time: isSet(object.suite_end_time) ? String(object.suite_end_time) : undefined,
       test_results: Array.isArray(object?.test_results)
         ? object.test_results.map((e: any) => TestResult.fromJSON(e))
         : [],
@@ -626,8 +605,6 @@ export const TestFrameworkResultV1 = {
     message.passing_test_count !== undefined && (obj.passing_test_count = Math.round(message.passing_test_count));
     message.failing_test_count !== undefined && (obj.failing_test_count = Math.round(message.failing_test_count));
     message.pending_test_count !== undefined && (obj.pending_test_count = Math.round(message.pending_test_count));
-    message.suite_start_time !== undefined && (obj.suite_start_time = message.suite_start_time);
-    message.suite_end_time !== undefined && (obj.suite_end_time = message.suite_end_time);
     if (message.test_results) {
       obj.test_results = message.test_results.map((e) => e ? TestResult.toJSON(e) : undefined);
     } else {
@@ -647,8 +624,6 @@ export const TestFrameworkResultV1 = {
     message.passing_test_count = object.passing_test_count ?? undefined;
     message.failing_test_count = object.failing_test_count ?? undefined;
     message.pending_test_count = object.pending_test_count ?? undefined;
-    message.suite_start_time = object.suite_start_time ?? undefined;
-    message.suite_end_time = object.suite_end_time ?? undefined;
     message.test_results = object.test_results?.map((e) => TestResult.fromPartial(e)) || [];
     return message;
   },
@@ -846,18 +821,16 @@ export const GenericResultV1_GenericError = {
 
 function createBaseSyntheticResult(): SyntheticResult {
   return {
-    execution_id: undefined,
     synthetic_test_framework_result_v1: undefined,
     synthetic_generic_result_v1: undefined,
     runtime_metadata: {},
+    start_time: undefined,
+    end_time: undefined,
   };
 }
 
 export const SyntheticResult = {
   encode(message: SyntheticResult, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.execution_id !== undefined) {
-      writer.uint32(10).string(message.execution_id);
-    }
     if (message.synthetic_test_framework_result_v1 !== undefined) {
       TestFrameworkResultV1.encode(message.synthetic_test_framework_result_v1, writer.uint32(18).fork()).ldelim();
     }
@@ -867,6 +840,12 @@ export const SyntheticResult = {
     Object.entries(message.runtime_metadata).forEach(([key, value]) => {
       SyntheticResult_RuntimeMetadataEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
     });
+    if (message.start_time !== undefined) {
+      writer.uint32(42).string(message.start_time);
+    }
+    if (message.end_time !== undefined) {
+      writer.uint32(50).string(message.end_time);
+    }
     return writer;
   },
 
@@ -877,13 +856,6 @@ export const SyntheticResult = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          if (tag != 10) {
-            break;
-          }
-
-          message.execution_id = reader.string();
-          continue;
         case 2:
           if (tag != 18) {
             break;
@@ -908,6 +880,20 @@ export const SyntheticResult = {
             message.runtime_metadata[entry4.key] = entry4.value;
           }
           continue;
+        case 5:
+          if (tag != 42) {
+            break;
+          }
+
+          message.start_time = reader.string();
+          continue;
+        case 6:
+          if (tag != 50) {
+            break;
+          }
+
+          message.end_time = reader.string();
+          continue;
       }
       if ((tag & 7) == 4 || tag == 0) {
         break;
@@ -919,7 +905,6 @@ export const SyntheticResult = {
 
   fromJSON(object: any): SyntheticResult {
     return {
-      execution_id: isSet(object.execution_id) ? String(object.execution_id) : undefined,
       synthetic_test_framework_result_v1: isSet(object.synthetic_test_framework_result_v1)
         ? TestFrameworkResultV1.fromJSON(object.synthetic_test_framework_result_v1)
         : undefined,
@@ -932,12 +917,13 @@ export const SyntheticResult = {
           return acc;
         }, {})
         : {},
+      start_time: isSet(object.start_time) ? String(object.start_time) : undefined,
+      end_time: isSet(object.end_time) ? String(object.end_time) : undefined,
     };
   },
 
   toJSON(message: SyntheticResult): unknown {
     const obj: any = {};
-    message.execution_id !== undefined && (obj.execution_id = message.execution_id);
     message.synthetic_test_framework_result_v1 !== undefined &&
       (obj.synthetic_test_framework_result_v1 = message.synthetic_test_framework_result_v1
         ? TestFrameworkResultV1.toJSON(message.synthetic_test_framework_result_v1)
@@ -952,6 +938,8 @@ export const SyntheticResult = {
         obj.runtime_metadata[k] = v;
       });
     }
+    message.start_time !== undefined && (obj.start_time = message.start_time);
+    message.end_time !== undefined && (obj.end_time = message.end_time);
     return obj;
   },
 
@@ -961,7 +949,6 @@ export const SyntheticResult = {
 
   fromPartial<I extends Exact<DeepPartial<SyntheticResult>, I>>(object: I): SyntheticResult {
     const message = createBaseSyntheticResult();
-    message.execution_id = object.execution_id ?? undefined;
     message.synthetic_test_framework_result_v1 =
       (object.synthetic_test_framework_result_v1 !== undefined && object.synthetic_test_framework_result_v1 !== null)
         ? TestFrameworkResultV1.fromPartial(object.synthetic_test_framework_result_v1)
@@ -979,6 +966,8 @@ export const SyntheticResult = {
       },
       {},
     );
+    message.start_time = object.start_time ?? undefined;
+    message.end_time = object.end_time ?? undefined;
     return message;
   },
 };

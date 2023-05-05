@@ -20,6 +20,7 @@ import {
   TestFrameworkResultV1,
   TestResult,
   TestResult_TestError_StackFrame,
+  SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 
 const {
@@ -59,14 +60,18 @@ class GcmSyntheticsReporter {
       passing_test_count: 0,
       pending_test_count: 0,
       failing_test_count: 0,
-      suite_start_time: '',
-      suite_end_time: '',
       test_results: [],
+    };
+
+    const syntheticResult: SyntheticResult = {
+      start_time: '',
+      end_time: '',
+      runtime_metadata: {},
     };
 
     runner
       .on(EVENT_RUN_BEGIN, () => {
-        testFrameworkResult.suite_start_time = new Date().toISOString();
+        syntheticResult.start_time = new Date().toISOString();
       })
       .on(EVENT_SUITE_BEGIN, (suite: Mocha.Suite) => {
         // Only add root suite when it has tests directly in it.
@@ -94,9 +99,12 @@ class GcmSyntheticsReporter {
           (testFrameworkResult.pending_test_count ?? 0) + 1;
       })
       .on(EVENT_RUN_END, () => {
-        testFrameworkResult.suite_end_time = new Date().toISOString();
+        syntheticResult.end_time = new Date().toISOString();
+        syntheticResult.synthetic_test_framework_result_v1 =
+          testFrameworkResult;
+
         const json = JSON.stringify(
-          TestFrameworkResultV1.toJSON(testFrameworkResult),
+          SyntheticResult.toJSON(syntheticResult),
           null,
           2
         );

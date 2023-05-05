@@ -70,13 +70,9 @@ message TestFrameworkResultV1 {
  optional int64 failing_test_count = 4;
  // The number of total tests that remain pending after the suite run.
  optional int64 pending_test_count = 5;
- // The start time of the test suite in iso format.
- optional string suite_start_time = 6;
- // The end time of the test suite in iso format.
- optional string suite_end_time = 7;
  // A collection of individual test results from a given synthetic's test
  // suite.
- repeated TestResult test_results = 8;
+ repeated TestResult test_results = 6;
 }
 
 message GenericResultV1 {
@@ -90,6 +86,7 @@ message GenericResultV1 {
    // lookup".
    optional string error_message = 2;
 
+   // The name of the function where the error occurred
    optional string function_name = 3;
    // The name of the file that reported the error.
    optional string file_name = 4;
@@ -97,12 +94,11 @@ message GenericResultV1 {
    optional int64 line = 5;
  }
 
+ // An error 
  optional GenericError error = 2;
 }
 
 message SyntheticResult {
- optional string execution_id = 1;
-
  oneof result {
    TestFrameworkResultV1 synthetic_test_framework_result_v1 = 2;
    GenericResultV1 synthetic_generic_result_v1 = 3;
@@ -112,4 +108,9 @@ message SyntheticResult {
  // synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
  // SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
  map<string, string> runtime_metadata = 4;
+
+  // The start time of synthetic in iso format.
+ optional string start_time = 5;
+ // The end time of the synthetic in iso format.
+ optional string end_time = 6;
 }

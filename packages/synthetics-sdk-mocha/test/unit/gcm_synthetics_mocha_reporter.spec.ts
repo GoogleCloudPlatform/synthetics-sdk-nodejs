@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as Mocha from 'mocha';
 import * as path from 'path';
 
-import { TestFrameworkResultV1 } from '@google-cloud/synthetics-sdk-api';
+import { SyntheticResult, TestFrameworkResultV1 } from '@google-cloud/synthetics-sdk-api';
 
 const reporterPath = path.join(
   __dirname,
@@ -27,7 +27,7 @@ const reporterPath = path.join(
   'src',
   'gcm_synthetics_mocha_reporter.js'
 );
-const testResultFile = '/tmp/gcm_synthetics_mocha_reporter.spec.ts/output';
+const syntheticResultFile = '/tmp/gcm_synthetics_mocha_reporter.spec.ts/output';
 
 describe('gcm_synthetic_reporter', () => {
   let mocha: Mocha;
@@ -39,7 +39,7 @@ describe('gcm_synthetic_reporter', () => {
   beforeEach(() => {
     mocha = new Mocha({
       reporter: reporterPath,
-      reporterOptions: { output: testResultFile },
+      reporterOptions: { output: syntheticResultFile },
     });
 
     passingTest = new Mocha.Test('passing test', () => {});
@@ -53,9 +53,9 @@ describe('gcm_synthetic_reporter', () => {
     pendingTest = new Mocha.Test('pending test');
   });
 
-  const readOutputFile = (): TestFrameworkResultV1 => {
-    const output = fs.readFileSync(testResultFile, { encoding: 'utf-8' });
-    fs.unlinkSync(testResultFile);
+  const readOutputFile = (): SyntheticResult => {
+    const output = fs.readFileSync(syntheticResultFile, { encoding: 'utf-8' });
+    fs.unlinkSync(syntheticResultFile);
     return JSON.parse(output);
   };
 
@@ -63,20 +63,20 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(passingTest);
 
     mocha.run(() => {
-      const testFrameworkResult = readOutputFile();
+      const syntheticResult = readOutputFile();
       try {
-        expect(testFrameworkResult?.suite_count).to.equal(1);
-        expect(testFrameworkResult?.test_count).to.equal(1);
-        expect(testFrameworkResult?.passing_test_count).to.equal(1);
-        expect(testFrameworkResult?.pending_test_count).to.equal(0);
-        expect(testFrameworkResult?.failing_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.suite_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.passing_test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.pending_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.failing_test_count).to.equal(0);
 
-        expect(testFrameworkResult?.test_results).to.have.length(1);
-        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.true;
-        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('passing test');
-        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.have.length(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_passed).to.be.true;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title).to.equal('passing test');
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
 
-        expect(testFrameworkResult?.test_results?.[0]?.error).to.be.undefined;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.error).to.be.undefined;
         done();
       } catch (e) {
         done(e);
@@ -88,20 +88,20 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(failingTest);
 
     mocha.run(() => {
-      const testFrameworkResult = readOutputFile();
+      const syntheticResult = readOutputFile();
       try {
-        expect(testFrameworkResult?.suite_count).to.equal(1);
-        expect(testFrameworkResult?.test_count).to.equal(1);
-        expect(testFrameworkResult?.passing_test_count).to.equal(0);
-        expect(testFrameworkResult?.pending_test_count).to.equal(0);
-        expect(testFrameworkResult?.failing_test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.suite_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.passing_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.pending_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.failing_test_count).to.equal(1);
 
-        expect(testFrameworkResult?.test_results).to.have.length(1);
-        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.false;
-        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('failing test');
-        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['failing test']);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.have.length(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_passed).to.be.false;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title).to.equal('failing test');
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title_paths).to.deep.equal(['failing test']);
 
-        const error = testFrameworkResult?.test_results?.[0]?.error;
+        const error = syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.error;
         expect(error?.error_name).to.equal('Error');
         expect(error?.error_message).to.equal('this test has failed');
 
@@ -132,15 +132,15 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addTest(pendingTest);
 
     mocha.run(() => {
-      const testFrameworkResult = readOutputFile();
+      const syntheticResult = readOutputFile();
       try {
-        expect(testFrameworkResult?.suite_count).to.equal(1);
-        expect(testFrameworkResult?.test_count).to.equal(0);
-        expect(testFrameworkResult?.passing_test_count).to.equal(0);
-        expect(testFrameworkResult?.pending_test_count).to.equal(1);
-        expect(testFrameworkResult?.failing_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.suite_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.passing_test_count).to.equal(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.pending_test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.failing_test_count).to.equal(0);
 
-        expect(testFrameworkResult?.test_results).to.have.length(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.have.length(0);
         done();
       } catch (e) {
         done(e);
@@ -157,27 +157,27 @@ describe('gcm_synthetic_reporter', () => {
     mocha.suite.addSuite(subSuite);
 
     mocha.run(() => {
-      const testFrameworkResult = readOutputFile();
+      const syntheticResult = readOutputFile();
       try {
-        expect(testFrameworkResult?.suite_count).to.equal(2);
-        expect(testFrameworkResult?.test_count).to.equal(3);
-        expect(testFrameworkResult?.passing_test_count).to.equal(2);
-        expect(testFrameworkResult?.pending_test_count).to.equal(1);
-        expect(testFrameworkResult?.failing_test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.suite_count).to.equal(2);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_count).to.equal(3);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.passing_test_count).to.equal(2);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.pending_test_count).to.equal(1);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.failing_test_count).to.equal(1);
 
-        expect(testFrameworkResult?.test_results).to.have.length(3);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.have.length(3);
 
-        expect(testFrameworkResult?.test_results?.[0]?.test_passed).to.be.true;
-        expect(testFrameworkResult?.test_results?.[0]?.title).to.equal('passing test');
-        expect(testFrameworkResult?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_passed).to.be.true;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title).to.equal('passing test');
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
 
-        expect(testFrameworkResult?.test_results?.[1]?.test_passed).to.be.false;
-        expect(testFrameworkResult?.test_results?.[1]?.title).to.equal('failing test');
-        expect(testFrameworkResult?.test_results?.[1]?.title_paths).to.deep.equal(['failing test']);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[1]?.test_passed).to.be.false;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[1]?.title).to.equal('failing test');
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[1]?.title_paths).to.deep.equal(['failing test']);
 
-        expect(testFrameworkResult?.test_results?.[2]?.test_passed).to.be.true;
-        expect(testFrameworkResult?.test_results?.[2]?.title).to.equal('passing test 2');
-        expect(testFrameworkResult?.test_results?.[2]?.title_paths).to.deep.equal([
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[2]?.test_passed).to.be.true;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[2]?.title).to.equal('passing test 2');
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[2]?.title_paths).to.deep.equal([
           'sub suite',
           'passing test 2',
         ]);
@@ -195,17 +195,17 @@ describe('gcm_synthetic_reporter', () => {
     mocha.run(() => {
       const end = new Date();
 
-      const testFrameworkResult = readOutputFile();
-      const suiteStart = new Date(testFrameworkResult?.suite_start_time ?? '');
-      const suiteEnd = new Date(testFrameworkResult?.suite_end_time ?? '');
+      const syntheticResult = readOutputFile();
+      const suiteStart = new Date(syntheticResult?.start_time ?? '');
+      const suiteEnd = new Date(syntheticResult?.end_time ?? '');
 
       try {
         expect(suiteStart >= start).to.be.true;
         expect(suiteEnd <= end).to.be.true;
 
-        expect(new Date(testFrameworkResult?.test_results?.[0].test_start_time ?? '') >= suiteStart)
+        expect(new Date(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0].test_start_time ?? '') >= suiteStart)
           .to.be.true;
-        expect(new Date(testFrameworkResult?.test_results?.[0]?.test_end_time ?? '') <= suiteEnd).to
+        expect(new Date(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_end_time ?? '') <= suiteEnd).to
           .be.true;
         done();
       } catch (e) {

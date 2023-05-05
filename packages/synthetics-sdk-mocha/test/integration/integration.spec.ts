@@ -32,17 +32,20 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const test_framework_result = output?.synthetic_test_framework_result_v1;
     const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
+
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(test_framework_result?.suite_count).to.equal(1);
     expect(test_framework_result?.test_count).to.equal(1);
     expect(test_framework_result?.passing_test_count).to.equal(1);
     expect(test_framework_result?.failing_test_count).to.equal(0);
     expect(test_framework_result?.pending_test_count).to.equal(0);
-    expect(test_framework_result?.suite_start_time).to.be.a.string;
-    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
@@ -67,17 +70,20 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const test_framework_result = output?.synthetic_test_framework_result_v1;
     const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
+
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(test_framework_result?.suite_count).to.equal(1);
     expect(test_framework_result?.test_count).to.equal(1);
     expect(test_framework_result?.passing_test_count).to.equal(0);
     expect(test_framework_result?.failing_test_count).to.equal(1);
     expect(test_framework_result?.pending_test_count).to.equal(0);
-    expect(test_framework_result?.suite_start_time).to.be.a.string;
-    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
@@ -104,17 +110,20 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const test_framework_result = output?.synthetic_test_framework_result_v1;
     const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
+
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(test_framework_result?.suite_count).to.equal(2);
     expect(test_framework_result?.test_count).to.equal(3);
     expect(test_framework_result?.passing_test_count).to.equal(1);
     expect(test_framework_result?.failing_test_count).to.equal(2);
     expect(test_framework_result?.pending_test_count).to.equal(1);
-    expect(test_framework_result?.suite_start_time).to.be.a.string;
-    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(3);
     expect(runtime_metadata).to.not.be.undefined;
@@ -131,6 +140,8 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const synthetic_generic_result = output?.synthetic_generic_result_v1;
     const runtime_metadata = output?.runtime_metadata;
 
@@ -139,6 +150,8 @@ describe('CloudFunctionV2 Running Synthetics', () => {
     expect(synthetic_generic_result?.error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(runtime_metadata).to.not.be.undefined;
   });
@@ -154,17 +167,20 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const test_framework_result = output?.synthetic_test_framework_result_v1;
     const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
+
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(test_framework_result?.suite_count).to.equal(1);
     expect(test_framework_result?.test_count).to.equal(1);
     expect(test_framework_result?.passing_test_count).to.equal(1);
     expect(test_framework_result?.failing_test_count).to.equal(0);
     expect(test_framework_result?.pending_test_count).to.equal(0);
-    expect(test_framework_result?.suite_start_time).to.be.a.string;
-    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
@@ -189,17 +205,20 @@ describe('CloudFunctionV2 Running Synthetics', () => {
       .expect(200);
 
     const output: SyntheticResult = response.body as SyntheticResult;
+    const start_time = output.start_time;
+    const end_time = output.end_time;
     const test_framework_result = output?.synthetic_test_framework_result_v1;
     const test_results = output?.synthetic_test_framework_result_v1?.test_results;
     const runtime_metadata = output?.runtime_metadata;
+
+    expect(start_time).to.be.a.string;
+    expect(end_time).to.be.a.string;
 
     expect(test_framework_result?.suite_count).to.equal(1);
     expect(test_framework_result?.test_count).to.equal(1);
     expect(test_framework_result?.passing_test_count).to.equal(0);
     expect(test_framework_result?.failing_test_count).to.equal(1);
     expect(test_framework_result?.pending_test_count).to.equal(0);
-    expect(test_framework_result?.suite_start_time).to.be.a.string;
-    expect(test_framework_result?.suite_end_time).to.be.a.string;
 
     expect(test_results).to.have.length(1);
 
