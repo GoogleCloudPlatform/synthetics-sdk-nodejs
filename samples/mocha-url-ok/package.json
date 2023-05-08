@@ -3,11 +3,8 @@
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "dependencies": {
-    "@google-cloud/synthetics-sdk-mocha": "file:../../packages/synthetics-sdk-mocha",
+    "@google-cloud/synthetics-sdk-mocha": "^0.1.0",
     "chai": "^4.3.0",
     "node-fetch": "^2.6.0",
     "@google-cloud/functions-framework": "^3.1.2"

@@ -18,6 +18,10 @@ See [README.md](packages/synthetics-sdk-mocha/README.md) for installation and us
 
 ## Synthetics SDK API
 
+```
+npm install --save @google-cloud/syntetics-sdk-api
+```
+
 As long as a Google Cloud Function exposes an http endpoint that complies with the API spec as defined in the Synthetics SDK API package, the Cloud Function will work as a target for the Synthetic Monitor. The Synthetics SDK API package includes a proto definition that contains the api spec, as well as typescript types that are generated from that proto.
 
 See [README.md](packages/synthetics-sdk-api/README.md) for installation and usage information.

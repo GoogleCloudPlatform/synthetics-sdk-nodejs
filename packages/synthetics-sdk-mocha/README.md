@@ -65,6 +65,7 @@ The created function may now be used within the Google Cloud Monitoring Syntheti
 
 # Useful Links
 
+* For a sample, see [mocha-url-ok](../../samples/mocha-url-ok/)
 * For more information on Mocha, visit [mochajs.org](https://mochajs.org/)
 * For documentation regarding Google Cloud Monitoring Synthetics, visit [cloud.google.com/monitoring/](https://cloud.google.com/monitoring/)
 * For documentation on Cloud Functions, visit [https://cloud.google.com/functions](https://cloud.google.com/functions/docs/concepts/version-comparison#new-in-2nd-gen)
