@@ -24,7 +24,7 @@ const { SyntheticResult, GenericResultV1 } = require('@google-cloud/synthetics-s
  */
 const syntheticCode = async () => {
   // PUT YOUR SYNTHETIC CODE IN THIS FUNCTION
-  const url = 'https://www.asfwerqewadfa;welrkjasdf.coqewrqewm/'; // URL to send the request to
+  const url = 'https://www.google.com/'; // URL to send the request to
   return await fetch(url);
 }
 
@@ -46,8 +46,8 @@ functions.http('SyntheticFunction', async (req, res) => {
   } catch (e) {
     syntheticGenericResult = GenericResultV1.create({
       ok: false,
-      error: {
-        error_name: e.name,
+      generic_error: {
+        error_type: e.name,
         error_message: e.message
       }
     });

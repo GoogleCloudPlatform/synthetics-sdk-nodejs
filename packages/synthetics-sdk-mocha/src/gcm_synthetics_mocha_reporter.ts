@@ -147,9 +147,9 @@ export function serializeTest(
     // metadata for logging
     title: test.title,
     title_paths: test.titlePath(),
-    error: err
+    test_error: err
       ? {
-          error_name: err.name,
+          error_type: err.name,
           error_message: err.message,
           stack_frames: serializeStack(err.stack || ''),
         }
@@ -177,7 +177,7 @@ function serializeStack(errStack: string): TestResult_TestError_StackFrame[] {
     const frame = frameStr.split('at ')[1];
     if (!frame) {
       // Frame is in an invalid format, this is defensive.
-      return {};
+      return TestResult_TestError_StackFrame.create();
     }
     const locationParansRegex = /\(([^)]+)\)/;
     const locationInParens = locationParansRegex.exec(frame);
@@ -186,12 +186,15 @@ function serializeStack(errStack: string): TestResult_TestError_StackFrame[] {
       // if regex passed, location will be found at
       // [1] index. If so, then there is a function
       // name prefix
-      return {
+      return TestResult_TestError_StackFrame.fromJSON({
         function_name: frame.split(locationInParens[0])[0].trim(),
         ...serializeLocation(locationInParens[1]),
-      };
+      });
     }
-    return { function_name: undefined, ...serializeLocation(frame) };
+    return TestResult_TestError_StackFrame.fromJSON({
+      function_name: undefined,
+      ...serializeLocation(frame),
+    });
   });
 }
 
@@ -220,7 +223,7 @@ function serializeLocation(location: string) {
   const lineNumber = locationColonSplit.pop();
 
   return {
-    file_name: locationColonSplit.join(':'),
+    file_path: locationColonSplit.join(':'),
     line: Number(lineNumber),
     column: Number(columnNumber),
   };

@@ -14,7 +14,7 @@
 
 import * as ff from '@google-cloud/functions-framework';
 import fetch from 'node-fetch';
-import {SyntheticResult, GenericResultV1} from '@google-cloud/synthetics-sdk-api'
+import {SyntheticResult, GenericResultV1, GenericResultV1_GenericError} from '@google-cloud/synthetics-sdk-api'
 
 /*
  * This is the function that should run your code synthetic code. This should
@@ -36,26 +36,21 @@ const syntheticCode = async () => {
 ff.http('SyntheticFunction', async (req: ff.Request, res: ff.Response) => {
   const startTime = new Date().toISOString();
 
-  const syntheticResult: SyntheticResult = {
-    runtime_metadata: {}
-  };
-  let synthetic_generic_result: GenericResultV1;
+  const syntheticResult = SyntheticResult.create();
+  let synthetic_generic_result = GenericResultV1.create();
 
   try {
     await syntheticCode();
-    synthetic_generic_result = {
-      ok: true
-    };
+    synthetic_generic_result.ok = true;
   } catch (err: unknown) {
-    synthetic_generic_result = {
-      ok: false
-    };
+    synthetic_generic_result.ok = false;
 
     if (err instanceof Error) {
-      synthetic_generic_result.error = {
-        error_name: err?.name,
-        error_message: err?.message
-      }
+
+      synthetic_generic_result.generic_error = GenericResultV1_GenericError.create({
+        error_type: err.name,
+        error_message: err.message
+      });
     }
   }
 

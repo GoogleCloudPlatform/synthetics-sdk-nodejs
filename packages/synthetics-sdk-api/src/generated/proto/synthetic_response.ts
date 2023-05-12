@@ -11,21 +11,19 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-/* eslint-disable */
 
+/* eslint-disable */
 import * as Long from "long";
 import * as _m0 from "protobufjs/minimal";
 
-export const protobufPackage = "cloud_monitoring_uptime_proto";
+export const protobufPackage = "cloud.monitoring.uptime.synthetic";
 
 export interface TestResult {
   /**
    * The name of the test in this suite, "pings my website". Multiple tests can
    * have the same title & title_path.
    */
-  title?:
-    | string
-    | undefined;
+  title: string;
   /** Whether or not the test passed. */
   test_passed?:
     | boolean
@@ -37,30 +35,22 @@ export interface TestResult {
    */
   title_paths: string[];
   /** The start time of the test in iso format. */
-  test_start_time?:
-    | string
-    | undefined;
+  test_start_time: string;
   /** The end time of the test suite in iso format. */
-  test_end_time?:
-    | string
-    | undefined;
+  test_end_time: string;
   /** The error that was the result of a test failure. */
-  error?: TestResult_TestError | undefined;
+  test_error: TestResult_TestError | undefined;
 }
 
 /** Information on an error that occurred. */
 export interface TestResult_TestError {
   /** The class of error. */
-  error_name?:
-    | string
-    | undefined;
+  error_type: string;
   /**
    * The full error message. Eg. "The url that you are fetching failed DNS
    * lookup".
    */
-  error_message?:
-    | string
-    | undefined;
+  error_message: string;
   /** A list of StackFrame messages that indicate a single trace of code. */
   stack_frames: TestResult_TestError_StackFrame[];
 }
@@ -68,13 +58,9 @@ export interface TestResult_TestError {
 /** An individual stack frame that represents a line of code within a file. */
 export interface TestResult_TestError_StackFrame {
   /** The name of the function that reported the error. */
-  function_name?:
-    | string
-    | undefined;
+  function_name: string;
   /** The name of the file that reported the error. */
-  file_name?:
-    | string
-    | undefined;
+  file_path: string;
   /** Line number that reported the error. */
   line?:
     | number
@@ -116,30 +102,22 @@ export interface GenericResultV1 {
   ok?:
     | boolean
     | undefined;
-  /** An error */
-  error?: GenericResultV1_GenericError | undefined;
+  /** Error that was associated with this result, causing it to fail. */
+  generic_error: GenericResultV1_GenericError | undefined;
 }
 
 export interface GenericResultV1_GenericError {
   /** The class of error. */
-  error_name?:
-    | string
-    | undefined;
+  error_type: string;
   /**
    * The full error message. Eg. "The url that you are fetching failed DNS
    * lookup".
    */
-  error_message?:
-    | string
-    | undefined;
+  error_message: string;
   /** The name of the function where the error occurred */
-  function_name?:
-    | string
-    | undefined;
+  function_name: string;
   /** The name of the file that reported the error. */
-  file_name?:
-    | string
-    | undefined;
+  file_path: string;
   /** Line number that reported the error. */
   line?: number | undefined;
 }
@@ -155,12 +133,10 @@ export interface SyntheticResult {
    * SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
    */
   runtime_metadata: { [key: string]: string };
-  /** The start time of synthetic in iso format. */
-  start_time?:
-    | string
-    | undefined;
+  /** The start time of the synthetic in iso format. */
+  start_time: string;
   /** The end time of the synthetic in iso format. */
-  end_time?: string | undefined;
+  end_time: string;
 }
 
 export interface SyntheticResult_RuntimeMetadataEntry {
@@ -170,18 +146,18 @@ export interface SyntheticResult_RuntimeMetadataEntry {
 
 function createBaseTestResult(): TestResult {
   return {
-    title: undefined,
+    title: "",
     test_passed: undefined,
     title_paths: [],
-    test_start_time: undefined,
-    test_end_time: undefined,
-    error: undefined,
+    test_start_time: "",
+    test_end_time: "",
+    test_error: undefined,
   };
 }
 
 export const TestResult = {
   encode(message: TestResult, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.title !== undefined) {
+    if (message.title !== "") {
       writer.uint32(10).string(message.title);
     }
     if (message.test_passed !== undefined) {
@@ -190,14 +166,14 @@ export const TestResult = {
     for (const v of message.title_paths) {
       writer.uint32(26).string(v!);
     }
-    if (message.test_start_time !== undefined) {
+    if (message.test_start_time !== "") {
       writer.uint32(34).string(message.test_start_time);
     }
-    if (message.test_end_time !== undefined) {
+    if (message.test_end_time !== "") {
       writer.uint32(42).string(message.test_end_time);
     }
-    if (message.error !== undefined) {
-      TestResult_TestError.encode(message.error, writer.uint32(50).fork()).ldelim();
+    if (message.test_error !== undefined) {
+      TestResult_TestError.encode(message.test_error, writer.uint32(50).fork()).ldelim();
     }
     return writer;
   },
@@ -249,7 +225,7 @@ export const TestResult = {
             break;
           }
 
-          message.error = TestResult_TestError.decode(reader, reader.uint32());
+          message.test_error = TestResult_TestError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) == 4 || tag == 0) {
@@ -262,12 +238,12 @@ export const TestResult = {
 
   fromJSON(object: any): TestResult {
     return {
-      title: isSet(object.title) ? String(object.title) : undefined,
+      title: isSet(object.title) ? String(object.title) : "",
       test_passed: isSet(object.test_passed) ? Boolean(object.test_passed) : undefined,
       title_paths: Array.isArray(object?.title_paths) ? object.title_paths.map((e: any) => String(e)) : [],
-      test_start_time: isSet(object.test_start_time) ? String(object.test_start_time) : undefined,
-      test_end_time: isSet(object.test_end_time) ? String(object.test_end_time) : undefined,
-      error: isSet(object.error) ? TestResult_TestError.fromJSON(object.error) : undefined,
+      test_start_time: isSet(object.test_start_time) ? String(object.test_start_time) : "",
+      test_end_time: isSet(object.test_end_time) ? String(object.test_end_time) : "",
+      test_error: isSet(object.test_error) ? TestResult_TestError.fromJSON(object.test_error) : undefined,
     };
   },
 
@@ -282,7 +258,8 @@ export const TestResult = {
     }
     message.test_start_time !== undefined && (obj.test_start_time = message.test_start_time);
     message.test_end_time !== undefined && (obj.test_end_time = message.test_end_time);
-    message.error !== undefined && (obj.error = message.error ? TestResult_TestError.toJSON(message.error) : undefined);
+    message.test_error !== undefined &&
+      (obj.test_error = message.test_error ? TestResult_TestError.toJSON(message.test_error) : undefined);
     return obj;
   },
 
@@ -292,28 +269,28 @@ export const TestResult = {
 
   fromPartial<I extends Exact<DeepPartial<TestResult>, I>>(object: I): TestResult {
     const message = createBaseTestResult();
-    message.title = object.title ?? undefined;
+    message.title = object.title ?? "";
     message.test_passed = object.test_passed ?? undefined;
     message.title_paths = object.title_paths?.map((e) => e) || [];
-    message.test_start_time = object.test_start_time ?? undefined;
-    message.test_end_time = object.test_end_time ?? undefined;
-    message.error = (object.error !== undefined && object.error !== null)
-      ? TestResult_TestError.fromPartial(object.error)
+    message.test_start_time = object.test_start_time ?? "";
+    message.test_end_time = object.test_end_time ?? "";
+    message.test_error = (object.test_error !== undefined && object.test_error !== null)
+      ? TestResult_TestError.fromPartial(object.test_error)
       : undefined;
     return message;
   },
 };
 
 function createBaseTestResult_TestError(): TestResult_TestError {
-  return { error_name: undefined, error_message: undefined, stack_frames: [] };
+  return { error_type: "", error_message: "", stack_frames: [] };
 }
 
 export const TestResult_TestError = {
   encode(message: TestResult_TestError, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.error_name !== undefined) {
-      writer.uint32(10).string(message.error_name);
+    if (message.error_type !== "") {
+      writer.uint32(10).string(message.error_type);
     }
-    if (message.error_message !== undefined) {
+    if (message.error_message !== "") {
       writer.uint32(18).string(message.error_message);
     }
     for (const v of message.stack_frames) {
@@ -334,7 +311,7 @@ export const TestResult_TestError = {
             break;
           }
 
-          message.error_name = reader.string();
+          message.error_type = reader.string();
           continue;
         case 2:
           if (tag != 18) {
@@ -361,8 +338,8 @@ export const TestResult_TestError = {
 
   fromJSON(object: any): TestResult_TestError {
     return {
-      error_name: isSet(object.error_name) ? String(object.error_name) : undefined,
-      error_message: isSet(object.error_message) ? String(object.error_message) : undefined,
+      error_type: isSet(object.error_type) ? String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? String(object.error_message) : "",
       stack_frames: Array.isArray(object?.stack_frames)
         ? object.stack_frames.map((e: any) => TestResult_TestError_StackFrame.fromJSON(e))
         : [],
@@ -371,7 +348,7 @@ export const TestResult_TestError = {
 
   toJSON(message: TestResult_TestError): unknown {
     const obj: any = {};
-    message.error_name !== undefined && (obj.error_name = message.error_name);
+    message.error_type !== undefined && (obj.error_type = message.error_type);
     message.error_message !== undefined && (obj.error_message = message.error_message);
     if (message.stack_frames) {
       obj.stack_frames = message.stack_frames.map((e) => e ? TestResult_TestError_StackFrame.toJSON(e) : undefined);
@@ -387,24 +364,24 @@ export const TestResult_TestError = {
 
   fromPartial<I extends Exact<DeepPartial<TestResult_TestError>, I>>(object: I): TestResult_TestError {
     const message = createBaseTestResult_TestError();
-    message.error_name = object.error_name ?? undefined;
-    message.error_message = object.error_message ?? undefined;
+    message.error_type = object.error_type ?? "";
+    message.error_message = object.error_message ?? "";
     message.stack_frames = object.stack_frames?.map((e) => TestResult_TestError_StackFrame.fromPartial(e)) || [];
     return message;
   },
 };
 
 function createBaseTestResult_TestError_StackFrame(): TestResult_TestError_StackFrame {
-  return { function_name: undefined, file_name: undefined, line: undefined, column: undefined };
+  return { function_name: "", file_path: "", line: undefined, column: undefined };
 }
 
 export const TestResult_TestError_StackFrame = {
   encode(message: TestResult_TestError_StackFrame, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.function_name !== undefined) {
+    if (message.function_name !== "") {
       writer.uint32(10).string(message.function_name);
     }
-    if (message.file_name !== undefined) {
-      writer.uint32(18).string(message.file_name);
+    if (message.file_path !== "") {
+      writer.uint32(18).string(message.file_path);
     }
     if (message.line !== undefined) {
       writer.uint32(24).int64(message.line);
@@ -434,7 +411,7 @@ export const TestResult_TestError_StackFrame = {
             break;
           }
 
-          message.file_name = reader.string();
+          message.file_path = reader.string();
           continue;
         case 3:
           if (tag != 24) {
@@ -461,8 +438,8 @@ export const TestResult_TestError_StackFrame = {
 
   fromJSON(object: any): TestResult_TestError_StackFrame {
     return {
-      function_name: isSet(object.function_name) ? String(object.function_name) : undefined,
-      file_name: isSet(object.file_name) ? String(object.file_name) : undefined,
+      function_name: isSet(object.function_name) ? String(object.function_name) : "",
+      file_path: isSet(object.file_path) ? String(object.file_path) : "",
       line: isSet(object.line) ? Number(object.line) : undefined,
       column: isSet(object.column) ? Number(object.column) : undefined,
     };
@@ -471,7 +448,7 @@ export const TestResult_TestError_StackFrame = {
   toJSON(message: TestResult_TestError_StackFrame): unknown {
     const obj: any = {};
     message.function_name !== undefined && (obj.function_name = message.function_name);
-    message.file_name !== undefined && (obj.file_name = message.file_name);
+    message.file_path !== undefined && (obj.file_path = message.file_path);
     message.line !== undefined && (obj.line = Math.round(message.line));
     message.column !== undefined && (obj.column = Math.round(message.column));
     return obj;
@@ -485,8 +462,8 @@ export const TestResult_TestError_StackFrame = {
     object: I,
   ): TestResult_TestError_StackFrame {
     const message = createBaseTestResult_TestError_StackFrame();
-    message.function_name = object.function_name ?? undefined;
-    message.file_name = object.file_name ?? undefined;
+    message.function_name = object.function_name ?? "";
+    message.file_path = object.file_path ?? "";
     message.line = object.line ?? undefined;
     message.column = object.column ?? undefined;
     return message;
@@ -630,7 +607,7 @@ export const TestFrameworkResultV1 = {
 };
 
 function createBaseGenericResultV1(): GenericResultV1 {
-  return { ok: undefined, error: undefined };
+  return { ok: undefined, generic_error: undefined };
 }
 
 export const GenericResultV1 = {
@@ -638,8 +615,8 @@ export const GenericResultV1 = {
     if (message.ok !== undefined) {
       writer.uint32(8).bool(message.ok);
     }
-    if (message.error !== undefined) {
-      GenericResultV1_GenericError.encode(message.error, writer.uint32(18).fork()).ldelim();
+    if (message.generic_error !== undefined) {
+      GenericResultV1_GenericError.encode(message.generic_error, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
@@ -663,7 +640,7 @@ export const GenericResultV1 = {
             break;
           }
 
-          message.error = GenericResultV1_GenericError.decode(reader, reader.uint32());
+          message.generic_error = GenericResultV1_GenericError.decode(reader, reader.uint32());
           continue;
       }
       if ((tag & 7) == 4 || tag == 0) {
@@ -677,15 +654,18 @@ export const GenericResultV1 = {
   fromJSON(object: any): GenericResultV1 {
     return {
       ok: isSet(object.ok) ? Boolean(object.ok) : undefined,
-      error: isSet(object.error) ? GenericResultV1_GenericError.fromJSON(object.error) : undefined,
+      generic_error: isSet(object.generic_error)
+        ? GenericResultV1_GenericError.fromJSON(object.generic_error)
+        : undefined,
     };
   },
 
   toJSON(message: GenericResultV1): unknown {
     const obj: any = {};
     message.ok !== undefined && (obj.ok = message.ok);
-    message.error !== undefined &&
-      (obj.error = message.error ? GenericResultV1_GenericError.toJSON(message.error) : undefined);
+    message.generic_error !== undefined && (obj.generic_error = message.generic_error
+      ? GenericResultV1_GenericError.toJSON(message.generic_error)
+      : undefined);
     return obj;
   },
 
@@ -696,36 +676,30 @@ export const GenericResultV1 = {
   fromPartial<I extends Exact<DeepPartial<GenericResultV1>, I>>(object: I): GenericResultV1 {
     const message = createBaseGenericResultV1();
     message.ok = object.ok ?? undefined;
-    message.error = (object.error !== undefined && object.error !== null)
-      ? GenericResultV1_GenericError.fromPartial(object.error)
+    message.generic_error = (object.generic_error !== undefined && object.generic_error !== null)
+      ? GenericResultV1_GenericError.fromPartial(object.generic_error)
       : undefined;
     return message;
   },
 };
 
 function createBaseGenericResultV1_GenericError(): GenericResultV1_GenericError {
-  return {
-    error_name: undefined,
-    error_message: undefined,
-    function_name: undefined,
-    file_name: undefined,
-    line: undefined,
-  };
+  return { error_type: "", error_message: "", function_name: "", file_path: "", line: undefined };
 }
 
 export const GenericResultV1_GenericError = {
   encode(message: GenericResultV1_GenericError, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.error_name !== undefined) {
-      writer.uint32(10).string(message.error_name);
+    if (message.error_type !== "") {
+      writer.uint32(10).string(message.error_type);
     }
-    if (message.error_message !== undefined) {
+    if (message.error_message !== "") {
       writer.uint32(18).string(message.error_message);
     }
-    if (message.function_name !== undefined) {
+    if (message.function_name !== "") {
       writer.uint32(26).string(message.function_name);
     }
-    if (message.file_name !== undefined) {
-      writer.uint32(34).string(message.file_name);
+    if (message.file_path !== "") {
+      writer.uint32(34).string(message.file_path);
     }
     if (message.line !== undefined) {
       writer.uint32(40).int64(message.line);
@@ -745,7 +719,7 @@ export const GenericResultV1_GenericError = {
             break;
           }
 
-          message.error_name = reader.string();
+          message.error_type = reader.string();
           continue;
         case 2:
           if (tag != 18) {
@@ -766,7 +740,7 @@ export const GenericResultV1_GenericError = {
             break;
           }
 
-          message.file_name = reader.string();
+          message.file_path = reader.string();
           continue;
         case 5:
           if (tag != 40) {
@@ -786,20 +760,20 @@ export const GenericResultV1_GenericError = {
 
   fromJSON(object: any): GenericResultV1_GenericError {
     return {
-      error_name: isSet(object.error_name) ? String(object.error_name) : undefined,
-      error_message: isSet(object.error_message) ? String(object.error_message) : undefined,
-      function_name: isSet(object.function_name) ? String(object.function_name) : undefined,
-      file_name: isSet(object.file_name) ? String(object.file_name) : undefined,
+      error_type: isSet(object.error_type) ? String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? String(object.error_message) : "",
+      function_name: isSet(object.function_name) ? String(object.function_name) : "",
+      file_path: isSet(object.file_path) ? String(object.file_path) : "",
       line: isSet(object.line) ? Number(object.line) : undefined,
     };
   },
 
   toJSON(message: GenericResultV1_GenericError): unknown {
     const obj: any = {};
-    message.error_name !== undefined && (obj.error_name = message.error_name);
+    message.error_type !== undefined && (obj.error_type = message.error_type);
     message.error_message !== undefined && (obj.error_message = message.error_message);
     message.function_name !== undefined && (obj.function_name = message.function_name);
-    message.file_name !== undefined && (obj.file_name = message.file_name);
+    message.file_path !== undefined && (obj.file_path = message.file_path);
     message.line !== undefined && (obj.line = Math.round(message.line));
     return obj;
   },
@@ -810,10 +784,10 @@ export const GenericResultV1_GenericError = {
 
   fromPartial<I extends Exact<DeepPartial<GenericResultV1_GenericError>, I>>(object: I): GenericResultV1_GenericError {
     const message = createBaseGenericResultV1_GenericError();
-    message.error_name = object.error_name ?? undefined;
-    message.error_message = object.error_message ?? undefined;
-    message.function_name = object.function_name ?? undefined;
-    message.file_name = object.file_name ?? undefined;
+    message.error_type = object.error_type ?? "";
+    message.error_message = object.error_message ?? "";
+    message.function_name = object.function_name ?? "";
+    message.file_path = object.file_path ?? "";
     message.line = object.line ?? undefined;
     return message;
   },
@@ -824,26 +798,26 @@ function createBaseSyntheticResult(): SyntheticResult {
     synthetic_test_framework_result_v1: undefined,
     synthetic_generic_result_v1: undefined,
     runtime_metadata: {},
-    start_time: undefined,
-    end_time: undefined,
+    start_time: "",
+    end_time: "",
   };
 }
 
 export const SyntheticResult = {
   encode(message: SyntheticResult, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.synthetic_test_framework_result_v1 !== undefined) {
-      TestFrameworkResultV1.encode(message.synthetic_test_framework_result_v1, writer.uint32(18).fork()).ldelim();
+      TestFrameworkResultV1.encode(message.synthetic_test_framework_result_v1, writer.uint32(10).fork()).ldelim();
     }
     if (message.synthetic_generic_result_v1 !== undefined) {
-      GenericResultV1.encode(message.synthetic_generic_result_v1, writer.uint32(26).fork()).ldelim();
+      GenericResultV1.encode(message.synthetic_generic_result_v1, writer.uint32(18).fork()).ldelim();
     }
     Object.entries(message.runtime_metadata).forEach(([key, value]) => {
       SyntheticResult_RuntimeMetadataEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
     });
-    if (message.start_time !== undefined) {
+    if (message.start_time !== "") {
       writer.uint32(42).string(message.start_time);
     }
-    if (message.end_time !== undefined) {
+    if (message.end_time !== "") {
       writer.uint32(50).string(message.end_time);
     }
     return writer;
@@ -856,15 +830,15 @@ export const SyntheticResult = {
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 2:
-          if (tag != 18) {
+        case 1:
+          if (tag != 10) {
             break;
           }
 
           message.synthetic_test_framework_result_v1 = TestFrameworkResultV1.decode(reader, reader.uint32());
           continue;
-        case 3:
-          if (tag != 26) {
+        case 2:
+          if (tag != 18) {
             break;
           }
 
@@ -917,8 +891,8 @@ export const SyntheticResult = {
           return acc;
         }, {})
         : {},
-      start_time: isSet(object.start_time) ? String(object.start_time) : undefined,
-      end_time: isSet(object.end_time) ? String(object.end_time) : undefined,
+      start_time: isSet(object.start_time) ? String(object.start_time) : "",
+      end_time: isSet(object.end_time) ? String(object.end_time) : "",
     };
   },
 
@@ -966,8 +940,8 @@ export const SyntheticResult = {
       },
       {},
     );
-    message.start_time = object.start_time ?? undefined;
-    message.end_time = object.end_time ?? undefined;
+    message.start_time = object.start_time ?? "";
+    message.end_time = object.end_time ?? "";
     return message;
   },
 };

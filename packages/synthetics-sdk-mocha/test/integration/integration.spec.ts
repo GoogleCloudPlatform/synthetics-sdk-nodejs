@@ -146,8 +146,8 @@ describe('CloudFunctionV2 Running Synthetics', () => {
     const runtime_metadata = output?.runtime_metadata;
 
     expect(synthetic_generic_result?.ok).to.be.false;
-    expect(synthetic_generic_result?.error?.error_name).to.equal('Error');
-    expect(synthetic_generic_result?.error?.error_message).to.equal(
+    expect(synthetic_generic_result?.generic_error?.error_type).to.equal('Error');
+    expect(synthetic_generic_result?.generic_error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
     expect(start_time).to.be.a.string;

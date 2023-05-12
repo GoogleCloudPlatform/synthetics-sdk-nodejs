@@ -22,8 +22,8 @@ describe('GCM Synthetics Mocha', async () => {
     });
 
     expect(synthetic_generic_result_v1?.ok).to.be.false;
-    expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
-    expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
+    expect(synthetic_generic_result_v1?.generic_error?.error_type).to.equal('Error');
+    expect(synthetic_generic_result_v1?.generic_error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
 
@@ -66,7 +66,7 @@ describe('GCM Synthetics Mocha', async () => {
     expect(testFrameworkResult?.failing_test_count).to.equal(1);
 
     expect(testFrameworkResult?.test_results).to.have.length(1);
-    expect(testFrameworkResult?.test_results?.[0]).to.have.property('error');
+    expect(testFrameworkResult?.test_results?.[0]).to.have.property('test_error');
   });
 
   it('runs multiple files of tests at the provided path', async () => {
@@ -110,8 +110,8 @@ describe('GCM Synthetics Mocha', async () => {
     });
 
     expect(synthetic_generic_result_v1?.ok).to.be.false;
-    expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
-    expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
+    expect(synthetic_generic_result_v1?.generic_error?.error_type).to.equal('Error');
+    expect(synthetic_generic_result_v1?.generic_error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
   });
@@ -123,8 +123,8 @@ describe('GCM Synthetics Mocha', async () => {
       });
 
     expect(synthetic_generic_result_v1?.ok).to.be.false;
-    expect(synthetic_generic_result_v1?.error?.error_name).to.equal('Error');
-    expect(synthetic_generic_result_v1?.error?.error_message).to.equal(
+    expect(synthetic_generic_result_v1?.generic_error?.error_type).to.equal('Error');
+    expect(synthetic_generic_result_v1?.generic_error?.error_message).to.equal(
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.'
     );
 

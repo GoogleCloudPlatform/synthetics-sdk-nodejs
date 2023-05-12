@@ -39,10 +39,13 @@ export interface SyntheticMochaOptions {
 
 const defaultError: GenericResultV1 = {
   ok: false,
-  error: {
-    error_name: 'Error',
+  generic_error: {
+    error_type: 'Error',
     error_message:
       'An error occurred while starting or running the mocha test suite. Please reference server logs for further information.',
+    function_name: '',
+    file_path: '',
+    line: 0,
   },
 };
 

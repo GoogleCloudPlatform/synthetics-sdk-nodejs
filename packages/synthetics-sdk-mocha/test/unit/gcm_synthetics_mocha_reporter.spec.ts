@@ -76,7 +76,7 @@ describe('gcm_synthetic_reporter', () => {
         expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title).to.equal('passing test');
         expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title_paths).to.deep.equal(['passing test']);
 
-        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.error).to.be.undefined;
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_error).to.be.undefined;
         done();
       } catch (e) {
         done(e);
@@ -101,12 +101,12 @@ describe('gcm_synthetic_reporter', () => {
         expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title).to.equal('failing test');
         expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.title_paths).to.deep.equal(['failing test']);
 
-        const error = syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.error;
-        expect(error?.error_name).to.equal('Error');
+        const error = syntheticResult?.synthetic_test_framework_result_v1?.test_results?.[0]?.test_error;
+        expect(error?.error_type).to.equal('Error');
         expect(error?.error_message).to.equal('this test has failed');
 
         expect(error?.stack_frames?.[0]?.function_name).to.equal('innerFn');
-        expect(error?.stack_frames?.[0]?.file_name).to.equal(
+        expect(error?.stack_frames?.[0]?.file_path).to.equal(
           'test/unit/gcm_synthetics_mocha_reporter.spec.ts'
         );
         expect(error?.stack_frames?.[0]?.line).to.not.be.undefined;
@@ -115,7 +115,7 @@ describe('gcm_synthetic_reporter', () => {
         expect(error?.stack_frames?.[1]?.function_name).to.equal(
           'Context.<anonymous>'
         );
-        expect(error?.stack_frames?.[1]?.file_name).to.equal(
+        expect(error?.stack_frames?.[1]?.file_path).to.equal(
           'test/unit/gcm_synthetics_mocha_reporter.spec.ts'
         );
         expect(error?.stack_frames?.[1]?.line).to.not.be.undefined;
