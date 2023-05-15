@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { mocha, SyntheticMochaOptions } from './mocha';
+import { runMocha, SyntheticMochaOptions } from './mocha';
 import { Request, Response } from 'express';
 
 /**
@@ -23,8 +23,8 @@ import { Request, Response } from 'express';
  * @returns ExpressJS compatible middleware that invokes SyntheticsSDK mocha, and
  * returns the results via res.send
  */
-export function mochaHandler(options: SyntheticMochaOptions) {
+export function runMochaHandler(options: SyntheticMochaOptions) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
-    res.send(await mocha(options));
+    res.send(await runMocha(options));
 }

@@ -68,7 +68,7 @@ const getGenericSyntheticResult = (startTime: string): SyntheticResult => ({
  *          Errors within this function reolve, with further information within the
  *          returned object's synthetic_generic_result_v1.
  */
-export function mocha(
+export function runMocha(
   options: SyntheticMochaOptions
 ): Promise<SyntheticResult> {
   const uniqueFileName = `/tmp/${crypto.randomUUID()}`;

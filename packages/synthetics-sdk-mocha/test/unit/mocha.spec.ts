@@ -17,7 +17,7 @@ const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
 describe('GCM Synthetics Mocha', async () => {
   it('returns a GenericResult, when no test spec is provided', async () => {
-    const { synthetic_generic_result_v1, runtime_metadata } = await SyntheticsSdkMocha.mocha({
+    const { synthetic_generic_result_v1, runtime_metadata } = await SyntheticsSdkMocha.runMocha({
       spec: '',
     });
 
@@ -31,7 +31,7 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs passing tests in a file at the provided path', async () => {
-    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_passing.spec.js',
     });
 
@@ -52,7 +52,7 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs failing tests in a file at the provided path', async () => {
-    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_failing.spec.js',
     });
 
@@ -70,7 +70,7 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs multiple files of tests at the provided path', async () => {
-    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_passing.spec.js ./test/example_test_files/test_failing.spec.js',
     });
 
@@ -87,7 +87,7 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('runs mocha suite with additional flagged parameters', async () => {
-    const syntheticMochaResults = await SyntheticsSdkMocha.mocha({
+    const syntheticMochaResults = await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_passing.spec.js ./test/example_test_files/test_failing.spec.js',
       mochaOptions: '--fgrep error' // Only runs tests with "error" in their name
     });
@@ -105,7 +105,7 @@ describe('GCM Synthetics Mocha', async () => {
   });
 
   it('returns an error when a the test file doesnt exist', async () => {
-    const { synthetic_generic_result_v1 } = await SyntheticsSdkMocha.mocha({
+    const { synthetic_generic_result_v1 } = await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_does_not_exist.spec.js',
     });
 
@@ -118,7 +118,7 @@ describe('GCM Synthetics Mocha', async () => {
 
   it('returns a GenericResult, when the test file fails to run', async () => {
     const { synthetic_generic_result_v1, runtime_metadata } =
-      await SyntheticsSdkMocha.mocha({
+      await SyntheticsSdkMocha.runMocha({
         spec: './test/example_test_files/test_does_not_exist.spec.js',
       });
 

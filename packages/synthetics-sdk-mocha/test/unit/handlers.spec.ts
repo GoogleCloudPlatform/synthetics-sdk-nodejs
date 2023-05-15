@@ -19,7 +19,7 @@ import { Request, Response, Send } from 'express';
 
 describe('GCM Synthetics Mocha Handler', async () => {
   it('runs a mocha suite when middleware is invoked', async () => {
-    const handler = SyntheticsSdkMocha.mochaHandler({
+    const handler = SyntheticsSdkMocha.runMochaHandler({
       spec: './test/example_test_files/test_passing.spec.js',
     });
 

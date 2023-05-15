@@ -22,7 +22,7 @@ const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
 functions.http('SyntheticOk', async (req, res) => {
   res.send(
-    await SyntheticsSdkMocha.mocha({
+    await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_passing.spec.js',
     })
   );
@@ -30,7 +30,7 @@ functions.http('SyntheticOk', async (req, res) => {
 
 functions.http('SyntheticNotOk', async (req, res) => {
   res.send(
-    await SyntheticsSdkMocha.mocha({
+    await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_failing.spec.js',
     })
   );
@@ -38,7 +38,7 @@ functions.http('SyntheticNotOk', async (req, res) => {
 
 functions.http('SyntheticMultiple', async (req, res) => {
   res.send(
-    await SyntheticsSdkMocha.mocha({
+    await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_multiple.spec.js',
     })
   );
@@ -46,16 +46,16 @@ functions.http('SyntheticMultiple', async (req, res) => {
 
 functions.http('SyntheticFailsToRun', async (req, res) => {
   res.send(
-    await SyntheticsSdkMocha.mocha({
+    await SyntheticsSdkMocha.runMocha({
       spec: './test/example_test_files/test_fails_to_run.spec.js',
     })
   );
 });
 
-functions.http('SyntheticHandlerOk', SyntheticsSdkMocha.mochaHandler({
-  spec: './test/example_test_files/test_passing.spec.js',
+functions.http('SyntheticHandlerOk', SyntheticsSdkMocha.runMochaHandler({
+  spec: './test/example_test_files/test_passing.spec.js'
 }));
 
-functions.http('SyntheticHandlerNotOk', SyntheticsSdkMocha.mochaHandler({
-  spec: './test/example_test_files/test_failing.spec.js',
+functions.http('SyntheticHandlerNotOk', SyntheticsSdkMocha.runMochaHandler({
+  spec: './test/example_test_files/test_failing.spec.js'
 }));
