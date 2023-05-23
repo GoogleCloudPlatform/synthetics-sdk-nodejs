@@ -14,7 +14,7 @@
     "author": "Google Inc.",
     "dependencies": {
         "@google-cloud/functions-framework": "^3.2.0",
-        "@google-cloud/synthetics-sdk-api": "^0.1.0",
+        "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
         "node-fetch": "^2.6.0"
     },
     "devDependencies": {

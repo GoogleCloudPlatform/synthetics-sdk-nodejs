@@ -16,3 +16,4 @@
  * @public
  */
 export * from './generated/proto/synthetic_response';
+export * from './handlers';
