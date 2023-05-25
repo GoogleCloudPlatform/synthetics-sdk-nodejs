@@ -19,8 +19,8 @@ import * as fs from 'fs';
 import {
   GenericResultV1,
   SyntheticResult,
+  getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
-import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 export interface SyntheticMochaOptions {
   /**

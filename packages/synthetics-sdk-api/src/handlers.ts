@@ -18,6 +18,8 @@ import {
   GenericResultV1,
   GenericResultV1_GenericError,
 } from './index';
+import { serializeStack } from './stack_serializer';
+import { getRuntimeMetadata } from './runtime_metadata_extractor';
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const runSynthetic = async (syntheticCode: () => any) => {
@@ -33,10 +35,15 @@ const runSynthetic = async (syntheticCode: () => any) => {
     synthetic_generic_result.ok = false;
 
     if (err instanceof Error) {
+      const stack = serializeStack(err.stack ?? '');
+
       synthetic_generic_result.generic_error =
         GenericResultV1_GenericError.create({
           error_type: err.name,
           error_message: err.message,
+          file_path: stack[0]?.file_path,
+          line: stack[0]?.line,
+          function_name: stack[0]?.function_name,
         });
     }
   }
@@ -46,6 +53,7 @@ const runSynthetic = async (syntheticCode: () => any) => {
   syntheticResult.synthetic_generic_result_v1 = synthetic_generic_result;
   syntheticResult.start_time = startTime;
   syntheticResult.end_time = endTime;
+  syntheticResult.runtime_metadata = getRuntimeMetadata();
 
   return syntheticResult;
 };
