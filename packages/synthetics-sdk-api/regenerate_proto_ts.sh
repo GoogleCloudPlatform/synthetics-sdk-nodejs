@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-protoc --plugin="../../node_modules/.bin/protoc-gen-ts_proto" --ts_proto_out="./src/generated" "./proto/synthetic_response.proto" --ts_proto_opt=snakeToCamel=false
+protoc --plugin="../../node_modules/.bin/protoc-gen-ts_proto" --ts_proto_out="./src/generated" "./proto/synthetic_response.proto" --ts_proto_opt=snakeToCamel=false --ts_proto_opt=esModuleInterop=true

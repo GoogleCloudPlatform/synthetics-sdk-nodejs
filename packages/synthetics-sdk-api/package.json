@@ -29,7 +29,7 @@
     "posttest": "npm run lint"
   },
   "dependencies": {
-    "ts-proto": "^1.143.0"
+    "ts-proto": "^1.148.1"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"

@@ -4,6 +4,9 @@
         "rootDir": ".",
         "outDir": "build",
         "allowJs": true,
+	"resolveJsonModule": true,
+	"esModuleInterop": true,
+	"module": "commonjs"
     },
     "include": [
         "src/**/*",

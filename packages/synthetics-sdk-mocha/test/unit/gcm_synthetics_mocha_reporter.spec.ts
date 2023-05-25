@@ -14,7 +14,7 @@
 
 import { expect } from 'chai';
 import * as fs from 'fs';
-import * as Mocha from 'mocha';
+import Mocha from 'mocha';
 import * as path from 'path';
 
 import { SyntheticResult, TestFrameworkResultV1 } from '@google-cloud/synthetics-sdk-api';

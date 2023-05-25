@@ -15,7 +15,7 @@
 import { SyntheticResult } from '@google-cloud/synthetics-sdk-api';
 
 import { expect } from 'chai';
-import * as supertest from 'supertest';
+import supertest from 'supertest';
 
 require('../../test/example_test_files/integration_server.js');
 const { getTestServer } = require('@google-cloud/functions-framework/testing');

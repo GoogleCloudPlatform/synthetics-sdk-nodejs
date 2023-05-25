@@ -4,7 +4,10 @@
         "rootDir": ".",
         "outDir": "build",
         "allowJs": true,
-        "composite": true
+        "composite": true,
+	"resolveJsonModule": true,
+	"esModuleInterop": true,
+	"module": "commonjs"
     },
     "include": [
         "src/**/*",
