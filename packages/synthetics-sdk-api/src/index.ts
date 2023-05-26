@@ -17,5 +17,4 @@
  */
 export * from './generated/proto/synthetic_response';
 export * from './handlers';
-export { serializeStack } from './stack_serializer';
 export { getRuntimeMetadata } from './runtime_metadata_extractor';

@@ -20,8 +20,9 @@ import {
   TestFrameworkResultV1,
   TestResult,
   SyntheticResult,
-  serializeStack,
 } from '@google-cloud/synthetics-sdk-api';
+
+import ErrorStackParser from 'error-stack-parser';
 
 const {
   EVENT_RUN_BEGIN,
@@ -151,7 +152,12 @@ export function serializeTest(
       ? {
           error_type: err.name,
           error_message: err.message,
-          stack_frames: serializeStack(err.stack || ''),
+          stack_frames: ErrorStackParser.parse(err).map((frame) => ({
+            file_path: frame.fileName ?? '',
+            line: frame.lineNumber,
+            column: frame.columnNumber,
+            function_name: frame.functionName ?? '',
+          })),
         }
       : undefined,
   };
