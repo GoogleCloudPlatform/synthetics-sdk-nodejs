@@ -14,7 +14,8 @@
 
 import { SyntheticResult, runSyntheticHandler } from '../../src/index';
 import { AssertionError, expect } from 'chai';
-import { Request, Response, Send } from 'express';
+import { Request, Response } from 'express';
+import assert from 'assert';
 
 describe('GCM Synthetics Handler', async () => {
   it('runs a passing synthetic function', async () => {
@@ -69,6 +70,47 @@ describe('GCM Synthetics Handler', async () => {
     expect(syntheticResult?.synthetic_generic_result_v1?.ok).to.be.false;
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_type).to.equal('AssertionError');
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_message).to.equal('NOOOOO');
+    expect(syntheticResult?.runtime_metadata).to.not.be.undefined;
+  });
+
+  it('Assigns first stack frame with user code to the error', async () => {
+    const now = new Date();
+
+    const handlerFunction = () => {
+      const e = new AssertionError('Did not assert');
+      const splitStack = e.stack?.split('\n', 2) ?? '';
+      e.stack = [
+        splitStack?.[0],
+        '    at internalFn (node:internal)',
+        '   at async fn (/user/code/location.js:8:3)'
+      ].join('\n');
+      throw e;
+    }
+
+    const handler = runSyntheticHandler(handlerFunction);
+
+    const runHandler = new Promise((resolve) => {
+      let mockResponse = {
+        send: (body: any) => {
+          resolve(body);
+        }
+      } as Response;
+
+      handler({} as Request, mockResponse);
+    });
+
+    const syntheticResult = await runHandler as SyntheticResult;
+
+    const later = new Date();
+
+    expect(syntheticResult.end_time).to.not.be.undefined;
+    expect(syntheticResult.start_time).to.not.be.undefined;
+    expect(syntheticResult?.synthetic_generic_result_v1?.ok).to.be.false;
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_type).to.equal('AssertionError');
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_message).to.contain('Did not assert');
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.function_name).to.contain('async fn');
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.file_path).to.contain('user/code/location.js');
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.line).to.equal(8);
     expect(syntheticResult?.runtime_metadata).to.not.be.undefined;
   });
 });

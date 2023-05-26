@@ -36,13 +36,16 @@ const runSynthetic = async (syntheticCode: () => any) => {
 
     if (err instanceof Error) {
       const stack = ErrorStackParser.parse(err);
+      const firstUserErrorStackFrame = stack.find(
+        (frame) => (frame.fileName ?? '').charAt(0) === '/'
+      );
       synthetic_generic_result.generic_error =
         GenericResultV1_GenericError.create({
           error_type: err.name,
           error_message: err.message,
-          file_path: stack[0]?.fileName,
-          line: stack[0]?.lineNumber,
-          function_name: stack[0]?.functionName,
+          file_path: firstUserErrorStackFrame?.fileName,
+          line: firstUserErrorStackFrame?.lineNumber,
+          function_name: firstUserErrorStackFrame?.functionName,
         });
     }
   }
