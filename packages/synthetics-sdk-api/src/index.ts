@@ -17,4 +17,7 @@
  */
 export * from './generated/proto/synthetic_response';
 export * from './handlers';
-export { getRuntimeMetadata } from './runtime_metadata_extractor';
+export {
+  getRuntimeMetadata,
+  instantiateMetadata,
+} from './runtime_metadata_extractor';

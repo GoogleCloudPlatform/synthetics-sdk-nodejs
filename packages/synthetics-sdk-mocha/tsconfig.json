@@ -10,7 +10,8 @@
     },
     "include": [
         "src/**/*",
-        "test/**/*"
+        "test/**/*",
+        "package.json"
     ],
     "exclude": [
         "test/example_test_files/*"

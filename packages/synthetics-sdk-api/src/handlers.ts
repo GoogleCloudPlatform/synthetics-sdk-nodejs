@@ -19,7 +19,12 @@ import {
   GenericResultV1_GenericError,
 } from './index';
 import ErrorStackParser from 'error-stack-parser';
-import { getRuntimeMetadata } from './runtime_metadata_extractor';
+import {
+  getRuntimeMetadata,
+  instantiateMetadata,
+} from './runtime_metadata_extractor';
+
+instantiateMetadata();
 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const runSynthetic = async (syntheticCode: () => any) => {

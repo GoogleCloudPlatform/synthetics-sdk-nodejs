@@ -5,13 +5,14 @@
         "outDir": "build",
         "allowJs": true,
         "composite": true,
-	"resolveJsonModule": true,
-	"esModuleInterop": true,
-	"module": "commonjs"
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "module": "commonjs"
     },
     "include": [
         "src/**/*",
-        "test/**/*"
+        "test/**/*",
+        "package.json"
     ],
     "exclude": [
         "test/example_test_files/*"

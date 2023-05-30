@@ -19,8 +19,13 @@ import * as fs from 'fs';
 import {
   GenericResultV1,
   SyntheticResult,
+  instantiateMetadata,
   getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
+
+const synthetics_sdk_mocha_package = require('../package.json');
+
+instantiateMetadata(synthetics_sdk_mocha_package);
 
 export interface SyntheticMochaOptions {
   /**

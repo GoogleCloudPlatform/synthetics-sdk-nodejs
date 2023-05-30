@@ -43,7 +43,7 @@ describe('CloudFunctionV2 Running Synthetics', async () => {
     expect(generic_result?.ok).to.be.true;
     expect(generic_result?.generic_error).to.be.undefined;
 
-    expect(runtime_metadata).to.not.be.undefined;
+    expect(runtime_metadata?.['@google-cloud/synthetics-sdk-api']).to.not.be.undefined;
   });
 
   it('runs a failing synthetic function', async () => {

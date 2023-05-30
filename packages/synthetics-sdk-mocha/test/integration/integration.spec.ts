@@ -153,7 +153,8 @@ describe('CloudFunctionV2 Running Synthetics', () => {
     expect(start_time).to.be.a.string;
     expect(end_time).to.be.a.string;
 
-    expect(runtime_metadata).to.not.be.undefined;
+    expect(runtime_metadata?.['@google-cloud/synthetics-sdk-api']).to.not.be.undefined;
+    expect(runtime_metadata?.['@google-cloud/synthetics-sdk-mocha']).to.not.be.undefined;
   });
 
   it('runs a passing mocha_test suite using the mochaHandler', async () => {

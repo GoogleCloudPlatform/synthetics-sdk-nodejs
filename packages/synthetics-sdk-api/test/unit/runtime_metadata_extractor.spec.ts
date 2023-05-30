@@ -16,7 +16,7 @@ import { expect } from 'chai';
 
 import {
   getRuntimeMetadata,
-  reloadMetadata,
+  instantiateMetadata,
 } from '../../src/runtime_metadata_extractor';
 
 describe('runtimeMetadata', () => {
@@ -31,27 +31,50 @@ describe('runtimeMetadata', () => {
       K_SERVICE: 'service_name',
       K_REVISION: 'service_revision',
       K_CONFIGURATION: 'configuration',
-      npm_package_version: '1.0.0',
-      npm_package_name: 'the package name',
       other: 'fields',
       that: 'dont',
       matter: 'at all',
     };
-    reloadMetadata();
+    instantiateMetadata();
 
     expect(getRuntimeMetadata()).to.deep.equal({
       K_SERVICE: 'service_name',
       K_REVISION: 'service_revision',
       K_CONFIGURATION: 'configuration',
-      npm_package_version: '1.0.0',
-      npm_package_name: 'the package name',
+      '@google-cloud/synthetics-sdk-api': '0.1.0',
+    });
+  });
+
+
+  it('allows for sub-package information to be provided', () => {
+    process.env = {
+      K_SERVICE: 'service_name',
+      K_REVISION: 'service_revision',
+      K_CONFIGURATION: 'configuration',
+      other: 'fields',
+      that: 'dont',
+      matter: 'at all',
+    };
+    instantiateMetadata({
+      name: 'subpackage',
+      version: '0.5.0'
+    });
+
+    expect(getRuntimeMetadata()).to.deep.equal({
+      K_SERVICE: 'service_name',
+      K_REVISION: 'service_revision',
+      K_CONFIGURATION: 'configuration',
+      '@google-cloud/synthetics-sdk-api': '0.1.0',
+      subpackage: '0.5.0'
     });
   });
 
   it('sets only metadata thats present and relevant', () => {
     process.env = { other: 'fields', that: 'dont', matter: 'at all' };
-    reloadMetadata();
+    instantiateMetadata();
 
-    expect(getRuntimeMetadata()).to.deep.equal({});
+    expect(getRuntimeMetadata()).to.deep.equal({
+      '@google-cloud/synthetics-sdk-api': '0.1.0'
+    });
   });
 });
