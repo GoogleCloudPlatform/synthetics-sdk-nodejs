@@ -16,11 +16,6 @@ const functions = require('@google-cloud/functions-framework');
 const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 import { AssertionError } from 'chai';
 
-/*
- * This is the server template that is required to run a synthetic monitor in
- * Google Cloud Functions. It is unlikely that you should need to change the
- * contents of this function.
- */
 functions.http('SyntheticOk', runSyntheticHandler(async () => {
   return await true;
 }));

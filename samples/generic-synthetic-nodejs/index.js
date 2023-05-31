@@ -15,6 +15,7 @@
 const functions = require('@google-cloud/functions-framework');
 const fetch = require('node-fetch');
 const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
+const assert = require('node:assert');
 
 /*
  * This is the server template that is required to run a synthetic monitor in
@@ -29,5 +30,5 @@ functions.http('SyntheticFunction', runSyntheticHandler(async () => {
    * considered a failure.
    */
   const url = 'https://www.google.com/'; // URL to send the request to
-  return await fetch(url);
+  return await assert.doesNotReject(fetch(url));
 }));

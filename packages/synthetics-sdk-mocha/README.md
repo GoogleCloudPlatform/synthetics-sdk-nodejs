@@ -1,5 +1,7 @@
 # Synthetics SDK Mocha
 
+Note: This is an experimental package under active development. New releases may include breaking changes.
+
 The Synthetics SDK Mocha is a framework that runs a provided mocha test suite, and returns a response that may be consumed by the Google Cloud Monitoring Synthetics.
 
 ## Installation
@@ -10,7 +12,7 @@ npm install --save @google-cloud/synthetics-sdk-mocha
 
 ## Usage With Cloud Function V2
 
-Google Cloud Monitoring requires a Cloud Function v2 target, and as such, this guide explains how to set up a simple Function that uses the `@google-cloud/synthetics-sdk-mocha` package to run a basic mocha test that ensures that an http endpoint returns OK.
+Google Cloud Monitoring Synthetics requires a Cloud Function v2 target, and as such, this guide explains how to set up a simple Function that uses the `@google-cloud/synthetics-sdk-mocha` package that runs a basic mocha test that ensures that an http endpoint returns OK.
 
 ### Write Synthetic Function & Mocha Tests
 ```bash

@@ -66,10 +66,23 @@ const runSynthetic = async (syntheticCode: () => any) => {
 };
 
 /**
- * Middleware for easy invocation of SyntheticSDK mocha, and may be used to
- * register a GoogleCloudFunction http function, or express js compatible handler.
+ * Middleware for ease of running user written code in the context of GCM
+ * Synthetics. When a user written function is provided, it is ran and 
+ * the following scnearios occur:
+ * 
+ * * If the function exits without error, a GenericResponse is served as a 
+ *   response, with the `ok` attribute being set to true.
+ * * If the function throws an Error, a GenericResponse is served as a
+ *   response, with the `ok` attribute being set to false, and attributes of
+ *   the error being provided.
+ * 
+ * This function should be used within a Google Cloud Function http function,
+ * or an express js compatible handler.
+ * 
  * @public
- * @param options - Options for running GCM Synthetics Mocha.
+ * @param syntheticCode - A function that is ran prior to a response being
+ *                        served by the returned middleware
+ * 
  * @returns ExpressJS compatible middleware that invokes SyntheticsSDK mocha, and
  * returns the results via res.send
  */

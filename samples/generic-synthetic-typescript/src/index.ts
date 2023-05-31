@@ -15,6 +15,7 @@
 import * as ff from '@google-cloud/functions-framework';
 import fetch from 'node-fetch';
 import {runSyntheticHandler} from '@google-cloud/synthetics-sdk-api'
+import assert from 'node:assert';
 
 /*
  * This is the server template that is required to run a synthetic monitor in
@@ -30,5 +31,5 @@ ff.http('SyntheticFunction', runSyntheticHandler(async () => {
    */
 
   const url = 'https://www.google.com/'; // URL to send the request to
-  return await fetch(url);
+  return await assert.doesNotReject(fetch(url));
 }));

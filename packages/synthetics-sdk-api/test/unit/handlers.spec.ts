@@ -15,7 +15,6 @@
 import { SyntheticResult, runSyntheticHandler } from '../../src/index';
 import { AssertionError, expect } from 'chai';
 import { Request, Response } from 'express';
-import assert from 'assert';
 
 describe('GCM Synthetics Handler', async () => {
   it('runs a passing synthetic function', async () => {
@@ -82,7 +81,7 @@ describe('GCM Synthetics Handler', async () => {
       e.stack = [
         splitStack?.[0],
         '    at internalFn (node:internal)',
-        '   at async fn (/user/code/location.js:8:3)'
+        '    at async fn (/user/code/location.js:8:3)'
       ].join('\n');
       throw e;
     }
