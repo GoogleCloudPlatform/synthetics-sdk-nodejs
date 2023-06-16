@@ -23,7 +23,7 @@ const synthetics_sdk_api_package = require('../package.json');
  * This function repopulates the global runtime_metadata object.
  * NOTE: This should only be called once per package, or when
  * testing this module.
- * 
+ *
  * @param sub_sdk_package - a package.json for a Synthetics SDK that has the
  * @google-cloud/synthetics-sdk-api as a dependency.
  */

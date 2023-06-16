@@ -16,7 +16,7 @@
  * @public
  */
 export * from './generated/proto/synthetic_response';
-export * from './handlers';
+export { runSyntheticHandler } from './handlers';
 export {
   getRuntimeMetadata,
   instantiateMetadata,

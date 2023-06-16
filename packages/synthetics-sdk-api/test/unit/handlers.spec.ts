@@ -15,6 +15,8 @@
 import { SyntheticResult, runSyntheticHandler } from '../../src/index';
 import { AssertionError, expect } from 'chai';
 import { Request, Response } from 'express';
+import { firstUserErrorStackFrame } from '../../src/handlers';
+import ErrorStackParser = require('error-stack-parser');
 
 describe('GCM Synthetics Handler', async () => {
   it('runs a passing synthetic function', async () => {
@@ -108,8 +110,44 @@ describe('GCM Synthetics Handler', async () => {
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_type).to.equal('AssertionError');
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.error_message).to.contain('Did not assert');
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.function_name).to.contain('async fn');
-    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.file_path).to.contain('user/code/location.js');
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.file_path).to.equal('/user/code/location.js');
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.line).to.equal(8);
     expect(syntheticResult?.runtime_metadata).to.not.be.undefined;
+  });
+
+  describe('firstUserErrorStackFrame', () => {
+    it('returns the first user location in a stack frame', () => {
+      const err = new Error();
+      err.stack = `Error: Things keep happening!
+      '\n    at Module._compile (module.js:456:26)
+      '\n    at MyClass.Function (/user/my/file.js:6:11)
+      '\n    at Object.<anonymous> (/home/my/other_file.js:5:3)`
+
+      const frame = firstUserErrorStackFrame(ErrorStackParser.parse(err));
+
+      expect(frame?.columnNumber).to.equal(11);
+      expect(frame?.lineNumber).to.equal(6);
+      expect(frame?.fileName).to.equal('/user/my/file.js');
+      expect(frame?.functionName).to.equal('MyClass.Function');
+      expect(frame?.source).to.equal(
+        '    at MyClass.Function (/user/my/file.js:6:11)');
+    });
+
+    it('ignores the async prefix in the filename of a stack trace', () => {
+      const err = new Error();
+      err.stack = `Error: Things keep happening!
+      '\n    at Module._compile (module.js:456:26)
+      '\n    at async MyClass.Function (/user/my/file.js:6:11)
+      '\n    at Object.<anonymous> (/home/my/other_file.js:5:3)`
+
+      const frame = firstUserErrorStackFrame(ErrorStackParser.parse(err));
+
+      expect(frame?.columnNumber).to.equal(11);
+      expect(frame?.lineNumber).to.equal(6);
+      expect(frame?.fileName).to.equal('/user/my/file.js');
+      expect(frame?.functionName).to.equal('async MyClass.Function');
+      expect(frame?.source).to.equal(
+        '    at async MyClass.Function (/user/my/file.js:6:11)');
+    });
   });
 });
