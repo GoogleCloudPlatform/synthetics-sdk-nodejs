@@ -14,7 +14,7 @@
 
 import * as ff from '@google-cloud/functions-framework';
 import fetch from 'node-fetch';
-import {runSyntheticHandler} from '@google-cloud/synthetics-sdk-api'
+import {runSyntheticHandler} from 'synthetics-sdk-node/packages/synthetics-sdk-api';
 import assert from 'node:assert';
 
 /*

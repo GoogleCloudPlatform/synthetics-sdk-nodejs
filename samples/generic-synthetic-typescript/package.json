@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && cd node_modules/synthetics-sdk-node && npm install",
         "start": "functions-framework --target=SyntheticFunction",
         "prestart": "npm run build",
         "gcp-build": "npm run build"
@@ -14,8 +14,8 @@
     "author": "Google Inc.",
     "dependencies": {
         "@google-cloud/functions-framework": "^3.2.0",
-        "@google-cloud/synthetics-sdk-api": "^0.1.0",
-        "node-fetch": "^2.6.0"
+        "node-fetch": "^2.6.0",
+        "synthetics-sdk-node": "github:GoogleCloudPlatform/synthetics-sdk-nodejs#pre-npm-dist"
     },
     "devDependencies": {
         "@types/node-fetch": "^2.6.3",

@@ -3,11 +3,16 @@
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
+  "scripts": {
+    "build": "cd node_modules/synthetics-sdk-node && npm install",
+    "gcp-build": "npm run build"
+  },
   "dependencies": {
-    "@google-cloud/synthetics-sdk-mocha": "^0.1.0",
+    "@google-cloud/functions-framework": "^3.1.2",
     "chai": "^4.3.0",
     "node-fetch": "^2.6.0",
-    "@google-cloud/functions-framework": "^3.1.2"
+    "mocha": "^10.2.0",
+    "synthetics-sdk-node": "github:GoogleCloudPlatform/synthetics-sdk-nodejs#pre-npm-dist"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"

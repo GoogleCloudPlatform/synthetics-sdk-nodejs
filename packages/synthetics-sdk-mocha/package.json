@@ -34,7 +34,7 @@
     "synthetics-sdk-mocha": "file:./"
   },
   "dependencies": {
-    "@google-cloud/synthetics-sdk-api": "^0.1.0",
+    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
     "mocha": "^10.2.0",
     "error-stack-parser": "^2.1.4"
   }
