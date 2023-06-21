@@ -1,4 +1,4 @@
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/{owner}/{repo}/badge)](https://securityscorecards.dev/viewer/?platform=github.com&org={owner}&repo={repo})
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/badge)](https://securityscorecards.dev/viewer/?platform=github.com&org=GoogleCloudPlatform&repo=synthetics-sdk-nodejs)
 
 # Synthetics SDK Node
 
