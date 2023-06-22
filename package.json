@@ -12,7 +12,8 @@
     "./packages/*"
   ],
   "scripts": {
-    "docs": "typedoc"
+    "docs": "typedoc",
+    "test": "npm run test --workspaces"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"
