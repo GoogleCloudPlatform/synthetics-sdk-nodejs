@@ -1,0 +1,24 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+name: ci
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [14, 16, 18, 20]
+        include:
+          # use latest npm by default
+          - npm-version: latest
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --version
+      - name: Upgrade to latest npm to support lockfile v2
+        run: npm install -g npm@${{ matrix.npm-version }}
+      - run: npm install --ignore-scripts && npm install --ignore-scripts
+      - run: npm run test
