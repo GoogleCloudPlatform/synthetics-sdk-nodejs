@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "NodeJS SDK for integrating with the Google Cloud Monitoring Synthetics product.",
   "main": "./build/src/index.js",
+  "repository": "GoogleCloudPlatform/synthetics-sdk-nodejs",
   "scripts": {
     "test": "ts-mocha -p tsconfig.json ./test/**/*.spec.ts",
     "build": "rm -rf ./build && npm run compile",
