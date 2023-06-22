@@ -7,7 +7,7 @@
         "composite": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
-        "module": "commonjs"
+        "module": "commonjs",
     },
     "include": [
         "src/**/*",
@@ -16,5 +16,5 @@
     ],
     "exclude": [
         "test/example_test_files/*"
-    ]
+    ],
 }
