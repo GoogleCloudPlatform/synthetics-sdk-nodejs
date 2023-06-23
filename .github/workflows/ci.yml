@@ -19,6 +19,6 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: node --version
       - name: Upgrade to latest npm to support lockfile v2
-        run: npm install -g npm@${{ matrix.npm-version }}
-      - run: npm install --ignore-scripts && npm install --ignore-scripts
+        run: npm i -g npm@7.20.2
+      - run: npm install
       - run: npm run test

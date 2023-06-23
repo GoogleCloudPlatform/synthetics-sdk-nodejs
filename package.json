@@ -9,7 +9,8 @@
     "typescript": "^5.0.2"
   },
   "workspaces": [
-    "./packages/*"
+    "packages/synthetics-sdk-api",
+    "packages/synthetics-sdk-mocha"
   ],
   "scripts": {
     "docs": "typedoc",
