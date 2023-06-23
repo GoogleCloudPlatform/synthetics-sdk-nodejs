@@ -23,7 +23,7 @@ import {
   getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
 
-const synthetics_sdk_mocha_package = require('../package.json');
+const synthetics_sdk_mocha_package = require('../../package.json');
 
 instantiateMetadata(synthetics_sdk_mocha_package);
 
