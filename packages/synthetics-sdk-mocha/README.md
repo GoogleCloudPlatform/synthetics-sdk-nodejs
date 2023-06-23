@@ -1,3 +1,5 @@
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-mocha.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-mocha)
+
 # Synthetics SDK Mocha
 
 Note: This is an experimental package under active development. New releases may include breaking changes.
