@@ -10,6 +10,8 @@ The packages in this repository support the authoring of Cloud Functions v2 that
 
 ## Synthetics SDK API
 
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-api.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-api)
+
 ```
 npm install --save @google-cloud/syntetics-sdk-api
 ```
@@ -19,6 +21,8 @@ As long as a Google Cloud Function exposes an http endpoint that complies with t
 See [README.md](packages/synthetics-sdk-api/README.md) for installation and usage information.
 
 ## Synthetics SDK Mocha
+
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-mocha.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-mocha)
 
 ```
 npm install --save @google-cloud/syntetics-sdk-mocha
