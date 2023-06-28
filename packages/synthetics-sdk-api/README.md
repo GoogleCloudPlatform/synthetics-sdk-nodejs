@@ -34,9 +34,7 @@ const functions = require("@google-cloud/functions-framework");
 const fetch = require("node-fetch");
 const GcmSynthetics = require("@google-cloud/synthetics-sdk-api");
 
-functions.http(
-  "SyntheticFunction",
-  GcmSynthetics.runSyntheticHandler(async () => {
+functions.http("SyntheticFunction", GcmSynthetics.runSyntheticHandler(async () => {
     const url = "https://www.google.com/"; // URL to send the request to
     return await assert.doesNotReject(fetch(url));
   })
@@ -51,10 +49,7 @@ This is predominantly important if you want to run a programmatic workflow for w
 
 ```typescript
 const functions = require("@google-cloud/functions-framework");
-const {
-  SyntheticResult,
-  GenericResultV1,
-} = require("@google-cloud/synthetics-sdk-api");
+const { SyntheticResult, GenericResultV1 } = require("@google-cloud/synthetics-sdk-api");
 ```
 
 # Useful Links
