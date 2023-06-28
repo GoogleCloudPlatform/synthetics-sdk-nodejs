@@ -54,8 +54,8 @@ const { SyntheticResult, GenericResultV1 } = require("@google-cloud/synthetics-s
 
 # Useful Links
 
-- For a sample in plain nodejs, see [generic-synthetic-nodejs](../../samples/generic-synthetic-nodejs/)
-- For a sample using typescript, see [generic-synthetic-typescript](../../samples/generic-synthetic-typescript/)
-- For the api proto, see [synthetic_response.proto](./proto/synthetic_response.proto)
-- For documentation regarding Google Cloud Monitoring Synthetics, visit [cloud.google.com/monitoring/](https://cloud.google.com/monitoring/)
-- For documentation on Cloud Functions, visit [https://cloud.google.com/functions](https://cloud.google.com/functions/docs/concepts/version-comparison#new-in-2nd-gen)
+* For a sample in plain nodejs, see [generic-synthetic-nodejs](../../samples/generic-synthetic-nodejs/)
+* For a sample using typescript, see [generic-synthetic-typescript](../../samples/generic-synthetic-typescript/)
+* For the api proto, see [synthetic_response.proto](./proto/synthetic_response.proto)
+* For documentation regarding Google Cloud Monitoring Synthetics, visit [cloud.google.com/monitoring/](https://cloud.google.com/monitoring/)
+* For documentation on Cloud Functions, visit [https://cloud.google.com/functions](https://cloud.google.com/functions/docs/concepts/version-comparison#new-in-2nd-gen)
