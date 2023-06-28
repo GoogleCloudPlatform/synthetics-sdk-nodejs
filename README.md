@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/badge)](https://securityscorecards.dev/viewer/?platform=github.com&org=GoogleCloudPlatform&repo=synthetics-sdk-nodejs)
+
 # Synthetics SDK Node
 
 Google Cloud Monitoring Synthetics allow you to observe and track application performance by issuing simulated requests and actions to your applications from GCP data centers located around the world. Synthetic monitoring can proactively help application owners detect faulty behavior such as unexpected changes in behavior, an increaese in latency, and changes in response status codes.
@@ -8,6 +10,8 @@ The packages in this repository support the authoring of Cloud Functions v2 that
 
 ## Synthetics SDK API
 
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-api.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-api)
+
 ```
 npm install --save @google-cloud/syntetics-sdk-api
 ```
@@ -17,6 +21,8 @@ As long as a Google Cloud Function exposes an http endpoint that complies with t
 See [README.md](packages/synthetics-sdk-api/README.md) for installation and usage information.
 
 ## Synthetics SDK Mocha
+
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-mocha.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-mocha)
 
 ```
 npm install --save @google-cloud/syntetics-sdk-mocha
