@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const functions = require('@google-cloud/functions-framework');
-const GcmSynthetics = require('synthetics-sdk-node/packages/synthetics-sdk-mocha');
+const GcmSynthetics = require('@google-cloud/synthetics-sdk-mocha');
 
 /*
  * This is the server template that is required to run a synthetic monitor in
