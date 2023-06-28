@@ -30,15 +30,14 @@ This package provides an easy to use express compatible middleware for writing c
 ```javascript
 // index.js
 const assert = require("node:assert");
-const functions = require("@google-cloud/functions-framework");
+const functions = require('@google-cloud/functions-framework');
 const fetch = require("node-fetch");
-const GcmSynthetics = require("@google-cloud/synthetics-sdk-api");
+const GcmSynthetics = require('@google-cloud/synthetics-sdk-api');
 
-functions.http("SyntheticFunction", GcmSynthetics.runSyntheticHandler(async () => {
-    const url = "https://www.google.com/"; // URL to send the request to
-    return await assert.doesNotReject(fetch(url));
-  })
-);
+functions.http('SyntheticFunction', GcmSynthetics.runSyntheticHandler(async () => {
+  const url = 'https://www.google.com/'; // URL to send the request to
+  return await assert.doesNotReject(fetch(url));
+}));
 ```
 
 ## Usage Without Framework
@@ -48,8 +47,8 @@ As long as a Google Cloud Function exposes an http endpoint that complies with t
 This is predominantly important if you want to run a programmatic workflow for which other SyntheticSDKs are not a good fit, or if you want to use another language for your Google Cloud function for which there is no direct support.
 
 ```typescript
-const functions = require("@google-cloud/functions-framework");
-const { SyntheticResult, GenericResultV1 } = require("@google-cloud/synthetics-sdk-api");
+const functions = require('@google-cloud/functions-framework');
+const { SyntheticResult, GenericResultV1 } = require('@google-cloud/synthetics-sdk-api');
 ```
 
 # Useful Links
