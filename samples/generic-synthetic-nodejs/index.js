@@ -14,7 +14,7 @@
 
 const functions = require('@google-cloud/functions-framework');
 const fetch = require('node-fetch');
-const { runSyntheticHandler } = require('synthetics-sdk-node/packages/synthetics-sdk-api');
+const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 const assert = require('node:assert');
 
 /*
