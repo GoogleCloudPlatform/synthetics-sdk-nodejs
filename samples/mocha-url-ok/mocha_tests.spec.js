@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START monitoring_synthetic_monitoring_mocha_test]
+
 /*
  * This is the file may be interacted with to author mocha tests. To interact
  * with other GCP products or services, users should add dependencies to the
@@ -30,3 +32,5 @@ it('pings my website', async () => {
   const externalRes = await fetch(url);
   expect(externalRes.ok).to.be.true;
 });
+
+// [END monitoring_synthetic_monitoring_mocha_test]
