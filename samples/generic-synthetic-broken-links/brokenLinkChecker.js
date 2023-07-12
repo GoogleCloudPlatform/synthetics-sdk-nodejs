@@ -19,7 +19,7 @@ function createNon2xxLinksDictionary(linksResult) {
 
   const stringified_dict = Object.entries(non2xxLinks).map(([key, value]) => `${key}:${value}`).join(", ");
 
-  return "Non 200" + stringified_dict;
+  return "Non 2xx Links: " + stringified_dict;
 }
 
 /**
