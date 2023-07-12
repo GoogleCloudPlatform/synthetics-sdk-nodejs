@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START monitoring_synthetic_monitoring_custom_typescript_script]
+
 import * as ff from '@google-cloud/functions-framework';
 import fetch from 'node-fetch';
 import {runSyntheticHandler} from '@google-cloud/synthetics-sdk-api'
@@ -33,3 +35,5 @@ ff.http('SyntheticFunction', runSyntheticHandler(async () => {
   const url = 'https://www.google.com/'; // URL to send the request to
   return await assert.doesNotReject(fetch(url));
 }));
+
+// [END monitoring_synthetic_monitoring_custom_typescript_script]
