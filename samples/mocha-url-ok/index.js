@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START monitoring_synthetic_monitoring_mocha_invocation]
+
 const functions = require('@google-cloud/functions-framework');
 const GcmSynthetics = require('@google-cloud/synthetics-sdk-mocha');
 
@@ -23,3 +25,5 @@ const GcmSynthetics = require('@google-cloud/synthetics-sdk-mocha');
 functions.http('SyntheticMochaSuite', GcmSynthetics.runMochaHandler({
   spec: `${__dirname}/mocha_tests.spec.js`
 }));
+
+// [END monitoring_synthetic_monitoring_mocha_invocation]
