@@ -14,7 +14,7 @@
 
 const functions = require('@google-cloud/functions-framework');
 const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
-const { crawl } = require('./brokenLinkChecker');
+const { runBrokenLinks } = require('./brokenLinkChecker');
 
 functions.http('SyntheticFunction', runSyntheticHandler(async () => {
   /*
@@ -24,10 +24,9 @@ functions.http('SyntheticFunction', runSyntheticHandler(async () => {
    * considered a failure.
    */
 
-  const startUrl = 'https://www.example.com';
+  const startUrl = 'https://www.pipsnacks.com/#';
   const maxNumberOfFollowedLinks = 50;
-  const maxTimeout = 5000; // in ms
+  const maxTimeout = 10000; // in ms
 
-  const link_failures = await crawl(startUrl, maxNumberOfFollowedLinks, maxTimeout);
-  throw new Error(link_failures);
+  await runBrokenLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout);
 }));
