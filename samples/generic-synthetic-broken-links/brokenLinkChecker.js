@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 /**
 * Creates a dictionary mapping non-2xx links' target URLs to their respective status codes.
 * @param {linksResult} An array of link objects with targetUrl and statusCode properties.
-* @returns The dictionary mapping target URLs to non-2xx status codes.
+* @returns The dictionary mapping target URLs to non-2xx status codes as a string.
 */
 function createNon2xxLinksDictionary(linksResult) {
   const non2xxLinks = {}; // possibly repeating
@@ -17,7 +17,9 @@ function createNon2xxLinksDictionary(linksResult) {
     }
   }
 
-  return non2xxLinks;
+  const stringified_dict = Object.entries(non2xxLinks).map(([key, value]) => `${key}:${value}`).join(", ");
+
+  return "Non 200" + stringified_dict;
 }
 
 /**

@@ -25,5 +25,5 @@ functions.http('SyntheticFunction', runSyntheticHandler(async () => {
    */
 
   const link_failures = await crawl('https://www.example.com', 50, 10000);
-  return link_failures;
+  throw new Error(link_failures);
 }));
