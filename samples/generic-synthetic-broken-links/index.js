@@ -24,6 +24,10 @@ functions.http('SyntheticFunction', runSyntheticHandler(async () => {
    * considered a failure.
    */
 
-  const link_failures = await crawl('https://www.example.com', 50, 10000);
+  const startUrl = 'https://www.example.com';
+  const maxNumberOfFollowedLinks = 50;
+  const maxTimeout = 5000; // in ms
+
+  const link_failures = await crawl(startUrl, maxNumberOfFollowedLinks, maxTimeout);
   throw new Error(link_failures);
 }));
