@@ -16,17 +16,9 @@ const functions = require('@google-cloud/functions-framework');
 const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 const { runBrokenLinks } = require('./brokenLinkChecker');
 
-functions.http('SyntheticFunction', runSyntheticHandler(async () => {
-  /*
-   * This is the function that should run your code synthetic code. This should
-   * either exit without issue, in which case the synthetic is considered a
-   * success, or it should throw an Error, in which case the synthetic is
-   * considered a failure.
-   */
+const startUrl = 'https://stackoverflow.com/questions/982388/how-to-implement-a-linked-list-in-c';
+const maxNumberOfFollowedLinks = 50;
+const maxTimeout = 10000; // in ms
 
-  const startUrl = 'https://example.com/';
-  const maxNumberOfFollowedLinks = 50;
-  const maxTimeout = 10000; // in ms
-
-  await runBrokenLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout);
-}));
+functions.http('SyntheticFunction', runSyntheticHandler(async () =>
+  await runBrokenLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout)));
