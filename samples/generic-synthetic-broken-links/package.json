@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "scripts": {
+    "gcp-build": "node node_modules/puppeteer/install.js"
+  },
   "dependencies": {
     "@google-cloud/functions-framework": "^3.1.2",
     "@google-cloud/synthetics-sdk-api": "^0.1.0",
-    "puppeteer": "~20"
+    "puppeteer": "^19.2.2"
   },
   "license": "Apache-2.0",
   "author": "Google Inc."

@@ -1,6 +1,6 @@
 # Overview
 
-This sample uses the `@google-cloud/synthetics-sdk-api` and `puppeteer` to create a Google Cloud Function that can be used with Google Cloud Monitoring Synthetics to monitor a url for broken links.
+This sample uses the `@google-cloud/synthetics-sdk-api` and `puppeteer` to create a Google Cloud Function, which can be used with Google Cloud Monitoring Synthetics to monitor a url for broken links.
 
 ## Installation
 
@@ -20,6 +20,7 @@ npx functions-framework --target=SyntheticFunction
 ```
 
 The following command deploys this sample to gcp as a cloud function.
+Note that the `--memory` arg must be set to at least `1024M` to support a puppeteer instance.
 
 ```
 gcloud functions deploy broken-links-http-function --memory=1024M --timeout=300 --gen2 --runtime=nodejs18 --region=us-central1 --source=. --entry-point=SyntheticFunction --trigger-http
