@@ -24,7 +24,7 @@ functions.http('SyntheticFunction', runSyntheticHandler(async () => {
    * considered a failure.
    */
 
-  const startUrl = 'https://www.pipsnacks.com/#';
+  const startUrl = 'https://example.com/';
   const maxNumberOfFollowedLinks = 50;
   const maxTimeout = 10000; // in ms
 
