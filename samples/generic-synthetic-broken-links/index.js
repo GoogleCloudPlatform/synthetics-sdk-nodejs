@@ -16,7 +16,7 @@ const functions = require('@google-cloud/functions-framework');
 const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 const { runBrokenLinks } = require('./brokenLinkChecker');
 
-const startUrl = 'https://stackoverflow.com/questions/982388/how-to-implement-a-linked-list-in-c';
+const startUrl = 'https://example.com';
 const maxNumberOfFollowedLinks = 50;
 const maxTimeout = 10000; // in ms
 
