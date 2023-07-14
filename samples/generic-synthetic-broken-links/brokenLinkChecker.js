@@ -116,7 +116,6 @@ async function checkLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout) {
   }
 
   await browser.close();
-  console.log(linksToReturn);
   return linksToReturn;
 }
 

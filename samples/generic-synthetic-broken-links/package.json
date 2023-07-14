@@ -9,7 +9,7 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^3.1.2",
     "@google-cloud/synthetics-sdk-api": "^0.1.0",
-    "puppeteer": "^19.2.2"
+    "puppeteer": "~20"
   },
   "license": "Apache-2.0",
   "author": "Google Inc."
