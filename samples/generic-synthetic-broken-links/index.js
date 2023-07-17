@@ -17,7 +17,7 @@ const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 const { runBrokenLinks } = require('./brokenLinkChecker');
 
 const startUrl = 'https://example.com';
-const maxNumberOfFollowedLinks = 50;
+const maxNumberOfFollowedLinks = 10;
 const maxTimeout = 10000; // in ms
 
 functions.http('SyntheticFunction', runSyntheticHandler(async () =>

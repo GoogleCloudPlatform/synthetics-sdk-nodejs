@@ -22,6 +22,8 @@ npx functions-framework --target=SyntheticFunction
 The following command deploys this sample to gcp as a cloud function.
 Note that the `--memory` arg must be set to at least `1024M` to support a puppeteer instance.
 
+If you get a `Could not find Chrome (ver. xxx.x.xxxx.xxx)` error try creating a new Cloud Function rather than updating an existing one.
+
 ```
 gcloud functions deploy broken-links-http-function --memory=1024M --timeout=300 --gen2 --runtime=nodejs18 --region=us-central1 --source=. --entry-point=SyntheticFunction --trigger-http
 ```
