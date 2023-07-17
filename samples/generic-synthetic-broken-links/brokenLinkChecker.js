@@ -98,6 +98,7 @@ async function checkLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout) {
   }
 
   linksToCheck.splice(maxNumberOfFollowedLinks);
+  console.log(linksToCheck);
 
   const page = await browser.newPage();
   page.setCacheEnabled(false);  // prevents 304 errors
