@@ -24,7 +24,7 @@ function checkForNon2xxLinks(linksResult) {
     return;
   } else {
     const stringified_dict = Object.entries(non2xxLinks)
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${key} : ${value}`)
       .join(',\n');
     throw new Error('Non 2xx Links: \n' + stringified_dict);
   }
