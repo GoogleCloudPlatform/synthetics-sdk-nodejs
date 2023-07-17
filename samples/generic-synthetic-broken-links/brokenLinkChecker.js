@@ -13,9 +13,10 @@ function checkForNon2xxLinks(linksResult) {
   for (const link of linksResult) {
     const statusCode = link.statusCode;
     const targetUrl = link.targetUrl;
+    const errorMessage = link.errorMessage;
 
-    if (statusCode < 200 || statusCode >= 300) {
-      non2xxLinks[targetUrl] = statusCode;
+    if (statusCode < 200 || statusCode >= 300 || errorMessage) {
+      non2xxLinks[targetUrl] = errorMessage ? errorMessage : statusCode;;
     }
   }
 
@@ -24,8 +25,8 @@ function checkForNon2xxLinks(linksResult) {
   } else {
     const stringified_dict = Object.entries(non2xxLinks)
       .map(([key, value]) => `${key}: ${value}`)
-      .join(', ');
-    throw new Error('Non 2xx Links: {' + stringified_dict + '}');
+      .join(',\n');
+    throw new Error('Non 2xx Links: \n' + stringified_dict);
   }
 }
 
@@ -103,15 +104,23 @@ async function checkLinks(startUrl, maxNumberOfFollowedLinks, maxTimeout) {
 
   for (const targetLink of linksToCheck) {
     try {
-      const response =
+      let response =
         await page.goto(targetLink, { waitUtil: 'load', timeout: maxTimeout });
+
+      // prevents errors caused by navigating from one url to same url with a
+      // different anchor part (normally returns null)
+      // e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
+      if (response === null) {
+        await page.goto('about:blank');
+        response = await page.goto(targetLink);
+      }
 
       linksToReturn.push({
         targetUrl: targetLink,
         statusCode: response.status(),
       });
     } catch (error) {
-      linksToReturn.push({ targetUrl: targetLink, statusCode: null });
+      linksToReturn.push({ targetUrl: targetLink, errorMessage: error.message });
     }
   }
 
