@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPResponse } from 'puppeteer';
+import { HTTPResponse, Browser } from 'puppeteer';
 import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -351,4 +351,15 @@ export function createSyntheticResult(
   };
 
   return synthetic_result;
+}
+
+export async function openNewPage(browser: Browser) {
+  try {
+    const page = await browser.newPage();
+    page.setCacheEnabled(false);
+    return page;
+  } catch (pageError) {
+    if (pageError instanceof Error) process.stderr.write(pageError.message);
+    throw new Error('An error occurred while opening a new puppeteer.Page.');
+  }
 }

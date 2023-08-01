@@ -350,7 +350,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
         {
           // Anchor Link (Just #)
           target_url: 'https://mocked.com/#',
-          anchor_text: 'Anchor Link (Just #)',
+          anchor_text: 'Anchor Link (No Href)',
           html_element: 'a',
         },
         {

@@ -510,24 +510,30 @@ export const TestResult = {
 
   toJSON(message: TestResult): unknown {
     const obj: any = {};
-    message.title !== undefined && (obj.title = message.title);
-    message.test_passed !== undefined && (obj.test_passed = message.test_passed);
-    if (message.title_paths) {
-      obj.title_paths = message.title_paths.map((e) => e);
-    } else {
-      obj.title_paths = [];
+    if (message.title !== "") {
+      obj.title = message.title;
     }
-    message.test_start_time !== undefined && (obj.test_start_time = message.test_start_time);
-    message.test_end_time !== undefined && (obj.test_end_time = message.test_end_time);
-    message.test_error !== undefined &&
-      (obj.test_error = message.test_error ? TestResult_TestError.toJSON(message.test_error) : undefined);
+    if (message.test_passed !== undefined) {
+      obj.test_passed = message.test_passed;
+    }
+    if (message.title_paths?.length) {
+      obj.title_paths = message.title_paths;
+    }
+    if (message.test_start_time !== "") {
+      obj.test_start_time = message.test_start_time;
+    }
+    if (message.test_end_time !== "") {
+      obj.test_end_time = message.test_end_time;
+    }
+    if (message.test_error !== undefined) {
+      obj.test_error = TestResult_TestError.toJSON(message.test_error);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<TestResult>, I>>(base?: I): TestResult {
-    return TestResult.fromPartial(base ?? {});
+    return TestResult.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<TestResult>, I>>(object: I): TestResult {
     const message = createBaseTestResult();
     message.title = object.title ?? "";
@@ -609,20 +615,21 @@ export const TestResult_TestError = {
 
   toJSON(message: TestResult_TestError): unknown {
     const obj: any = {};
-    message.error_type !== undefined && (obj.error_type = message.error_type);
-    message.error_message !== undefined && (obj.error_message = message.error_message);
-    if (message.stack_frames) {
-      obj.stack_frames = message.stack_frames.map((e) => e ? TestResult_TestError_StackFrame.toJSON(e) : undefined);
-    } else {
-      obj.stack_frames = [];
+    if (message.error_type !== "") {
+      obj.error_type = message.error_type;
+    }
+    if (message.error_message !== "") {
+      obj.error_message = message.error_message;
+    }
+    if (message.stack_frames?.length) {
+      obj.stack_frames = message.stack_frames.map((e) => TestResult_TestError_StackFrame.toJSON(e));
     }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<TestResult_TestError>, I>>(base?: I): TestResult_TestError {
-    return TestResult_TestError.fromPartial(base ?? {});
+    return TestResult_TestError.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<TestResult_TestError>, I>>(object: I): TestResult_TestError {
     const message = createBaseTestResult_TestError();
     message.error_type = object.error_type ?? "";
@@ -708,17 +715,24 @@ export const TestResult_TestError_StackFrame = {
 
   toJSON(message: TestResult_TestError_StackFrame): unknown {
     const obj: any = {};
-    message.function_name !== undefined && (obj.function_name = message.function_name);
-    message.file_path !== undefined && (obj.file_path = message.file_path);
-    message.line !== undefined && (obj.line = Math.round(message.line));
-    message.column !== undefined && (obj.column = Math.round(message.column));
+    if (message.function_name !== "") {
+      obj.function_name = message.function_name;
+    }
+    if (message.file_path !== "") {
+      obj.file_path = message.file_path;
+    }
+    if (message.line !== undefined) {
+      obj.line = Math.round(message.line);
+    }
+    if (message.column !== undefined) {
+      obj.column = Math.round(message.column);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<TestResult_TestError_StackFrame>, I>>(base?: I): TestResult_TestError_StackFrame {
-    return TestResult_TestError_StackFrame.fromPartial(base ?? {});
+    return TestResult_TestError_StackFrame.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<TestResult_TestError_StackFrame>, I>>(
     object: I,
   ): TestResult_TestError_StackFrame {
@@ -838,23 +852,30 @@ export const TestFrameworkResultV1 = {
 
   toJSON(message: TestFrameworkResultV1): unknown {
     const obj: any = {};
-    message.suite_count !== undefined && (obj.suite_count = Math.round(message.suite_count));
-    message.test_count !== undefined && (obj.test_count = Math.round(message.test_count));
-    message.passing_test_count !== undefined && (obj.passing_test_count = Math.round(message.passing_test_count));
-    message.failing_test_count !== undefined && (obj.failing_test_count = Math.round(message.failing_test_count));
-    message.pending_test_count !== undefined && (obj.pending_test_count = Math.round(message.pending_test_count));
-    if (message.test_results) {
-      obj.test_results = message.test_results.map((e) => e ? TestResult.toJSON(e) : undefined);
-    } else {
-      obj.test_results = [];
+    if (message.suite_count !== undefined) {
+      obj.suite_count = Math.round(message.suite_count);
+    }
+    if (message.test_count !== undefined) {
+      obj.test_count = Math.round(message.test_count);
+    }
+    if (message.passing_test_count !== undefined) {
+      obj.passing_test_count = Math.round(message.passing_test_count);
+    }
+    if (message.failing_test_count !== undefined) {
+      obj.failing_test_count = Math.round(message.failing_test_count);
+    }
+    if (message.pending_test_count !== undefined) {
+      obj.pending_test_count = Math.round(message.pending_test_count);
+    }
+    if (message.test_results?.length) {
+      obj.test_results = message.test_results.map((e) => TestResult.toJSON(e));
     }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<TestFrameworkResultV1>, I>>(base?: I): TestFrameworkResultV1 {
-    return TestFrameworkResultV1.fromPartial(base ?? {});
+    return TestFrameworkResultV1.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<TestFrameworkResultV1>, I>>(object: I): TestFrameworkResultV1 {
     const message = createBaseTestFrameworkResultV1();
     message.suite_count = object.suite_count ?? undefined;
@@ -923,17 +944,18 @@ export const GenericResultV1 = {
 
   toJSON(message: GenericResultV1): unknown {
     const obj: any = {};
-    message.ok !== undefined && (obj.ok = message.ok);
-    message.generic_error !== undefined && (obj.generic_error = message.generic_error
-      ? GenericResultV1_GenericError.toJSON(message.generic_error)
-      : undefined);
+    if (message.ok !== undefined) {
+      obj.ok = message.ok;
+    }
+    if (message.generic_error !== undefined) {
+      obj.generic_error = GenericResultV1_GenericError.toJSON(message.generic_error);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<GenericResultV1>, I>>(base?: I): GenericResultV1 {
-    return GenericResultV1.fromPartial(base ?? {});
+    return GenericResultV1.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<GenericResultV1>, I>>(object: I): GenericResultV1 {
     const message = createBaseGenericResultV1();
     message.ok = object.ok ?? undefined;
@@ -1031,18 +1053,27 @@ export const GenericResultV1_GenericError = {
 
   toJSON(message: GenericResultV1_GenericError): unknown {
     const obj: any = {};
-    message.error_type !== undefined && (obj.error_type = message.error_type);
-    message.error_message !== undefined && (obj.error_message = message.error_message);
-    message.function_name !== undefined && (obj.function_name = message.function_name);
-    message.file_path !== undefined && (obj.file_path = message.file_path);
-    message.line !== undefined && (obj.line = Math.round(message.line));
+    if (message.error_type !== "") {
+      obj.error_type = message.error_type;
+    }
+    if (message.error_message !== "") {
+      obj.error_message = message.error_message;
+    }
+    if (message.function_name !== "") {
+      obj.function_name = message.function_name;
+    }
+    if (message.file_path !== "") {
+      obj.file_path = message.file_path;
+    }
+    if (message.line !== undefined) {
+      obj.line = Math.round(message.line);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<GenericResultV1_GenericError>, I>>(base?: I): GenericResultV1_GenericError {
-    return GenericResultV1_GenericError.fromPartial(base ?? {});
+    return GenericResultV1_GenericError.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<GenericResultV1_GenericError>, I>>(object: I): GenericResultV1_GenericError {
     const message = createBaseGenericResultV1_GenericError();
     message.error_type = object.error_type ?? "";
@@ -1110,17 +1141,18 @@ export const ResponseStatusCode = {
 
   toJSON(message: ResponseStatusCode): unknown {
     const obj: any = {};
-    message.status_value !== undefined && (obj.status_value = Math.round(message.status_value));
-    message.status_class !== undefined && (obj.status_class = message.status_class !== undefined
-      ? responseStatusCode_StatusClassToJSON(message.status_class)
-      : undefined);
+    if (message.status_value !== undefined) {
+      obj.status_value = Math.round(message.status_value);
+    }
+    if (message.status_class !== undefined) {
+      obj.status_class = responseStatusCode_StatusClassToJSON(message.status_class);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<ResponseStatusCode>, I>>(base?: I): ResponseStatusCode {
-    return ResponseStatusCode.fromPartial(base ?? {});
+    return ResponseStatusCode.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<ResponseStatusCode>, I>>(object: I): ResponseStatusCode {
     const message = createBaseResponseStatusCode();
     message.status_value = object.status_value ?? undefined;
@@ -1300,35 +1332,47 @@ export const BrokenLinksResultV1 = {
 
   toJSON(message: BrokenLinksResultV1): unknown {
     const obj: any = {};
-    message.link_count !== undefined && (obj.link_count = Math.round(message.link_count));
-    message.passing_link_count !== undefined && (obj.passing_link_count = Math.round(message.passing_link_count));
-    message.failing_link_count !== undefined && (obj.failing_link_count = Math.round(message.failing_link_count));
-    message.unreachable_count !== undefined && (obj.unreachable_count = Math.round(message.unreachable_count));
-    message.status_2xx_count !== undefined && (obj.status_2xx_count = Math.round(message.status_2xx_count));
-    message.status_3xx_count !== undefined && (obj.status_3xx_count = Math.round(message.status_3xx_count));
-    message.status_4xx_count !== undefined && (obj.status_4xx_count = Math.round(message.status_4xx_count));
-    message.status_5xx_count !== undefined && (obj.status_5xx_count = Math.round(message.status_5xx_count));
-    message.options !== undefined &&
-      (obj.options = message.options
-        ? BrokenLinksResultV1_BrokenLinkCheckerOptions.toJSON(message.options)
-        : undefined);
-    message.origin_link_result !== undefined && (obj.origin_link_result = message.origin_link_result
-      ? BrokenLinksResultV1_SyntheticLinkResult.toJSON(message.origin_link_result)
-      : undefined);
-    if (message.followed_link_results) {
+    if (message.link_count !== undefined) {
+      obj.link_count = Math.round(message.link_count);
+    }
+    if (message.passing_link_count !== undefined) {
+      obj.passing_link_count = Math.round(message.passing_link_count);
+    }
+    if (message.failing_link_count !== undefined) {
+      obj.failing_link_count = Math.round(message.failing_link_count);
+    }
+    if (message.unreachable_count !== undefined) {
+      obj.unreachable_count = Math.round(message.unreachable_count);
+    }
+    if (message.status_2xx_count !== undefined) {
+      obj.status_2xx_count = Math.round(message.status_2xx_count);
+    }
+    if (message.status_3xx_count !== undefined) {
+      obj.status_3xx_count = Math.round(message.status_3xx_count);
+    }
+    if (message.status_4xx_count !== undefined) {
+      obj.status_4xx_count = Math.round(message.status_4xx_count);
+    }
+    if (message.status_5xx_count !== undefined) {
+      obj.status_5xx_count = Math.round(message.status_5xx_count);
+    }
+    if (message.options !== undefined) {
+      obj.options = BrokenLinksResultV1_BrokenLinkCheckerOptions.toJSON(message.options);
+    }
+    if (message.origin_link_result !== undefined) {
+      obj.origin_link_result = BrokenLinksResultV1_SyntheticLinkResult.toJSON(message.origin_link_result);
+    }
+    if (message.followed_link_results?.length) {
       obj.followed_link_results = message.followed_link_results.map((e) =>
-        e ? BrokenLinksResultV1_SyntheticLinkResult.toJSON(e) : undefined
+        BrokenLinksResultV1_SyntheticLinkResult.toJSON(e)
       );
-    } else {
-      obj.followed_link_results = [];
     }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<BrokenLinksResultV1>, I>>(base?: I): BrokenLinksResultV1 {
-    return BrokenLinksResultV1.fromPartial(base ?? {});
+    return BrokenLinksResultV1.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1>, I>>(object: I): BrokenLinksResultV1 {
     const message = createBaseBrokenLinksResultV1();
     message.link_count = object.link_count ?? undefined;
@@ -1522,25 +1566,41 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
   toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions): unknown {
     const obj: any = {};
-    message.origin_url !== undefined && (obj.origin_url = message.origin_url);
-    message.link_limit !== undefined && (obj.link_limit = Math.round(message.link_limit));
-    message.query_selector_all !== undefined && (obj.query_selector_all = message.query_selector_all);
-    if (message.get_attributes) {
-      obj.get_attributes = message.get_attributes.map((e) => e);
-    } else {
-      obj.get_attributes = [];
+    if (message.origin_url !== "") {
+      obj.origin_url = message.origin_url;
     }
-    message.link_order !== undefined &&
-      (obj.link_order = brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderToJSON(message.link_order));
-    message.link_timeout_millis !== undefined && (obj.link_timeout_millis = Math.round(message.link_timeout_millis));
-    message.max_retries !== undefined && (obj.max_retries = Math.round(message.max_retries));
-    message.max_redirects !== undefined && (obj.max_redirects = Math.round(message.max_redirects));
-    message.wait_for_selector !== undefined && (obj.wait_for_selector = message.wait_for_selector);
-    obj.per_link_options = {};
+    if (message.link_limit !== undefined) {
+      obj.link_limit = Math.round(message.link_limit);
+    }
+    if (message.query_selector_all !== "") {
+      obj.query_selector_all = message.query_selector_all;
+    }
+    if (message.get_attributes?.length) {
+      obj.get_attributes = message.get_attributes;
+    }
+    if (message.link_order !== 0) {
+      obj.link_order = brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderToJSON(message.link_order);
+    }
+    if (message.link_timeout_millis !== undefined) {
+      obj.link_timeout_millis = Math.round(message.link_timeout_millis);
+    }
+    if (message.max_retries !== undefined) {
+      obj.max_retries = Math.round(message.max_retries);
+    }
+    if (message.max_redirects !== undefined) {
+      obj.max_redirects = Math.round(message.max_redirects);
+    }
+    if (message.wait_for_selector !== "") {
+      obj.wait_for_selector = message.wait_for_selector;
+    }
     if (message.per_link_options) {
-      Object.entries(message.per_link_options).forEach(([k, v]) => {
-        obj.per_link_options[k] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.toJSON(v);
-      });
+      const entries = Object.entries(message.per_link_options);
+      if (entries.length > 0) {
+        obj.per_link_options = {};
+        entries.forEach(([k, v]) => {
+          obj.per_link_options[k] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.toJSON(v);
+        });
+      }
     }
     return obj;
   },
@@ -1548,9 +1608,8 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
   create<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions>, I>>(
     base?: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
-    return BrokenLinksResultV1_BrokenLinkCheckerOptions.fromPartial(base ?? {});
+    return BrokenLinksResultV1_BrokenLinkCheckerOptions.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions>, I>>(
     object: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
@@ -1635,19 +1694,20 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
 
   toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption): unknown {
     const obj: any = {};
-    message.expected_status_code !== undefined && (obj.expected_status_code = message.expected_status_code
-      ? ResponseStatusCode.toJSON(message.expected_status_code)
-      : undefined);
-    message.link_timeout_millis !== undefined && (obj.link_timeout_millis = Math.round(message.link_timeout_millis));
+    if (message.expected_status_code !== undefined) {
+      obj.expected_status_code = ResponseStatusCode.toJSON(message.expected_status_code);
+    }
+    if (message.link_timeout_millis !== undefined) {
+      obj.link_timeout_millis = Math.round(message.link_timeout_millis);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption>, I>>(
     base?: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
-    return BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromPartial(base ?? {});
+    return BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption>, I>>(
     object: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
@@ -1723,19 +1783,20 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = 
 
   toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry): unknown {
     const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value
-      ? BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.toJSON(message.value)
-      : undefined);
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== undefined) {
+      obj.value = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.toJSON(message.value);
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry>, I>>(
     base?: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
-    return BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.fromPartial(base ?? {});
+    return BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry>, I>>(
     object: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
@@ -1927,29 +1988,50 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
 
   toJSON(message: BrokenLinksResultV1_SyntheticLinkResult): unknown {
     const obj: any = {};
-    message.link_passed !== undefined && (obj.link_passed = message.link_passed);
-    message.expected_status_code !== undefined && (obj.expected_status_code = message.expected_status_code
-      ? ResponseStatusCode.toJSON(message.expected_status_code)
-      : undefined);
-    message.origin_url !== undefined && (obj.origin_url = message.origin_url);
-    message.target_url !== undefined && (obj.target_url = message.target_url);
-    message.anchor_text !== undefined && (obj.anchor_text = message.anchor_text);
-    message.html_element !== undefined && (obj.html_element = message.html_element);
-    message.status_code !== undefined && (obj.status_code = Math.round(message.status_code));
-    message.error_type !== undefined && (obj.error_type = message.error_type);
-    message.error_message !== undefined && (obj.error_message = message.error_message);
-    message.link_start_time !== undefined && (obj.link_start_time = message.link_start_time);
-    message.link_end_time !== undefined && (obj.link_end_time = message.link_end_time);
-    message.is_origin !== undefined && (obj.is_origin = message.is_origin);
+    if (message.link_passed !== undefined) {
+      obj.link_passed = message.link_passed;
+    }
+    if (message.expected_status_code !== undefined) {
+      obj.expected_status_code = ResponseStatusCode.toJSON(message.expected_status_code);
+    }
+    if (message.origin_url !== "") {
+      obj.origin_url = message.origin_url;
+    }
+    if (message.target_url !== "") {
+      obj.target_url = message.target_url;
+    }
+    if (message.anchor_text !== "") {
+      obj.anchor_text = message.anchor_text;
+    }
+    if (message.html_element !== "") {
+      obj.html_element = message.html_element;
+    }
+    if (message.status_code !== undefined) {
+      obj.status_code = Math.round(message.status_code);
+    }
+    if (message.error_type !== "") {
+      obj.error_type = message.error_type;
+    }
+    if (message.error_message !== "") {
+      obj.error_message = message.error_message;
+    }
+    if (message.link_start_time !== "") {
+      obj.link_start_time = message.link_start_time;
+    }
+    if (message.link_end_time !== "") {
+      obj.link_end_time = message.link_end_time;
+    }
+    if (message.is_origin !== undefined) {
+      obj.is_origin = message.is_origin;
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<BrokenLinksResultV1_SyntheticLinkResult>, I>>(
     base?: I,
   ): BrokenLinksResultV1_SyntheticLinkResult {
-    return BrokenLinksResultV1_SyntheticLinkResult.fromPartial(base ?? {});
+    return BrokenLinksResultV1_SyntheticLinkResult.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_SyntheticLinkResult>, I>>(
     object: I,
   ): BrokenLinksResultV1_SyntheticLinkResult {
@@ -2091,33 +2173,36 @@ export const SyntheticResult = {
 
   toJSON(message: SyntheticResult): unknown {
     const obj: any = {};
-    message.synthetic_test_framework_result_v1 !== undefined &&
-      (obj.synthetic_test_framework_result_v1 = message.synthetic_test_framework_result_v1
-        ? TestFrameworkResultV1.toJSON(message.synthetic_test_framework_result_v1)
-        : undefined);
-    message.synthetic_generic_result_v1 !== undefined &&
-      (obj.synthetic_generic_result_v1 = message.synthetic_generic_result_v1
-        ? GenericResultV1.toJSON(message.synthetic_generic_result_v1)
-        : undefined);
-    message.synthetic_broken_links_result_v1 !== undefined &&
-      (obj.synthetic_broken_links_result_v1 = message.synthetic_broken_links_result_v1
-        ? BrokenLinksResultV1.toJSON(message.synthetic_broken_links_result_v1)
-        : undefined);
-    obj.runtime_metadata = {};
-    if (message.runtime_metadata) {
-      Object.entries(message.runtime_metadata).forEach(([k, v]) => {
-        obj.runtime_metadata[k] = v;
-      });
+    if (message.synthetic_test_framework_result_v1 !== undefined) {
+      obj.synthetic_test_framework_result_v1 = TestFrameworkResultV1.toJSON(message.synthetic_test_framework_result_v1);
     }
-    message.start_time !== undefined && (obj.start_time = message.start_time);
-    message.end_time !== undefined && (obj.end_time = message.end_time);
+    if (message.synthetic_generic_result_v1 !== undefined) {
+      obj.synthetic_generic_result_v1 = GenericResultV1.toJSON(message.synthetic_generic_result_v1);
+    }
+    if (message.synthetic_broken_links_result_v1 !== undefined) {
+      obj.synthetic_broken_links_result_v1 = BrokenLinksResultV1.toJSON(message.synthetic_broken_links_result_v1);
+    }
+    if (message.runtime_metadata) {
+      const entries = Object.entries(message.runtime_metadata);
+      if (entries.length > 0) {
+        obj.runtime_metadata = {};
+        entries.forEach(([k, v]) => {
+          obj.runtime_metadata[k] = v;
+        });
+      }
+    }
+    if (message.start_time !== "") {
+      obj.start_time = message.start_time;
+    }
+    if (message.end_time !== "") {
+      obj.end_time = message.end_time;
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<SyntheticResult>, I>>(base?: I): SyntheticResult {
-    return SyntheticResult.fromPartial(base ?? {});
+    return SyntheticResult.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<SyntheticResult>, I>>(object: I): SyntheticResult {
     const message = createBaseSyntheticResult();
     message.synthetic_test_framework_result_v1 =
@@ -2198,17 +2283,20 @@ export const SyntheticResult_RuntimeMetadataEntry = {
 
   toJSON(message: SyntheticResult_RuntimeMetadataEntry): unknown {
     const obj: any = {};
-    message.key !== undefined && (obj.key = message.key);
-    message.value !== undefined && (obj.value = message.value);
+    if (message.key !== "") {
+      obj.key = message.key;
+    }
+    if (message.value !== "") {
+      obj.value = message.value;
+    }
     return obj;
   },
 
   create<I extends Exact<DeepPartial<SyntheticResult_RuntimeMetadataEntry>, I>>(
     base?: I,
   ): SyntheticResult_RuntimeMetadataEntry {
-    return SyntheticResult_RuntimeMetadataEntry.fromPartial(base ?? {});
+    return SyntheticResult_RuntimeMetadataEntry.fromPartial(base ?? ({} as any));
   },
-
   fromPartial<I extends Exact<DeepPartial<SyntheticResult_RuntimeMetadataEntry>, I>>(
     object: I,
   ): SyntheticResult_RuntimeMetadataEntry {
@@ -2219,10 +2307,10 @@ export const SyntheticResult_RuntimeMetadataEntry = {
   },
 };
 
-declare var self: any | undefined;
-declare var window: any | undefined;
-declare var global: any | undefined;
-var tsProtoGlobalThis: any = (() => {
+declare const self: any | undefined;
+declare const window: any | undefined;
+declare const global: any | undefined;
+const tsProtoGlobalThis: any = (() => {
   if (typeof globalThis !== "undefined") {
     return globalThis;
   }

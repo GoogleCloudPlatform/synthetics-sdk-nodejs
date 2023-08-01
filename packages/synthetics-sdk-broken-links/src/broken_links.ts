@@ -12,14 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import puppeteer, { HTTPResponse, Page } from 'puppeteer';
+import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   getRuntimeMetadata,
+  BrokenLinksResultV1,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   SyntheticResult,
+  instantiateMetadata,
+  GenericResultV1,
 } from '@google-cloud/synthetics-sdk-api';
 import {
   checkStatusPassing,
@@ -30,8 +34,11 @@ import {
   NavigateResponse,
   CommonResponseProps,
   createSyntheticResult,
+  openNewPage
 } from './link_utils';
+import { link } from 'fs';
 
+// should I just export BrokenLinksResultV1_BrokenLinkCheckerOptions
 export interface BrokenLinkCheckerOptions {
   origin_url: string;
   link_limit?: number;
@@ -65,11 +72,35 @@ export enum StatusClass {
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
 
+const synthetics_sdk_broken_links_package = require('../package.json');
+instantiateMetadata(synthetics_sdk_broken_links_package);
+
+const getGenericError = (genericErrorMessage: string): GenericResultV1 => ({
+  ok: false,
+  generic_error: {
+    error_type: 'Error',
+    error_message: genericErrorMessage,
+    function_name: '',
+    file_path: '',
+    line: 0,
+  },
+});
+
+const getGenericSyntheticResult = (
+  startTime: string,
+  genericErrorMessage: string
+): SyntheticResult => ({
+  synthetic_generic_result_v1: getGenericError(genericErrorMessage),
+  runtime_metadata: getRuntimeMetadata(),
+  start_time: startTime,
+  end_time: new Date().toISOString(),
+});
+
 export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // init
-  const start_time = new Date().toISOString();
+  const startTime = new Date().toISOString();
   const runtime_metadata = getRuntimeMetadata();
 
   // TODO validate input_options
@@ -77,46 +108,89 @@ export async function runBrokenLinks(
   // options object modified directly
   const options = setDefaultOptions(input_options);
 
-  // create Browser & origin page then navigate to origin_url, w/ origin
-  // specific settings
-  const browser = await puppeteer.launch({ headless: 'new' });
-  const origin_page = await browser.newPage();
+  let browser: Browser;
+  let originPage: Page;
+  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+  try {
+    // create Browser & origin page then navigate to origin_url, w/ origin
+    // specific settings
+    browser = await puppeteer.launch({ headless: 'new' });
+    originPage = await browser.newPage();
 
-  // TODO check origin_link
+    // check origin_link
+    const originLinkResult = await checkLink(
+      originPage,
+      { target_url: options.origin_url, anchor_text: '', html_element: '' },
+      options,
+      true
+    );
+    followed_links.push(originLinkResult);
+    // if orgin link did not pass exit and return the singular link result
+    if (!originLinkResult.link_passed) {
+      return createSyntheticResult(
+        startTime,
+        runtime_metadata,
+        options,
+        followed_links
+      );
+    }
 
-  if (options.wait_for_selector) {
-    // TODO set timeout here to be timeout - time from checking origin link above
-    await origin_page.waitForSelector(options.wait_for_selector);
+    if (options.wait_for_selector) {
+      // TODO set timeout here to be timeout - time from checking origin link above
+      await originPage.waitForSelector(options.wait_for_selector);
+    }
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+    return getGenericSyntheticResult(
+      startTime,
+      `An error occurred while loading or checking ${options.origin_url}. Please reference server logs for further information.`
+    );
   }
 
-  // TODO
-  // scrape origin_url for all links
+  const links_to_follow: LinkIntermediate[] = [];
   try {
     // eslint-disable-next-line  @typescript-eslint/no-unused-vars
     const retrieved_links: LinkIntermediate[] = await retrieveLinksFromPage(
-      origin_page,
+      originPage,
       options.query_selector_all,
       options.get_attributes
     );
 
-    // TODO shuffle links if link_order is `RANDOM`
-    // TODO always truncate to lint_limit
+    // shuffle links if link_order is `RANDOM`
+    options.link_order ===
+    BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM
+      ? links_to_follow.push(...retrieved_links.sort(() => Math.random() - 0.5))
+      : links_to_follow.push(...retrieved_links);
+    // always truncate to lint_limit
+    links_to_follow.splice(options.link_limit! - 1);
   } catch (err) {
     if (err instanceof Error) process.stderr.write(err.message);
-    // TODO throw generic error with `failure to scrape links`
+    return getGenericSyntheticResult(
+      startTime,
+      `An error occurred while scraping ${options.origin_url}. Please reference server logs for further information.`
+    );
   }
 
-  // TODO
-  // create new page to be used for all scraped links
-  // navigate to each link - LOOP:
-  //          each call to `checkLink(...)` will return a `SyntheticLinkResult`
-  //          Object added to an array of `followed_links`
-  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+  try {
+    const page = await openNewPage(browser);
 
-  // returned a SyntheticResult with `options`, `followed_links` &
-  // runtimeMetadata
+    followed_links.push(...(await checkLinks(page, links_to_follow, options)));
+  } catch (err) {
+    let errorMessage =
+      'An error occured while checking scraped links. Please reference server logs for further information.';
+    if (err instanceof Error) errorMessage = err.message;
+    return getGenericSyntheticResult(startTime, errorMessage);
+  }
+
+  try {
+    await browser.close();
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+    // if this step fails we do not need to fail the entire execution
+  }
+
   return createSyntheticResult(
-    start_time,
+    startTime,
     runtime_metadata,
     options,
     followed_links
@@ -170,6 +244,25 @@ export async function retrieveLinksFromPage(
     get_attributes,
     origin_url
   );
+}
+
+async function checkLinks(
+  page: Page,
+  links: LinkIntermediate[],
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
+  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+  for (const link of links) {
+    try {
+      followed_links.push(await checkLink(page, link, options));
+    } catch (err) {
+      if (err instanceof Error) process.stderr.write(err.message);
+      throw new Error(
+        `An error occurred while checking ${link}. Please reference server logs for further information.`
+      );
+    }
+  }
+  return followed_links;
 }
 
 /**
@@ -343,4 +436,70 @@ async function fetchLink(
 
   const linkEndTime = new Date().toISOString();
   return { responseOrError, linkStartTime, linkEndTime };
+}
+
+export function parseFollowedLinks(
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+) {
+  const broken_links_result: BrokenLinksResultV1 = {
+    link_count: 0,
+    passing_link_count: 0,
+    failing_link_count: 0,
+    unreachable_count: 0,
+    status_2xx_count: 0,
+    status_3xx_count: 0,
+    status_4xx_count: 0,
+    status_5xx_count: 0,
+    options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
+    origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
+    followed_link_results: [],
+  };
+
+  for (const link of followed_links) {
+    link.is_origin
+      ? (broken_links_result.origin_link_result = link)
+      : broken_links_result.followed_link_results.push(link);
+
+    broken_links_result.link_count = (broken_links_result.link_count ?? 0) + 1;
+
+    link.link_passed === true
+      ? (broken_links_result.passing_link_count =
+          (broken_links_result.passing_link_count ?? 0) + 1)
+      : (broken_links_result.failing_link_count =
+          (broken_links_result.failing_link_count ?? 0) + 1);
+
+    if (!link.link_passed) {
+      console.log('failed: ', link);
+    }
+
+    switch (Math.floor(link.status_code! / 100)) {
+      case 2:
+        broken_links_result.status_2xx_count =
+          (broken_links_result.status_2xx_count ?? 0) + 1;
+        break;
+
+      case 3:
+        broken_links_result.status_3xx_count =
+          (broken_links_result.status_3xx_count ?? 0) + 1;
+        break;
+
+      case 4:
+        broken_links_result.status_4xx_count =
+          (broken_links_result.status_4xx_count ?? 0) + 1;
+        break;
+
+      case 5:
+        broken_links_result.status_5xx_count =
+          (broken_links_result.status_5xx_count ?? 0) + 1;
+        break;
+
+      default:
+        // Handle other status codes if needed
+        broken_links_result.unreachable_count =
+          (broken_links_result.unreachable_count ?? 0) + 1;
+        break;
+    }
+  }
+
+  return broken_links_result;
 }
