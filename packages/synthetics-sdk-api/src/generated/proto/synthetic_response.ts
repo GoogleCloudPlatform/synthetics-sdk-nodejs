@@ -1,17 +1,3 @@
-// Copyright 2023 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
@@ -26,8 +12,8 @@ export interface TestResult {
   title: string;
   /** Whether or not the test passed. */
   test_passed?:
-  | boolean
-  | undefined;
+    | boolean
+    | undefined;
   /**
    * The full path of names from the name of the suite, to the name of the test.
    * Tests may be nested under multiple suites. Eg. ["my suite name", "pings my
@@ -63,8 +49,8 @@ export interface TestResult_TestError_StackFrame {
   file_path: string;
   /** Line number that reported the error. */
   line?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** Column number that reported the error. */
   column?: number | undefined;
 }
@@ -72,24 +58,24 @@ export interface TestResult_TestError_StackFrame {
 export interface TestFrameworkResultV1 {
   /** The number of total test suites ran. */
   suite_count?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** The number of total tests that ran as a part of the suite run. */
   test_count?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** The number of total tests that passed as a part of the suite run. */
   passing_test_count?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** The number of total tests that failed as a prt of the suite run. */
   failing_test_count?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** The number of total tests that remain pending after the suite run. */
   pending_test_count?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /**
    * A collection of individual test results from a given synthetic's test
    * suite.
@@ -100,8 +86,8 @@ export interface TestFrameworkResultV1 {
 export interface GenericResultV1 {
   /** Whether or not the synthetic is considered to have passed. */
   ok?:
-  | boolean
-  | undefined;
+    | boolean
+    | undefined;
   /** Error that was associated with this result, causing it to fail. */
   generic_error: GenericResultV1_GenericError | undefined;
 }
@@ -129,8 +115,8 @@ export interface GenericResultV1_GenericError {
 export interface ResponseStatusCode {
   /** A status code to accept. */
   status_value?:
-  | number
-  | undefined;
+    | number
+    | undefined;
   /** A class of status codes to accept. */
   status_class?: ResponseStatusCode_StatusClass | undefined;
 }
@@ -209,11 +195,11 @@ export function responseStatusCode_StatusClassToJSON(object: ResponseStatusCode_
 /** Aggregate and individual results of a Broken Link Synthetic execution */
 export interface BrokenLinksResultV1 {
   /** the total number of links checked as part of the execution */
-  links_count: number;
+  link_count: number;
   /** the total number of links that passed as part of the execution */
-  passing_links_count: number;
+  passing_link_count: number;
   /** the total number of links that failed */
-  failing_links_count: number;
+  failing_link_count: number;
   /** the total number of links that count not be reached */
   unreachable_count: number;
   /** the total number of links that returned 2xx status codes */
@@ -224,40 +210,40 @@ export interface BrokenLinksResultV1 {
   status_4xx_count: number;
   /** the total number of links that returned 5xx status codes */
   status_5xx_count: number;
-  /** options set for broken link synthetic */
+  /** Options set for broken link synthetic. */
   options:
-  | BrokenLinksResultV1_BrokenLinkCheckerOptions
-  | undefined;
+    | BrokenLinksResultV1_BrokenLinkCheckerOptions
+    | undefined;
   /** link result for origin_url */
   origin_link_result:
-  | BrokenLinksResultV1_LinkResult
-  | undefined;
+    | BrokenLinksResultV1_LinkResult
+    | undefined;
   /** link results for all scraped and followed links */
   followed_link_results: BrokenLinksResultV1_LinkResult[];
 }
 
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
   /**
-   * origin url from which to scrape all other links, this is the only
-   * required field
+   * Origin url from which to scrape all other links, this is the only
+   * required field.
    */
   origin_url: string;
-  /** number of links to follow, default 50 */
+  /** Number of links to follow, default 50. */
   link_limit: number;
-  /** HTML elements to scrape from origin_url, default 'a' */
+  /** HTML elements to scrape from origin_url, default 'a'. */
   query_selector_all: string;
-  /** attributes to scrape from queried HTML elements, default ['href'] */
+  /** Attributes to scrape from queried HTML elements, default ['href']. */
   get_attributes: string[];
   /** order to check links scraped */
   link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder;
   /**
-   * maximum amount of time to wait for HTTP response to complete per link,
-   * default 30000 milliseconds
+   * Maximum amount of time to wait for HTTP response to complete per link,
+   * default 30000 milliseconds.
    */
   link_timeout_millis: number;
   /**
-   * number of times to retry a link that does not return
-   * “expected_status_code”
+   * Number of times to retry a link that does not return the
+   * “expected_status_code”.
    */
   max_retries: number;
   /**
@@ -271,14 +257,14 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    * individual link options, default None. string must be formatted as a
    * fully qualified url
    */
-  per_link_options: {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption};
+  per_link_options: { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption };
 }
 
-/** options for which to check links scraped */
+/** Possible orders for checking links that have been scraped. */
 export enum BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder {
-  /** FIRST_N - first "n" number of links scraped */
+  /** FIRST_N - First "n" number of links scraped. */
   FIRST_N = 0,
-  /** RANDOM - random selection of links scraped */
+  /** RANDOM - Random selection of links scraped. */
   RANDOM = 1,
   UNRECOGNIZED = -1,
 }
@@ -314,15 +300,15 @@ export function brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderToJSON(
   }
 }
 
-/** individual link options */
+/** Individual link options. */
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
-  /** expected status code */
+  /** The expected status code or class. */
   expected_status_code:
-  | ResponseStatusCode
-  | undefined;
+    | ResponseStatusCode
+    | undefined;
   /**
-   * maximum amount of time to wait for HTTP response to complete for
-   * specific link passed in "per_link_optionss" map
+   * Maximum amount of time to wait for HTTP response to complete, for
+   * the given specified link passed in "per_link_options" map.
    */
   link_timeout_millis: number;
 }
@@ -334,21 +320,21 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntr
 
 /** Result of a single link checked / network request */
 export interface BrokenLinksResultV1_LinkResult {
-  /** Whether or not the status code is the same as "expected_status_code" */
+  /** Whether or not the status code is the same as "expected_status_code". */
   link_passed?:
-  | boolean
-  | undefined;
-  /** expected status code */
+    | boolean
+    | undefined;
+  /** The expected status code or status class. */
   expected_status_code:
-  | ResponseStatusCode
-  | undefined;
-  /** Source_url from which the target_url is navigated from */
+    | ResponseStatusCode
+    | undefined;
+  /** Source_url from which the target_url is navigated from. */
   origin_url: string;
-  /** Target_url navigated to from the source_url */
+  /** Target_url navigated to from the source_url. */
   target_url: string;
-  /** Anchor_text on the source URL */
+  /** Anchor text on the source URL. */
   anchor_text: string;
-  /** Status code returned by the target_url */
+  /** Status code returned by the target_url. */
   status_code: number;
   /**
    * The class of the error, eg 'connectionaborted', docs:
@@ -357,13 +343,13 @@ export interface BrokenLinksResultV1_LinkResult {
   error_type: string;
   /** Error Message, if any */
   error_message?:
-  | string
-  | undefined;
-  /** the start time of the link navigation in iso format. */
+    | string
+    | undefined;
+  /** The start time of the link navigation in iso format. */
   link_start_time: string;
-  /** the end time of the link navigation in iso format. */
+  /** The end time of the link navigation in iso format. */
   link_end_time: string;
-  /** these fields only apply to the origin story */
+  /** These fields only apply to the origin link. */
   is_origin?: boolean | undefined;
 }
 
@@ -371,14 +357,14 @@ export interface SyntheticResult {
   synthetic_test_framework_result_v1?: TestFrameworkResultV1 | undefined;
   synthetic_generic_result_v1?: GenericResultV1 | undefined;
   synthetic_broken_links_result_v1?:
-  | BrokenLinksResultV1
-  | undefined;
+    | BrokenLinksResultV1
+    | undefined;
   /**
    * Used to determine information about the runtime environment that the
    * synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
    * SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
    */
-  runtime_metadata: {[key: string]: string};
+  runtime_metadata: { [key: string]: string };
   /** The start time of the synthetic in iso format. */
   start_time: string;
   /** The end time of the synthetic in iso format. */
@@ -528,7 +514,7 @@ export const TestResult = {
 };
 
 function createBaseTestResult_TestError(): TestResult_TestError {
-  return {error_type: "", error_message: "", stack_frames: []};
+  return { error_type: "", error_message: "", stack_frames: [] };
 }
 
 export const TestResult_TestError = {
@@ -618,7 +604,7 @@ export const TestResult_TestError = {
 };
 
 function createBaseTestResult_TestError_StackFrame(): TestResult_TestError_StackFrame {
-  return {function_name: "", file_path: "", line: undefined, column: undefined};
+  return { function_name: "", file_path: "", line: undefined, column: undefined };
 }
 
 export const TestResult_TestError_StackFrame = {
@@ -853,7 +839,7 @@ export const TestFrameworkResultV1 = {
 };
 
 function createBaseGenericResultV1(): GenericResultV1 {
-  return {ok: undefined, generic_error: undefined};
+  return { ok: undefined, generic_error: undefined };
 }
 
 export const GenericResultV1 = {
@@ -930,7 +916,7 @@ export const GenericResultV1 = {
 };
 
 function createBaseGenericResultV1_GenericError(): GenericResultV1_GenericError {
-  return {error_type: "", error_message: "", function_name: "", file_path: "", line: undefined};
+  return { error_type: "", error_message: "", function_name: "", file_path: "", line: undefined };
 }
 
 export const GenericResultV1_GenericError = {
@@ -1040,7 +1026,7 @@ export const GenericResultV1_GenericError = {
 };
 
 function createBaseResponseStatusCode(): ResponseStatusCode {
-  return {status_value: undefined, status_class: undefined};
+  return { status_value: undefined, status_class: undefined };
 }
 
 export const ResponseStatusCode = {
@@ -1116,9 +1102,9 @@ export const ResponseStatusCode = {
 
 function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
   return {
-    links_count: 0,
-    passing_links_count: 0,
-    failing_links_count: 0,
+    link_count: 0,
+    passing_link_count: 0,
+    failing_link_count: 0,
     unreachable_count: 0,
     status_2xx_count: 0,
     status_3xx_count: 0,
@@ -1132,14 +1118,14 @@ function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
 
 export const BrokenLinksResultV1 = {
   encode(message: BrokenLinksResultV1, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.links_count !== 0) {
-      writer.uint32(8).int64(message.links_count);
+    if (message.link_count !== 0) {
+      writer.uint32(8).int64(message.link_count);
     }
-    if (message.passing_links_count !== 0) {
-      writer.uint32(16).int64(message.passing_links_count);
+    if (message.passing_link_count !== 0) {
+      writer.uint32(16).int64(message.passing_link_count);
     }
-    if (message.failing_links_count !== 0) {
-      writer.uint32(24).int64(message.failing_links_count);
+    if (message.failing_link_count !== 0) {
+      writer.uint32(24).int64(message.failing_link_count);
     }
     if (message.unreachable_count !== 0) {
       writer.uint32(32).int64(message.unreachable_count);
@@ -1180,21 +1166,21 @@ export const BrokenLinksResultV1 = {
             break;
           }
 
-          message.links_count = longToNumber(reader.int64() as Long);
+          message.link_count = longToNumber(reader.int64() as Long);
           continue;
         case 2:
           if (tag !== 16) {
             break;
           }
 
-          message.passing_links_count = longToNumber(reader.int64() as Long);
+          message.passing_link_count = longToNumber(reader.int64() as Long);
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
-          message.failing_links_count = longToNumber(reader.int64() as Long);
+          message.failing_link_count = longToNumber(reader.int64() as Long);
           continue;
         case 4:
           if (tag !== 32) {
@@ -1263,9 +1249,9 @@ export const BrokenLinksResultV1 = {
 
   fromJSON(object: any): BrokenLinksResultV1 {
     return {
-      links_count: isSet(object.links_count) ? Number(object.links_count) : 0,
-      passing_links_count: isSet(object.passing_links_count) ? Number(object.passing_links_count) : 0,
-      failing_links_count: isSet(object.failing_links_count) ? Number(object.failing_links_count) : 0,
+      link_count: isSet(object.link_count) ? Number(object.link_count) : 0,
+      passing_link_count: isSet(object.passing_link_count) ? Number(object.passing_link_count) : 0,
+      failing_link_count: isSet(object.failing_link_count) ? Number(object.failing_link_count) : 0,
       unreachable_count: isSet(object.unreachable_count) ? Number(object.unreachable_count) : 0,
       status_2xx_count: isSet(object.status_2xx_count) ? Number(object.status_2xx_count) : 0,
       status_3xx_count: isSet(object.status_3xx_count) ? Number(object.status_3xx_count) : 0,
@@ -1285,9 +1271,9 @@ export const BrokenLinksResultV1 = {
 
   toJSON(message: BrokenLinksResultV1): unknown {
     const obj: any = {};
-    message.links_count !== undefined && (obj.links_count = Math.round(message.links_count));
-    message.passing_links_count !== undefined && (obj.passing_links_count = Math.round(message.passing_links_count));
-    message.failing_links_count !== undefined && (obj.failing_links_count = Math.round(message.failing_links_count));
+    message.link_count !== undefined && (obj.link_count = Math.round(message.link_count));
+    message.passing_link_count !== undefined && (obj.passing_link_count = Math.round(message.passing_link_count));
+    message.failing_link_count !== undefined && (obj.failing_link_count = Math.round(message.failing_link_count));
     message.unreachable_count !== undefined && (obj.unreachable_count = Math.round(message.unreachable_count));
     message.status_2xx_count !== undefined && (obj.status_2xx_count = Math.round(message.status_2xx_count));
     message.status_3xx_count !== undefined && (obj.status_3xx_count = Math.round(message.status_3xx_count));
@@ -1316,9 +1302,9 @@ export const BrokenLinksResultV1 = {
 
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1>, I>>(object: I): BrokenLinksResultV1 {
     const message = createBaseBrokenLinksResultV1();
-    message.links_count = object.links_count ?? 0;
-    message.passing_links_count = object.passing_links_count ?? 0;
-    message.failing_links_count = object.failing_links_count ?? 0;
+    message.link_count = object.link_count ?? 0;
+    message.passing_link_count = object.passing_link_count ?? 0;
+    message.failing_link_count = object.failing_link_count ?? 0;
     message.unreachable_count = object.unreachable_count ?? 0;
     message.status_2xx_count = object.status_2xx_count ?? 0;
     message.status_3xx_count = object.status_3xx_count ?? 0;
@@ -1378,7 +1364,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     }
     Object.entries(message.per_link_options).forEach(([key, value]) => {
       BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.encode(
-        {key: key as any, value},
+        { key: key as any, value },
         writer.uint32(74).fork(),
       ).ldelim();
     });
@@ -1484,7 +1470,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       wait_for_selector: isSet(object.wait_for_selector) ? String(object.wait_for_selector) : "",
       per_link_options: isObject(object.per_link_options)
         ? Object.entries(object.per_link_options).reduce<
-          {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
+          { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
         >((acc, [key, value]) => {
           acc[key] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromJSON(value);
           return acc;
@@ -1536,7 +1522,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     message.max_retries = object.max_retries ?? 0;
     message.wait_for_selector = object.wait_for_selector ?? "";
     message.per_link_options = Object.entries(object.per_link_options ?? {}).reduce<
-      {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
+      { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
     >((acc, [key, value]) => {
       if (value !== undefined) {
         acc[key] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromPartial(value);
@@ -1548,7 +1534,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption(): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
-  return {expected_status_code: undefined, link_timeout_millis: 0};
+  return { expected_status_code: undefined, link_timeout_millis: 0 };
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
@@ -1632,7 +1618,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry(): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
-  return {key: "", value: undefined};
+  return { key: "", value: undefined };
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = {
@@ -1950,7 +1936,7 @@ export const SyntheticResult = {
       BrokenLinksResultV1.encode(message.synthetic_broken_links_result_v1, writer.uint32(26).fork()).ldelim();
     }
     Object.entries(message.runtime_metadata).forEach(([key, value]) => {
-      SyntheticResult_RuntimeMetadataEntry.encode({key: key as any, value}, writer.uint32(34).fork()).ldelim();
+      SyntheticResult_RuntimeMetadataEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
     });
     if (message.start_time !== "") {
       writer.uint32(42).string(message.start_time);
@@ -2034,7 +2020,7 @@ export const SyntheticResult = {
         ? BrokenLinksResultV1.fromJSON(object.synthetic_broken_links_result_v1)
         : undefined,
       runtime_metadata: isObject(object.runtime_metadata)
-        ? Object.entries(object.runtime_metadata).reduce<{[key: string]: string}>((acc, [key, value]) => {
+        ? Object.entries(object.runtime_metadata).reduce<{ [key: string]: string }>((acc, [key, value]) => {
           acc[key] = String(value);
           return acc;
         }, {})
@@ -2087,7 +2073,7 @@ export const SyntheticResult = {
       (object.synthetic_broken_links_result_v1 !== undefined && object.synthetic_broken_links_result_v1 !== null)
         ? BrokenLinksResultV1.fromPartial(object.synthetic_broken_links_result_v1)
         : undefined;
-    message.runtime_metadata = Object.entries(object.runtime_metadata ?? {}).reduce<{[key: string]: string}>(
+    message.runtime_metadata = Object.entries(object.runtime_metadata ?? {}).reduce<{ [key: string]: string }>(
       (acc, [key, value]) => {
         if (value !== undefined) {
           acc[key] = String(value);
@@ -2103,7 +2089,7 @@ export const SyntheticResult = {
 };
 
 function createBaseSyntheticResult_RuntimeMetadataEntry(): SyntheticResult_RuntimeMetadataEntry {
-  return {key: "", value: ""};
+  return { key: "", value: "" };
 }
 
 export const SyntheticResult_RuntimeMetadataEntry = {
@@ -2148,7 +2134,7 @@ export const SyntheticResult_RuntimeMetadataEntry = {
   },
 
   fromJSON(object: any): SyntheticResult_RuntimeMetadataEntry {
-    return {key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : ""};
+    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
   },
 
   toJSON(message: SyntheticResult_RuntimeMetadataEntry): unknown {
@@ -2197,12 +2183,12 @@ type Builtin = Date | Function | Uint8Array | string | number | boolean | undefi
 
 export type DeepPartial<T> = T extends Builtin ? T
   : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? {[K in keyof T]?: DeepPartial<T[K]>}
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & {[K in keyof P]: Exact<P[K], I[K]>} & {[K in Exclude<keyof I, KeysOfUnion<P>>]: never};
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
