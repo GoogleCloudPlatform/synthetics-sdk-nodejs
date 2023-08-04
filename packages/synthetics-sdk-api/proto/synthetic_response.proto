@@ -98,10 +98,142 @@ message GenericResultV1 {
   GenericError generic_error = 2;
 }
 
+// A status to accept. Either a status code class like "2xx", or an
+// integer status code like "200".
+message ResponseStatusCode {
+  // An HTTP status code class.
+  enum StatusClass {
+    // Default value that matches no status codes.
+    STATUS_CLASS_UNSPECIFIED = 0;
+    // The class of status codes between 100 and 199.
+    STATUS_CLASS_1XX = 100;
+    // The class of status codes between 200 and 299.
+    STATUS_CLASS_2XX = 200;
+    // The class of status codes between 300 and 399.
+    STATUS_CLASS_3XX = 300;
+    // The class of status codes between 400 and 499.
+    STATUS_CLASS_4XX = 400;
+    // The class of status codes between 500 and 599.
+    STATUS_CLASS_5XX = 500;
+    // The class of all status codes.
+    STATUS_CLASS_ANY = 1000;
+  }
+  // Either a specific value or a class of status codes.
+  oneof status_code {
+    // A status code to accept.
+    int32 status_value = 1;
+    // A class of status codes to accept.
+    StatusClass status_class = 2;
+  }
+}
+
+// Aggregate and individual results of a Broken Link Synthetic execution
+message BrokenLinksResultV1 {
+  // the total number of links checked as part of the execution
+  int64 link_count = 1;
+  // the total number of links that passed as part of the execution
+  int64 passing_link_count = 2;
+  // the total number of links that failed
+  int64 failing_link_count = 3;
+  // the total number of links that count not be reached
+  int64 unreachable_count = 4;
+  // the total number of links that returned 2xx status codes
+  int64 status_2xx_count = 5;
+  // the total number of links that returned 3xx status codes
+  int64 status_3xx_count = 6;
+  // the total number of links that returned 4xx status codes
+  int64 status_4xx_count = 7;
+  // the total number of links that returned 5xx status codes
+  int64 status_5xx_count = 8;
+
+  message BrokenLinkCheckerOptions {
+    // Origin url from which to scrape all other links, this is the only
+    // required field.
+    string origin_url = 1;
+    // Number of links to follow, default 50.
+    int64 link_limit = 2;
+    // HTML elements to scrape from origin_url, default 'a'.
+    string query_selector_all = 3;
+    // Attributes to scrape from queried HTML elements, default ['href'].
+    repeated string get_attributes = 4;
+
+    // Possible orders for checking links that have been scraped.
+    enum LinkOrder {
+      // First "n" number of links scraped.
+      FIRST_N = 0;
+      // Random selection of links scraped.
+      RANDOM = 1;
+    }
+
+    // order to check links scraped
+    LinkOrder link_order = 5;  // default FIRST_N
+    // Maximum amount of time to wait for HTTP response to complete per link,
+    // default 30000 milliseconds.
+    int64 link_timeout_millis = 6;
+    // Number of times to retry a link that does not return the
+    // “expected_status_code”.
+    int32 max_retries = 7;
+    // HTML element to wait for before scraping links on origin_url.
+    // Method documentation:
+    // https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
+    string wait_for_selector = 8;
+
+    // Individual link options.
+    message PerLinkOption {
+      // The expected status code or class.
+      ResponseStatusCode expected_status_code = 1;
+      // Maximum amount of time to wait for HTTP response to complete, for
+      // the given specified link passed in "per_link_options" map.
+      int64 link_timeout_millis = 2;
+    }
+    // individual link options, default None. string must be formatted as a
+    // fully qualified url
+    map<string, PerLinkOption> per_link_options = 9;
+  }
+
+  // Options set for broken link synthetic.
+  BrokenLinkCheckerOptions options = 9;
+
+  // Result of a single link checked / network request
+  message LinkResult {
+    // Whether or not the status code is the same as "expected_status_code".
+    optional bool link_passed = 1;
+    // The expected status code or status class.
+    ResponseStatusCode expected_status_code = 2;
+    // Source_url from which the target_url is navigated from.
+    string origin_url = 3;
+    // Target_url navigated to from the source_url.
+    string target_url = 4;
+    // Anchor text on the source URL.
+    string anchor_text = 5;
+    // Status code returned by the target_url.
+    int64 status_code = 6;
+    // The class of the error, eg 'connectionaborted', docs:
+    // https://pptr.dev/api/puppeteer.errorcode
+    string error_type = 7;
+    // Error Message, if any
+    optional string error_message = 8;
+    // The start time of the link navigation in iso format.
+    string link_start_time = 9;
+    // The end time of the link navigation in iso format.
+    string link_end_time = 10;
+
+    // These fields only apply to the origin link.
+    optional bool is_origin = 11;
+  }
+
+  // link result for origin_url
+  LinkResult origin_link_result = 10;
+  // link results for all scraped and followed links
+  repeated LinkResult followed_link_results = 11;
+}
+
 message SyntheticResult {
   oneof result {
     TestFrameworkResultV1 synthetic_test_framework_result_v1 = 1;
     GenericResultV1 synthetic_generic_result_v1 = 2;
+    BrokenLinksResultV1 synthetic_broken_links_result_v1 = 3;
   }
 
   // Used to determine information about the runtime environment that the
