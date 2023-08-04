@@ -1,3 +1,17 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 /* eslint-disable */
 import Long from "long";
 import _m0 from "protobufjs/minimal";
@@ -12,8 +26,8 @@ export interface TestResult {
   title: string;
   /** Whether or not the test passed. */
   test_passed?:
-    | boolean
-    | undefined;
+  | boolean
+  | undefined;
   /**
    * The full path of names from the name of the suite, to the name of the test.
    * Tests may be nested under multiple suites. Eg. ["my suite name", "pings my
@@ -49,8 +63,8 @@ export interface TestResult_TestError_StackFrame {
   file_path: string;
   /** Line number that reported the error. */
   line?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** Column number that reported the error. */
   column?: number | undefined;
 }
@@ -58,24 +72,24 @@ export interface TestResult_TestError_StackFrame {
 export interface TestFrameworkResultV1 {
   /** The number of total test suites ran. */
   suite_count?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** The number of total tests that ran as a part of the suite run. */
   test_count?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** The number of total tests that passed as a part of the suite run. */
   passing_test_count?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** The number of total tests that failed as a prt of the suite run. */
   failing_test_count?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** The number of total tests that remain pending after the suite run. */
   pending_test_count?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /**
    * A collection of individual test results from a given synthetic's test
    * suite.
@@ -86,8 +100,8 @@ export interface TestFrameworkResultV1 {
 export interface GenericResultV1 {
   /** Whether or not the synthetic is considered to have passed. */
   ok?:
-    | boolean
-    | undefined;
+  | boolean
+  | undefined;
   /** Error that was associated with this result, causing it to fail. */
   generic_error: GenericResultV1_GenericError | undefined;
 }
@@ -115,8 +129,8 @@ export interface GenericResultV1_GenericError {
 export interface ResponseStatusCode {
   /** A status code to accept. */
   status_value?:
-    | number
-    | undefined;
+  | number
+  | undefined;
   /** A class of status codes to accept. */
   status_class?: ResponseStatusCode_StatusClass | undefined;
 }
@@ -212,12 +226,12 @@ export interface BrokenLinksResultV1 {
   status_5xx_count: number;
   /** Options set for broken link synthetic. */
   options:
-    | BrokenLinksResultV1_BrokenLinkCheckerOptions
-    | undefined;
+  | BrokenLinksResultV1_BrokenLinkCheckerOptions
+  | undefined;
   /** link result for origin_url */
   origin_link_result:
-    | BrokenLinksResultV1_LinkResult
-    | undefined;
+  | BrokenLinksResultV1_LinkResult
+  | undefined;
   /** link results for all scraped and followed links */
   followed_link_results: BrokenLinksResultV1_LinkResult[];
 }
@@ -257,7 +271,7 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    * individual link options, default None. string must be formatted as a
    * fully qualified url
    */
-  per_link_options: { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption };
+  per_link_options: {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption};
 }
 
 /** Possible orders for checking links that have been scraped. */
@@ -304,8 +318,8 @@ export function brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderToJSON(
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
   /** The expected status code or class. */
   expected_status_code:
-    | ResponseStatusCode
-    | undefined;
+  | ResponseStatusCode
+  | undefined;
   /**
    * Maximum amount of time to wait for HTTP response to complete, for
    * the given specified link passed in "per_link_options" map.
@@ -322,12 +336,12 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntr
 export interface BrokenLinksResultV1_LinkResult {
   /** Whether or not the status code is the same as "expected_status_code". */
   link_passed?:
-    | boolean
-    | undefined;
+  | boolean
+  | undefined;
   /** The expected status code or status class. */
   expected_status_code:
-    | ResponseStatusCode
-    | undefined;
+  | ResponseStatusCode
+  | undefined;
   /** Source_url from which the target_url is navigated from. */
   origin_url: string;
   /** Target_url navigated to from the source_url. */
@@ -343,8 +357,8 @@ export interface BrokenLinksResultV1_LinkResult {
   error_type: string;
   /** Error Message, if any */
   error_message?:
-    | string
-    | undefined;
+  | string
+  | undefined;
   /** The start time of the link navigation in iso format. */
   link_start_time: string;
   /** The end time of the link navigation in iso format. */
@@ -357,14 +371,14 @@ export interface SyntheticResult {
   synthetic_test_framework_result_v1?: TestFrameworkResultV1 | undefined;
   synthetic_generic_result_v1?: GenericResultV1 | undefined;
   synthetic_broken_links_result_v1?:
-    | BrokenLinksResultV1
-    | undefined;
+  | BrokenLinksResultV1
+  | undefined;
   /**
    * Used to determine information about the runtime environment that the
    * synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
    * SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
    */
-  runtime_metadata: { [key: string]: string };
+  runtime_metadata: {[key: string]: string};
   /** The start time of the synthetic in iso format. */
   start_time: string;
   /** The end time of the synthetic in iso format. */
@@ -514,7 +528,7 @@ export const TestResult = {
 };
 
 function createBaseTestResult_TestError(): TestResult_TestError {
-  return { error_type: "", error_message: "", stack_frames: [] };
+  return {error_type: "", error_message: "", stack_frames: []};
 }
 
 export const TestResult_TestError = {
@@ -604,7 +618,7 @@ export const TestResult_TestError = {
 };
 
 function createBaseTestResult_TestError_StackFrame(): TestResult_TestError_StackFrame {
-  return { function_name: "", file_path: "", line: undefined, column: undefined };
+  return {function_name: "", file_path: "", line: undefined, column: undefined};
 }
 
 export const TestResult_TestError_StackFrame = {
@@ -839,7 +853,7 @@ export const TestFrameworkResultV1 = {
 };
 
 function createBaseGenericResultV1(): GenericResultV1 {
-  return { ok: undefined, generic_error: undefined };
+  return {ok: undefined, generic_error: undefined};
 }
 
 export const GenericResultV1 = {
@@ -916,7 +930,7 @@ export const GenericResultV1 = {
 };
 
 function createBaseGenericResultV1_GenericError(): GenericResultV1_GenericError {
-  return { error_type: "", error_message: "", function_name: "", file_path: "", line: undefined };
+  return {error_type: "", error_message: "", function_name: "", file_path: "", line: undefined};
 }
 
 export const GenericResultV1_GenericError = {
@@ -1026,7 +1040,7 @@ export const GenericResultV1_GenericError = {
 };
 
 function createBaseResponseStatusCode(): ResponseStatusCode {
-  return { status_value: undefined, status_class: undefined };
+  return {status_value: undefined, status_class: undefined};
 }
 
 export const ResponseStatusCode = {
@@ -1364,7 +1378,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     }
     Object.entries(message.per_link_options).forEach(([key, value]) => {
       BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.encode(
-        { key: key as any, value },
+        {key: key as any, value},
         writer.uint32(74).fork(),
       ).ldelim();
     });
@@ -1470,7 +1484,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       wait_for_selector: isSet(object.wait_for_selector) ? String(object.wait_for_selector) : "",
       per_link_options: isObject(object.per_link_options)
         ? Object.entries(object.per_link_options).reduce<
-          { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
+          {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
         >((acc, [key, value]) => {
           acc[key] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromJSON(value);
           return acc;
@@ -1522,7 +1536,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     message.max_retries = object.max_retries ?? 0;
     message.wait_for_selector = object.wait_for_selector ?? "";
     message.per_link_options = Object.entries(object.per_link_options ?? {}).reduce<
-      { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
+      {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
     >((acc, [key, value]) => {
       if (value !== undefined) {
         acc[key] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromPartial(value);
@@ -1534,7 +1548,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption(): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
-  return { expected_status_code: undefined, link_timeout_millis: 0 };
+  return {expected_status_code: undefined, link_timeout_millis: 0};
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
@@ -1618,7 +1632,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry(): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
-  return { key: "", value: undefined };
+  return {key: "", value: undefined};
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = {
@@ -1936,7 +1950,7 @@ export const SyntheticResult = {
       BrokenLinksResultV1.encode(message.synthetic_broken_links_result_v1, writer.uint32(26).fork()).ldelim();
     }
     Object.entries(message.runtime_metadata).forEach(([key, value]) => {
-      SyntheticResult_RuntimeMetadataEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).ldelim();
+      SyntheticResult_RuntimeMetadataEntry.encode({key: key as any, value}, writer.uint32(34).fork()).ldelim();
     });
     if (message.start_time !== "") {
       writer.uint32(42).string(message.start_time);
@@ -2020,7 +2034,7 @@ export const SyntheticResult = {
         ? BrokenLinksResultV1.fromJSON(object.synthetic_broken_links_result_v1)
         : undefined,
       runtime_metadata: isObject(object.runtime_metadata)
-        ? Object.entries(object.runtime_metadata).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+        ? Object.entries(object.runtime_metadata).reduce<{[key: string]: string}>((acc, [key, value]) => {
           acc[key] = String(value);
           return acc;
         }, {})
@@ -2073,7 +2087,7 @@ export const SyntheticResult = {
       (object.synthetic_broken_links_result_v1 !== undefined && object.synthetic_broken_links_result_v1 !== null)
         ? BrokenLinksResultV1.fromPartial(object.synthetic_broken_links_result_v1)
         : undefined;
-    message.runtime_metadata = Object.entries(object.runtime_metadata ?? {}).reduce<{ [key: string]: string }>(
+    message.runtime_metadata = Object.entries(object.runtime_metadata ?? {}).reduce<{[key: string]: string}>(
       (acc, [key, value]) => {
         if (value !== undefined) {
           acc[key] = String(value);
@@ -2089,7 +2103,7 @@ export const SyntheticResult = {
 };
 
 function createBaseSyntheticResult_RuntimeMetadataEntry(): SyntheticResult_RuntimeMetadataEntry {
-  return { key: "", value: "" };
+  return {key: "", value: ""};
 }
 
 export const SyntheticResult_RuntimeMetadataEntry = {
@@ -2134,7 +2148,7 @@ export const SyntheticResult_RuntimeMetadataEntry = {
   },
 
   fromJSON(object: any): SyntheticResult_RuntimeMetadataEntry {
-    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
+    return {key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : ""};
   },
 
   toJSON(message: SyntheticResult_RuntimeMetadataEntry): unknown {
@@ -2183,12 +2197,12 @@ type Builtin = Date | Function | Uint8Array | string | number | boolean | undefi
 
 export type DeepPartial<T> = T extends Builtin ? T
   : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
-  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : T extends {} ? {[K in keyof T]?: DeepPartial<T[K]>}
   : Partial<T>;
 
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 export type Exact<P, I extends P> = P extends Builtin ? P
-  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+  : P & {[K in keyof P]: Exact<P[K], I[K]>} & {[K in Exclude<keyof I, KeysOfUnion<P>>]: never};
 
 function longToNumber(long: Long): number {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
