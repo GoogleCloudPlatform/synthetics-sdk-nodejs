@@ -14,19 +14,11 @@
 
 // TODO should I use this stuff or redeclare it? anyway to make it less messy?
 import {
-  BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_SyntheticLinkResult,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
-  GenericResultV1,
-  ResponseStatusCode,
-  ResponseStatusCode_StatusClass,
   SyntheticResult,
-  getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
 
-import { checkStatusPassing } from './link_utils';
+import {checkStatusPassing} from './link_utils';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
