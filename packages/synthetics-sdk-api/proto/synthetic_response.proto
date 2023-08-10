@@ -170,14 +170,16 @@ message BrokenLinksResultV1 {
     // Maximum amount of time to wait for HTTP response to complete per link,
     // default 30000 milliseconds.
     int64 link_timeout_millis = 6;
-    // Number of times to retry a link that does not return the
+    // Maximum number of times to retry a link that does not return the
     // “expected_status_code”.
-    int32 max_retries = 7;
+    int64 max_retries = 7;
+    // Maximum number of times to follow redirects for a link, defaults to following all redirects.
+    int64 max_redirects = 8;
     // HTML element to wait for before scraping links on origin_url.
     // Method documentation:
     // https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
-    string wait_for_selector = 8;
+    string wait_for_selector = 9;
 
     // Individual link options.
     message PerLinkOption {
@@ -189,14 +191,14 @@ message BrokenLinksResultV1 {
     }
     // individual link options, default None. string must be formatted as a
     // fully qualified url
-    map<string, PerLinkOption> per_link_options = 9;
+    map<string, PerLinkOption> per_link_options = 10;
   }
 
   // Options set for broken link synthetic.
   BrokenLinkCheckerOptions options = 9;
 
   // Result of a single link checked / network request
-  message LinkResult {
+  message SyntheticLinkResult {
     // Whether or not the status code is the same as "expected_status_code".
     optional bool link_passed = 1;
     // The expected status code or status class.
@@ -207,26 +209,28 @@ message BrokenLinksResultV1 {
     string target_url = 4;
     // Anchor text on the source URL.
     string anchor_text = 5;
+    // HTML element from which target_url was scraped.
+    string html_element = 6;
     // Status code returned by the target_url.
-    int64 status_code = 6;
+    int64 status_code = 7;
     // The class of the error, eg 'connectionaborted', docs:
     // https://pptr.dev/api/puppeteer.errorcode
-    string error_type = 7;
+    string error_type = 8;
     // Error Message, if any
-    optional string error_message = 8;
+    optional string error_message = 9;
     // The start time of the link navigation in iso format.
-    string link_start_time = 9;
+    string link_start_time = 10;
     // The end time of the link navigation in iso format.
-    string link_end_time = 10;
+    string link_end_time = 11;
 
     // These fields only apply to the origin link.
-    optional bool is_origin = 11;
+    optional bool is_origin = 12;
   }
 
   // link result for origin_url
-  LinkResult origin_link_result = 10;
+  SyntheticLinkResult origin_link_result = 10;
   // link results for all scraped and followed links
-  repeated LinkResult followed_link_results = 11;
+  repeated SyntheticLinkResult followed_link_results = 11;
 }
 
 message SyntheticResult {
