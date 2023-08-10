@@ -18,7 +18,7 @@ import {
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 
-import {checkStatusPassing} from './link_utils';
+import { checkStatusPassing } from './link_utils';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
