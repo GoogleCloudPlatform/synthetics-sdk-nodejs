@@ -1,0 +1,37 @@
+{
+  "name": "synthetics-sdk-broken-links",
+  "version": "0.1.0",
+  "description": "",
+  "main": "./build/src/index.js",
+  "scripts": {
+    "test": "ts-mocha -p tsconfig.json ./test/**/*.spec.ts",
+    "build": "rm -rf ./build && npm run compile",
+    "compile": "tsc",
+    "fix": "eslint --fix **/*.ts && eslint --fix **/*.spec.ts",
+    "watch": "npm run compile -- --watch",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "lint": "eslint **/*.ts",
+    "posttest": "npm run lint",
+    "all": "rm -rf ./node_modules && npm install && npm run build"
+  },
+  "files": [
+    "build/src/**/*.js",
+    "build/src/**/*.d.ts"
+  ],
+  "author": "Google Inc.",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@google-cloud/functions-framework": "^3.1.3",
+    "@types/express": "^4.17.17",
+    "@types/node": "^18.15.10",
+    "@types/supertest": "^2.0.12",
+    "express": "^4.18.2",
+    "supertest": "^6.3.3",
+    "synthetics-sdk-broken-links": "file:./"
+  },
+  "dependencies": {
+    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
+    "puppeteer": "^21.0.2"
+  }
+}
