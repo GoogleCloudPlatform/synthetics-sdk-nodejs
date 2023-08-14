@@ -20,7 +20,6 @@ import {
 import { checkStatusPassing } from "../../src/link_utils"
 
 describe('GCM Synthetics Broken Links', async () => {
-  describe('utilities', async () => {
     const success_status_value: ResponseStatusCode = {status_value: 200};
     const failure_status_value: ResponseStatusCode = {status_value: 404};
     const status_class_1xx: ResponseStatusCode = {status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_1XX }
@@ -54,5 +53,4 @@ describe('GCM Synthetics Broken Links', async () => {
       expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
       expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
     });
-  });
 });
