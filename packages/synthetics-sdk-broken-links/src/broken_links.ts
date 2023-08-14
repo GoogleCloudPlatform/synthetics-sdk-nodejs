@@ -15,6 +15,7 @@
 // TODO should I use this stuff or redeclare it? anyway to make it less messy?
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  ResponseStatusCode,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 
@@ -23,5 +24,8 @@ import { checkStatusPassing } from './link_utils';
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
+  // to resolve warnings
+  options;
+  checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
   return {} as SyntheticResult;
 }

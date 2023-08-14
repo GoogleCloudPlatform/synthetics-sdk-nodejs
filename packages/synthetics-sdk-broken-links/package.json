@@ -7,14 +7,13 @@
     "test": "ts-mocha -p tsconfig.json ./test/**/*.spec.ts",
     "build": "rm -rf ./build && npm run compile",
     "compile": "tsc",
-    "fix": "eslint --fix **/*.ts && eslint --fix **/*.ts",
+    "fix": "eslint --fix **/*.ts && eslint --fix **/*.spec.ts",
     "watch": "npm run compile -- --watch",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
     "lint": "eslint **/*.ts",
     "posttest": "npm run lint",
-    "reinstall": "rm -rf ./node_modules && npm install",
-    "all": "npm run reinstall && npm run build"
+    "all": "rm -rf ./node_modules && npm install && npm run build"
   },
   "files": [
     "build/src/**/*.js",
@@ -29,8 +28,7 @@
     "@types/supertest": "^2.0.12",
     "express": "^4.18.2",
     "supertest": "^6.3.3",
-    "synthetics-sdk-broken-links": "file:./",
-    "synthetics-sdk-broken-links-utils": "file:./src/link_utils.ts"
+    "synthetics-sdk-broken-links": "file:./"
   },
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
