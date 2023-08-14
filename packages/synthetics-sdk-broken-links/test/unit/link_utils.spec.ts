@@ -14,10 +14,11 @@
 
 import { expect } from 'chai';
 import {
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import { checkStatusPassing } from '../../src/link_utils';
+import { checkStatusPassing, setDefaultOptions } from '../../src/link_utils';
 
 describe('GCM Synthetics Broken Links', async () => {
   const success_status_value: ResponseStatusCode = { status_value: 200 };
@@ -62,5 +63,10 @@ describe('GCM Synthetics Broken Links', async () => {
     expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
     expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
     expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
+  });
+
+  it('setDefaultOptions', () => {
+    console.log('a');
+    setDefaultOptions({} as BrokenLinksResultV1_BrokenLinkCheckerOptions);
   });
 });
