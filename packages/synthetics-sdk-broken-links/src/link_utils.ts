@@ -15,6 +15,8 @@
 import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder
 } from '@google-cloud/synthetics-sdk-api';
 
 /**
@@ -47,4 +49,36 @@ export function checkStatusPassing(
         return false;
     }
   }
+}
+
+export function setDefaultOptions(
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+) {
+  const default_options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
+    origin_url: '',
+    link_limit: 50,
+    query_selector_all: 'a',
+    get_attributes: ['href'],
+    link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
+    link_timeout_millis: 30000,
+    max_retries: 1,
+    max_redirects: Number.MAX_SAFE_INTEGER, // allows infinite number of redirects
+    wait_for_selector: '',
+    per_link_options: {},
+  };
+
+  // go through options and if the field is undefinied then assign it to its appropriate field in default_options
+  options.link_limit = options.link_limit ?? default_options.link_limit;
+  options.query_selector_all =
+    options.query_selector_all ?? default_options.query_selector_all;
+  options.get_attributes =
+    options.get_attributes ?? default_options.get_attributes;
+  options.link_order = options.link_order ?? default_options.link_order;
+  options.link_timeout_millis =
+    options.link_timeout_millis ?? default_options.link_timeout_millis;
+  options.max_retries = options.max_retries ?? default_options.max_retries;
+  options.wait_for_selector =
+    options.wait_for_selector ?? default_options.wait_for_selector;
+  options.per_link_options =
+    options.per_link_options ?? default_options.per_link_options;
 }
