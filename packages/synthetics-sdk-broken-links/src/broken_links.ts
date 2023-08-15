@@ -15,6 +15,7 @@
 // TODO should I use this stuff or redeclare it? anyway to make it less messy?
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
@@ -30,14 +31,75 @@ import puppeteer, { HTTPResponse, Page } from 'puppeteer';
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
-  // to resolve warnings
+  // START - to resolve warnings while under development
   options;
   checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
+
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const page = await browser.newPage();
+  await checkLink(
+    page,
+    {} as LinkIntermediate,
+    {} as BrokenLinksResultV1_BrokenLinkCheckerOptions
+  );
+  // END - to resolve warnings  while under development
 
   // options object modified directly
   setDefaultOptions(options);
 
+  // PSEUDOCODE
+
+  // create puppeteer.Browser
+  // create puppeteer.Page & navigate to origin_url, w/ origin specific settings
+
+  // scrape origin_url for all links
+  // (shuffle links if necessary and) truncate at link_limit
+
+  // create new page to be used for all scraped links
+  // navigate to each link - LOOP:
+  //          each call to `checkLinks(...)` will return a `SyntheticLinkResult`
+  //          Object added to an array of `followed_links`
+
+  // returned a SyntheticResult with `options`, `followed_links` &
+  // runtimeMetadata
   return {} as SyntheticResult;
+}
+
+async function checkLink(
+  page: Page,
+  link: LinkIntermediate,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
+  // START - to resolve warnings while under development
+  page;
+  link;
+  options;
+  // END - to resolve warnings  while under development
+
+  // PSEUDOCODE
+
+  // determine expected_status_code—determined here rather than `navigate(...)`
+  // since it will be used later when creating
+  // `BrokenLinksResultV1_SyntheticLinkResult` Object
+
+  // call `navigate(...)`
+  /**
+   * const {
+   *    response: responseOrError,
+   *    passed,
+   *    testing_only,
+   *    link_start_time,
+   *    link_end_time,
+   * } = await navigate(page, link, expected_status_code, options);
+   */
+
+  // Error handling based on `responseOrError` & passed:
+  //    if      `responseOrError` is type `Error` set `error_type` and
+  //            `error_message` in `SyntheticLinkResult` accordingly
+  //    else if `passed === false`. Set error `SYNTHETIC_INCORRECT_STATUS_CODE`
+
+  // return `SynheticLinkResult` with all calculated information
+  return {} as BrokenLinksResultV1_SyntheticLinkResult;
 }
 
 /**
