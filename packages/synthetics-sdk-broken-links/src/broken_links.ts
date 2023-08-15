@@ -19,7 +19,7 @@ import {
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 
-import { checkStatusPassing } from './link_utils';
+import { checkStatusPassing, setDefaultOptions } from './link_utils';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
@@ -27,5 +27,9 @@ export async function runBrokenLinks(
   // to resolve warnings
   options;
   checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
+
+  // options object modified directly
+  setDefaultOptions(options);
+
   return {} as SyntheticResult;
 }
