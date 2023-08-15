@@ -17,7 +17,6 @@ import {
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
 } from '@google-cloud/synthetics-sdk-api';
 
 import { HTTPResponse } from 'puppeteer';
