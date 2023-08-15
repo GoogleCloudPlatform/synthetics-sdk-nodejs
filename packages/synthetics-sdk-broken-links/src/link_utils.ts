@@ -79,7 +79,7 @@ export function setDefaultOptions(
     max_retries: 1,
     max_redirects: Number.MAX_SAFE_INTEGER, // allows infinite number of redirects
     wait_for_selector: '',
-    per_link_options: {}
+    per_link_options: {},
   };
 
   const objKeys = Object.keys(default_options) as Array<
