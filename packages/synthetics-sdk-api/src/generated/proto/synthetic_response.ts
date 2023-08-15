@@ -209,21 +209,37 @@ export function responseStatusCode_StatusClassToJSON(object: ResponseStatusCode_
 /** Aggregate and individual results of a Broken Link Synthetic execution */
 export interface BrokenLinksResultV1 {
   /** the total number of links checked as part of the execution */
-  link_count: number;
+  link_count?:
+    | number
+    | undefined;
   /** the total number of links that passed as part of the execution */
-  passing_link_count: number;
+  passing_link_count?:
+    | number
+    | undefined;
   /** the total number of links that failed */
-  failing_link_count: number;
+  failing_link_count?:
+    | number
+    | undefined;
   /** the total number of links that count not be reached */
-  unreachable_count: number;
+  unreachable_count?:
+    | number
+    | undefined;
   /** the total number of links that returned 2xx status codes */
-  status_2xx_count: number;
+  status_2xx_count?:
+    | number
+    | undefined;
   /** the total number of links that returned 3xx status codes */
-  status_3xx_count: number;
+  status_3xx_count?:
+    | number
+    | undefined;
   /** the total number of links that returned 4xx status codes */
-  status_4xx_count: number;
+  status_4xx_count?:
+    | number
+    | undefined;
   /** the total number of links that returned 5xx status codes */
-  status_5xx_count: number;
+  status_5xx_count?:
+    | number
+    | undefined;
   /** Options set for broken link synthetic. */
   options:
     | BrokenLinksResultV1_BrokenLinkCheckerOptions
@@ -243,7 +259,9 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    */
   origin_url: string;
   /** Number of links to follow, default 50. */
-  link_limit: number;
+  link_limit?:
+    | number
+    | undefined;
   /** HTML elements to scrape from origin_url, default 'a'. */
   query_selector_all: string;
   /** Attributes to scrape from queried HTML elements, default ['href']. */
@@ -254,14 +272,20 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    * Maximum amount of time to wait for HTTP response to complete per link,
    * default 30000 milliseconds.
    */
-  link_timeout_millis: number;
+  link_timeout_millis?:
+    | number
+    | undefined;
   /**
    * Maximum number of times to retry a link that does not return the
    * “expected_status_code”.
    */
-  max_retries: number;
+  max_retries?:
+    | number
+    | undefined;
   /** Maximum number of times to follow redirects for a link, defaults to following all redirects. */
-  max_redirects: number;
+  max_redirects?:
+    | number
+    | undefined;
   /**
    * HTML element to wait for before scraping links on origin_url.
    * Method documentation:
@@ -326,7 +350,7 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
    * Maximum amount of time to wait for HTTP response to complete, for
    * the given specified link passed in "per_link_options" map.
    */
-  link_timeout_millis: number;
+  link_timeout_millis?: number | undefined;
 }
 
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
@@ -353,16 +377,16 @@ export interface BrokenLinksResultV1_SyntheticLinkResult {
   /** HTML element from which target_url was scraped. */
   html_element: string;
   /** Status code returned by the target_url. */
-  status_code: number;
+  status_code?:
+    | number
+    | undefined;
   /**
    * The class of the error, eg 'connectionaborted', docs:
    * https://pptr.dev/api/puppeteer.errorcode
    */
   error_type: string;
   /** Error Message, if any */
-  error_message?:
-    | string
-    | undefined;
+  error_message: string;
   /** The start time of the link navigation in iso format. */
   link_start_time: string;
   /** The end time of the link navigation in iso format. */
@@ -1120,14 +1144,14 @@ export const ResponseStatusCode = {
 
 function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
   return {
-    link_count: 0,
-    passing_link_count: 0,
-    failing_link_count: 0,
-    unreachable_count: 0,
-    status_2xx_count: 0,
-    status_3xx_count: 0,
-    status_4xx_count: 0,
-    status_5xx_count: 0,
+    link_count: undefined,
+    passing_link_count: undefined,
+    failing_link_count: undefined,
+    unreachable_count: undefined,
+    status_2xx_count: undefined,
+    status_3xx_count: undefined,
+    status_4xx_count: undefined,
+    status_5xx_count: undefined,
     options: undefined,
     origin_link_result: undefined,
     followed_link_results: [],
@@ -1136,28 +1160,28 @@ function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
 
 export const BrokenLinksResultV1 = {
   encode(message: BrokenLinksResultV1, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.link_count !== 0) {
+    if (message.link_count !== undefined) {
       writer.uint32(8).int64(message.link_count);
     }
-    if (message.passing_link_count !== 0) {
+    if (message.passing_link_count !== undefined) {
       writer.uint32(16).int64(message.passing_link_count);
     }
-    if (message.failing_link_count !== 0) {
+    if (message.failing_link_count !== undefined) {
       writer.uint32(24).int64(message.failing_link_count);
     }
-    if (message.unreachable_count !== 0) {
+    if (message.unreachable_count !== undefined) {
       writer.uint32(32).int64(message.unreachable_count);
     }
-    if (message.status_2xx_count !== 0) {
+    if (message.status_2xx_count !== undefined) {
       writer.uint32(40).int64(message.status_2xx_count);
     }
-    if (message.status_3xx_count !== 0) {
+    if (message.status_3xx_count !== undefined) {
       writer.uint32(48).int64(message.status_3xx_count);
     }
-    if (message.status_4xx_count !== 0) {
+    if (message.status_4xx_count !== undefined) {
       writer.uint32(56).int64(message.status_4xx_count);
     }
-    if (message.status_5xx_count !== 0) {
+    if (message.status_5xx_count !== undefined) {
       writer.uint32(64).int64(message.status_5xx_count);
     }
     if (message.options !== undefined) {
@@ -1267,14 +1291,14 @@ export const BrokenLinksResultV1 = {
 
   fromJSON(object: any): BrokenLinksResultV1 {
     return {
-      link_count: isSet(object.link_count) ? Number(object.link_count) : 0,
-      passing_link_count: isSet(object.passing_link_count) ? Number(object.passing_link_count) : 0,
-      failing_link_count: isSet(object.failing_link_count) ? Number(object.failing_link_count) : 0,
-      unreachable_count: isSet(object.unreachable_count) ? Number(object.unreachable_count) : 0,
-      status_2xx_count: isSet(object.status_2xx_count) ? Number(object.status_2xx_count) : 0,
-      status_3xx_count: isSet(object.status_3xx_count) ? Number(object.status_3xx_count) : 0,
-      status_4xx_count: isSet(object.status_4xx_count) ? Number(object.status_4xx_count) : 0,
-      status_5xx_count: isSet(object.status_5xx_count) ? Number(object.status_5xx_count) : 0,
+      link_count: isSet(object.link_count) ? Number(object.link_count) : undefined,
+      passing_link_count: isSet(object.passing_link_count) ? Number(object.passing_link_count) : undefined,
+      failing_link_count: isSet(object.failing_link_count) ? Number(object.failing_link_count) : undefined,
+      unreachable_count: isSet(object.unreachable_count) ? Number(object.unreachable_count) : undefined,
+      status_2xx_count: isSet(object.status_2xx_count) ? Number(object.status_2xx_count) : undefined,
+      status_3xx_count: isSet(object.status_3xx_count) ? Number(object.status_3xx_count) : undefined,
+      status_4xx_count: isSet(object.status_4xx_count) ? Number(object.status_4xx_count) : undefined,
+      status_5xx_count: isSet(object.status_5xx_count) ? Number(object.status_5xx_count) : undefined,
       options: isSet(object.options)
         ? BrokenLinksResultV1_BrokenLinkCheckerOptions.fromJSON(object.options)
         : undefined,
@@ -1320,14 +1344,14 @@ export const BrokenLinksResultV1 = {
 
   fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1>, I>>(object: I): BrokenLinksResultV1 {
     const message = createBaseBrokenLinksResultV1();
-    message.link_count = object.link_count ?? 0;
-    message.passing_link_count = object.passing_link_count ?? 0;
-    message.failing_link_count = object.failing_link_count ?? 0;
-    message.unreachable_count = object.unreachable_count ?? 0;
-    message.status_2xx_count = object.status_2xx_count ?? 0;
-    message.status_3xx_count = object.status_3xx_count ?? 0;
-    message.status_4xx_count = object.status_4xx_count ?? 0;
-    message.status_5xx_count = object.status_5xx_count ?? 0;
+    message.link_count = object.link_count ?? undefined;
+    message.passing_link_count = object.passing_link_count ?? undefined;
+    message.failing_link_count = object.failing_link_count ?? undefined;
+    message.unreachable_count = object.unreachable_count ?? undefined;
+    message.status_2xx_count = object.status_2xx_count ?? undefined;
+    message.status_3xx_count = object.status_3xx_count ?? undefined;
+    message.status_4xx_count = object.status_4xx_count ?? undefined;
+    message.status_5xx_count = object.status_5xx_count ?? undefined;
     message.options = (object.options !== undefined && object.options !== null)
       ? BrokenLinksResultV1_BrokenLinkCheckerOptions.fromPartial(object.options)
       : undefined;
@@ -1343,13 +1367,13 @@ export const BrokenLinksResultV1 = {
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksResultV1_BrokenLinkCheckerOptions {
   return {
     origin_url: "",
-    link_limit: 0,
+    link_limit: undefined,
     query_selector_all: "",
     get_attributes: [],
     link_order: 0,
-    link_timeout_millis: 0,
-    max_retries: 0,
-    max_redirects: 0,
+    link_timeout_millis: undefined,
+    max_retries: undefined,
+    max_redirects: undefined,
     wait_for_selector: "",
     per_link_options: {},
   };
@@ -1360,7 +1384,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     if (message.origin_url !== "") {
       writer.uint32(10).string(message.origin_url);
     }
-    if (message.link_limit !== 0) {
+    if (message.link_limit !== undefined) {
       writer.uint32(16).int64(message.link_limit);
     }
     if (message.query_selector_all !== "") {
@@ -1372,13 +1396,13 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     if (message.link_order !== 0) {
       writer.uint32(40).int32(message.link_order);
     }
-    if (message.link_timeout_millis !== 0) {
+    if (message.link_timeout_millis !== undefined) {
       writer.uint32(48).int64(message.link_timeout_millis);
     }
-    if (message.max_retries !== 0) {
+    if (message.max_retries !== undefined) {
       writer.uint32(56).int64(message.max_retries);
     }
-    if (message.max_redirects !== 0) {
+    if (message.max_redirects !== undefined) {
       writer.uint32(64).int64(message.max_redirects);
     }
     if (message.wait_for_selector !== "") {
@@ -1488,15 +1512,15 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
   fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions {
     return {
       origin_url: isSet(object.origin_url) ? String(object.origin_url) : "",
-      link_limit: isSet(object.link_limit) ? Number(object.link_limit) : 0,
+      link_limit: isSet(object.link_limit) ? Number(object.link_limit) : undefined,
       query_selector_all: isSet(object.query_selector_all) ? String(object.query_selector_all) : "",
       get_attributes: Array.isArray(object?.get_attributes) ? object.get_attributes.map((e: any) => String(e)) : [],
       link_order: isSet(object.link_order)
         ? brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderFromJSON(object.link_order)
         : 0,
-      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : 0,
-      max_retries: isSet(object.max_retries) ? Number(object.max_retries) : 0,
-      max_redirects: isSet(object.max_redirects) ? Number(object.max_redirects) : 0,
+      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : undefined,
+      max_retries: isSet(object.max_retries) ? Number(object.max_retries) : undefined,
+      max_redirects: isSet(object.max_redirects) ? Number(object.max_redirects) : undefined,
       wait_for_selector: isSet(object.wait_for_selector) ? String(object.wait_for_selector) : "",
       per_link_options: isObject(object.per_link_options)
         ? Object.entries(object.per_link_options).reduce<
@@ -1545,13 +1569,13 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
     const message = createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions();
     message.origin_url = object.origin_url ?? "";
-    message.link_limit = object.link_limit ?? 0;
+    message.link_limit = object.link_limit ?? undefined;
     message.query_selector_all = object.query_selector_all ?? "";
     message.get_attributes = object.get_attributes?.map((e) => e) || [];
     message.link_order = object.link_order ?? 0;
-    message.link_timeout_millis = object.link_timeout_millis ?? 0;
-    message.max_retries = object.max_retries ?? 0;
-    message.max_redirects = object.max_redirects ?? 0;
+    message.link_timeout_millis = object.link_timeout_millis ?? undefined;
+    message.max_retries = object.max_retries ?? undefined;
+    message.max_redirects = object.max_redirects ?? undefined;
     message.wait_for_selector = object.wait_for_selector ?? "";
     message.per_link_options = Object.entries(object.per_link_options ?? {}).reduce<
       { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
@@ -1566,7 +1590,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption(): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption {
-  return { expected_status_code: undefined, link_timeout_millis: 0 };
+  return { expected_status_code: undefined, link_timeout_millis: undefined };
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
@@ -1577,7 +1601,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
     if (message.expected_status_code !== undefined) {
       ResponseStatusCode.encode(message.expected_status_code, writer.uint32(10).fork()).ldelim();
     }
-    if (message.link_timeout_millis !== 0) {
+    if (message.link_timeout_millis !== undefined) {
       writer.uint32(16).int64(message.link_timeout_millis);
     }
     return writer;
@@ -1618,7 +1642,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
       expected_status_code: isSet(object.expected_status_code)
         ? ResponseStatusCode.fromJSON(object.expected_status_code)
         : undefined,
-      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : 0,
+      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : undefined,
     };
   },
 
@@ -1644,7 +1668,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
     message.expected_status_code = (object.expected_status_code !== undefined && object.expected_status_code !== null)
       ? ResponseStatusCode.fromPartial(object.expected_status_code)
       : undefined;
-    message.link_timeout_millis = object.link_timeout_millis ?? 0;
+    message.link_timeout_millis = object.link_timeout_millis ?? undefined;
     return message;
   },
 };
@@ -1745,9 +1769,9 @@ function createBaseBrokenLinksResultV1_SyntheticLinkResult(): BrokenLinksResultV
     target_url: "",
     anchor_text: "",
     html_element: "",
-    status_code: 0,
+    status_code: undefined,
     error_type: "",
-    error_message: undefined,
+    error_message: "",
     link_start_time: "",
     link_end_time: "",
     is_origin: undefined,
@@ -1774,13 +1798,13 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     if (message.html_element !== "") {
       writer.uint32(50).string(message.html_element);
     }
-    if (message.status_code !== 0) {
+    if (message.status_code !== undefined) {
       writer.uint32(56).int64(message.status_code);
     }
     if (message.error_type !== "") {
       writer.uint32(66).string(message.error_type);
     }
-    if (message.error_message !== undefined) {
+    if (message.error_message !== "") {
       writer.uint32(74).string(message.error_message);
     }
     if (message.link_start_time !== "") {
@@ -1905,9 +1929,9 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
       target_url: isSet(object.target_url) ? String(object.target_url) : "",
       anchor_text: isSet(object.anchor_text) ? String(object.anchor_text) : "",
       html_element: isSet(object.html_element) ? String(object.html_element) : "",
-      status_code: isSet(object.status_code) ? Number(object.status_code) : 0,
+      status_code: isSet(object.status_code) ? Number(object.status_code) : undefined,
       error_type: isSet(object.error_type) ? String(object.error_type) : "",
-      error_message: isSet(object.error_message) ? String(object.error_message) : undefined,
+      error_message: isSet(object.error_message) ? String(object.error_message) : "",
       link_start_time: isSet(object.link_start_time) ? String(object.link_start_time) : "",
       link_end_time: isSet(object.link_end_time) ? String(object.link_end_time) : "",
       is_origin: isSet(object.is_origin) ? Boolean(object.is_origin) : undefined,
@@ -1951,9 +1975,9 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     message.target_url = object.target_url ?? "";
     message.anchor_text = object.anchor_text ?? "";
     message.html_element = object.html_element ?? "";
-    message.status_code = object.status_code ?? 0;
+    message.status_code = object.status_code ?? undefined;
     message.error_type = object.error_type ?? "";
-    message.error_message = object.error_message ?? undefined;
+    message.error_message = object.error_message ?? "";
     message.link_start_time = object.link_start_time ?? "";
     message.link_end_time = object.link_end_time ?? "";
     message.is_origin = object.is_origin ?? undefined;
