@@ -19,6 +19,14 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
 } from '@google-cloud/synthetics-sdk-api';
 
+import { HTTPResponse } from 'puppeteer';
+
+export interface LinkIntermediate {
+  target_url: string;
+  anchor_text: string;
+  html_element: string;
+}
+
 /**
  * Checks if the given status code is passing w.r.t. expected status class or
  * code
@@ -82,4 +90,18 @@ export function setDefaultOptions(
       (options as any)[key] = default_options[key];
     }
   }
+}
+
+/**
+ * Type guard function to check if an object is an instance of HTTPResponse.
+ *
+ * @param response - The object to be checked.
+ * @returns `true` if the object is an instance of HTTPResponse, `false` otherwise.
+ */
+ export function isHTTPResponse(
+  response: HTTPResponse | Error | null
+): response is HTTPResponse {
+  return (
+    response !== null && typeof response === 'object' && 'status' in response
+  );
 }
