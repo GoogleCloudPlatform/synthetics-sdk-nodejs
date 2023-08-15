@@ -17,7 +17,6 @@ import {
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
 } from '@google-cloud/synthetics-sdk-api';
 
 /**
@@ -52,6 +51,12 @@ export function checkStatusPassing(
   }
 }
 
+/**
+ * Sets default values for the given options object, filling in missing
+ * properties with default values.
+ *
+ * @param options - The options object to be filled with default values.
+ */
 export function setDefaultOptions(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ) {
@@ -73,6 +78,7 @@ export function setDefaultOptions(
   >;
   for (const key of objKeys) {
     if (!(key in options) && key !== 'origin_url') {
+      /* eslint-disable */
       (options as any)[key] = default_options[key];
     }
   }
