@@ -36,7 +36,10 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
     let browser: Browser;
     let page: Page;
     before(async () => {
-      browser = await puppeteer.launch({ headless: 'new' });
+      browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXEC_PATH, // maybe change to `/usr/bin/google-chrome`
+        headless: 'new',
+      });
     });
 
     beforeEach(async () => {
