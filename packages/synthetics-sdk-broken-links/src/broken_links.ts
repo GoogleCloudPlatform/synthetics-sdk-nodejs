@@ -166,13 +166,7 @@ export async function navigate(
       checkStatusPassing(expected_status_code, response.status())
     ) {
       passed = true;
-      return {
-        response,
-        passed,
-        retriesRemaining,
-        link_start_time,
-        link_end_time,
-      };
+      break;
     }
   }
   return { response, passed, retriesRemaining, link_start_time, link_end_time };
