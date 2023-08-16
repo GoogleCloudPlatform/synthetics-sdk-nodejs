@@ -13,6 +13,7 @@
     "pretest": "npm run compile",
     "lint": "eslint **/*.ts",
     "posttest": "npm run lint",
+    "postinstall": "node ../../node_modules/puppeteer/install.js",
     "all": "rm -rf ./node_modules && npm install && npm run build"
   },
   "files": [
