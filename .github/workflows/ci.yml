@@ -21,13 +21,4 @@ jobs:
       - name: Upgrade to latest npm to support lockfile v2
         run: npm install -g npm@${{ matrix.npm-version }}
       - run: npm install && npm install
-
-      # Set PUPPETEER_EXECUTABLE_PATH to the path of Chrome executable
-      # - name: Set Puppeteer executable path
-      #   env:
-      #     PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-      #   run: |
-      #     # You may need to adjust the path based on the actual location of Chrome
-      #     # The path /usr/bin/google-chrome is an example and might not be accurate
-      #     echo "PUPPETEER_EXECUTABLE_PATH=$PUPPETEER_EXECUTABLE_PATH" >> $GITHUB_ENV
       - run: npm run test
