@@ -13,20 +13,12 @@
 // limitations under the License.
 
 const functions = require('@google-cloud/functions-framework');
-const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
-const { AssertionError } = require('chai');
+const SyntheticsSdkMocha = require('@google-cloud/synthetics-sdk-mocha');
 
-functions.http('SyntheticOk', runSyntheticHandler(async () => {
-  return await true;
+functions.http('SyntheticOk', SyntheticsSdkMocha.runMochaHandler({
+  spec: './test_passing.spec.js'
 }));
 
-functions.http('SyntheticNotOk', runSyntheticHandler(async () => {
-    const e = new AssertionError('Did not assert');
-    const splitStack = e.stack?.split('\n', 2) ?? '';
-    e.stack = [
-      splitStack?.[0],
-      '    at internalFn (node:internal)',
-      '    at async fn (/user/code/location.js:8:3)'
-    ].join('\n');
-    throw e;
+functions.http('SyntheticNotOk', SyntheticsSdkMocha.runMochaHandler({
+  spec: './test_failing.spec.js'
 }));

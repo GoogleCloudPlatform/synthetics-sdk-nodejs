@@ -13,8 +13,12 @@
   ],
   "scripts": {
     "docs": "typedoc",
-    "test": "npm run test --workspaces"
+    "test": "npm run test --workspaces",
+    "generate_test_servers": "sh ./e2e/generate_test_servers.sh"
   },
   "author": "Google Inc.",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@google-cloud/synthetics-sdk-api": "^0.1.0"
+  }
 }

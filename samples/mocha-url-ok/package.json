@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@google-cloud/synthetics-sdk-mocha": "^0.1.1",
     "chai": "^4.3.0",
     "node-fetch": "^2.6.0",
-    "@google-cloud/functions-framework": "^3.1.2"
+    "@google-cloud/functions-framework": "^3.1.2",
+    "@google-cloud/synthetics-sdk-mocha": "^0.1.1"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"

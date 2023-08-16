@@ -1,0 +1,13 @@
+{
+    "name": "functional-test-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "dependencies": {
+        "@google-cloud/functions-framework": "^3.1.2",
+        "chai": "^4.3.7",
+	"@google-cloud/synthetics-sdk-mocha": "^0.1.1"
+    },
+    "license": "Apache-2.0",
+    "author": "Google Inc."
+}
