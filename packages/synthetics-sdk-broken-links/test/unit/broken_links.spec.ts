@@ -15,18 +15,13 @@
 import { expect } from 'chai';
 import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
+import { setDefaultOptions } from '../../src/link_utils';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-
-describe('blah', () => {
-  it('hello', () => {
-    expect(true).to.be.true;
-  });
-});
 
 describe('TEST GCM Synthetics Broken Links', async () => {
   describe('navigate', async () => {
@@ -36,7 +31,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       origin_url: 'http://origin.com',
       max_retries: 3,
     } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-    SyntheticsSdkBrokenLinks.setDefaultOptions(options);
     const passing_2xx_status_class: ResponseStatusCode = {
       status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
     };
@@ -48,6 +42,7 @@ describe('TEST GCM Synthetics Broken Links', async () => {
     let page: Page;
     before(async () => {
       browser = await puppeteer.launch({ headless: 'new' });
+      setDefaultOptions(options);
     });
 
     beforeEach(async () => {
@@ -140,16 +135,16 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       );
 
       expect(result.passed).to.be.false;
+      expect(result.retriesRemaining).to.equal(0);
+
+      // response is a `TimeoutError
       expect(result.response.name).to.equal('TimeoutError');
       expect(result.response.message).to.equal(
         'Navigation timeout of 1 ms exceeded'
       );
-      expect(result.retriesRemaining).to.equal(0);
 
-      // Assert that link_start_time is less than link_end_time
-      const startTime = new Date(result.link_start_time).getTime();
-      const endTime = new Date(result.link_end_time).getTime();
-      expect(startTime).to.be.lessThan(endTime);
+      // not `HTTPResponse`
+      expect(result.response.status).to.be.undefined;
     });
   });
 });
