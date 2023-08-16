@@ -21,7 +21,7 @@ import {
 import { setDefaultOptions } from '../../src/link_utils';
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
 
-describe('TEST GCM Synthetics Broken Links', async () => {
+describe('GCM Synthetics Broken Links Core Functionality', async () => {
   describe('navigate', async () => {
     // constants
     const link = { target_url: 'https://example.com' };

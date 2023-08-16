@@ -21,7 +21,7 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import { checkStatusPassing, setDefaultOptions } from '../../src/link_utils';
 
-describe('GCM Synthetics Broken Links', async () => {
+describe('GCM Synthetics Broken Links Utilies', async () => {
   const success_status_value: ResponseStatusCode = { status_value: 200 };
   const failure_status_value: ResponseStatusCode = { status_value: 404 };
   const status_class_1xx: ResponseStatusCode = {
