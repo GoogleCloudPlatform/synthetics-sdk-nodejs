@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO should I use this stuff or redeclare it? anyway to make it less messy?
+import puppeteer, { HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
-
 import {
   checkStatusPassing,
-  setDefaultOptions,
-  LinkIntermediate,
   isHTTPResponse,
+  LinkIntermediate,
+  setDefaultOptions,
 } from './link_utils';
-import puppeteer, { HTTPResponse, Page } from 'puppeteer';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions

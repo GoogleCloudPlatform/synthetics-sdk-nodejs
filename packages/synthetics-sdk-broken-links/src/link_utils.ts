@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { HTTPResponse } from 'puppeteer';
 import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
 } from '@google-cloud/synthetics-sdk-api';
-
-import { HTTPResponse } from 'puppeteer';
 
 export interface LinkIntermediate {
   target_url: string;

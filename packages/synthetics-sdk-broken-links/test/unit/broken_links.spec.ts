@@ -14,14 +14,13 @@
 
 import { expect } from 'chai';
 import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
-const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
-import { setDefaultOptions } from '../../src/link_utils';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
+import { setDefaultOptions } from '../../src/link_utils';
 
 describe('TEST GCM Synthetics Broken Links', async () => {
   describe('navigate', async () => {
