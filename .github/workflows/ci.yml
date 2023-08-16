@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18, 20]
+        node: [16, 18, 20]
         include:
           # use latest npm by default
           - npm-version: latest
