@@ -32,7 +32,7 @@
     "chai": "^4.3.7",
     "express": "^4.18.2",
     "supertest": "^6.3.3",
-    "synthetics-sdk-mocha": "file:./"
+    "@google-cloud/synthetics-sdk-mocha": "file:./"
   },
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "^0.1.0",
