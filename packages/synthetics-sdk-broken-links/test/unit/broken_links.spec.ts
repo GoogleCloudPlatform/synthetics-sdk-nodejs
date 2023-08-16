@@ -17,10 +17,9 @@ import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  ResponseStatusCode,
-  ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
 import { setDefaultOptions } from '../../src/link_utils';
+const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
 
 describe('TEST GCM Synthetics Broken Links', async () => {
   describe('navigate', async () => {
@@ -30,9 +29,8 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       origin_url: 'http://origin.com',
       max_retries: 3,
     } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-    const passing_2xx_status_class: ResponseStatusCode = {
-      status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
-    };
+    setDefaultOptions(options);
+
     const failedResponse: Partial<HTTPResponse> = { status: () => 404 };
     const successfulResponse: Partial<HTTPResponse> = { status: () => 200 };
 
@@ -41,7 +39,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
     let page: Page;
     before(async () => {
       browser = await puppeteer.launch({ headless: 'new' });
-      setDefaultOptions(options);
     });
 
     beforeEach(async () => {
@@ -59,7 +56,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       const result = await SyntheticsSdkBrokenLinks.navigate(
         page,
         link,
-        passing_2xx_status_class,
         options
       );
 
@@ -87,7 +83,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       const result = await SyntheticsSdkBrokenLinks.navigate(
         pageStub,
         link,
-        passing_2xx_status_class,
         options
       );
 
@@ -112,7 +107,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       const result = await SyntheticsSdkBrokenLinks.navigate(
         pageStub,
         link,
-        passing_2xx_status_class,
         options
       );
 
@@ -129,7 +123,6 @@ describe('TEST GCM Synthetics Broken Links', async () => {
       const result = await SyntheticsSdkBrokenLinks.navigate(
         page,
         link,
-        passing_2xx_status_class,
         options_with_timeout
       );
 

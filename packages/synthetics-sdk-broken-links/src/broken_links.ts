@@ -17,6 +17,7 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
+  ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
@@ -117,8 +118,10 @@ async function checkLink(
 export async function navigate(
   page: Page,
   link: LinkIntermediate,
-  expected_status_code: ResponseStatusCode,
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  expected_status_code: ResponseStatusCode = {
+    status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+  }
 ): Promise<{
   response: HTTPResponse | Error | null;
   passed: boolean;
