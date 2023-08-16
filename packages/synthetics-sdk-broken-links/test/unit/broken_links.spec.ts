@@ -15,9 +15,7 @@
 import { expect } from 'chai';
 import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 import sinon from 'sinon';
-import {
-  BrokenLinksResultV1_BrokenLinkCheckerOptions,
-} from '@google-cloud/synthetics-sdk-api';
+import { BrokenLinksResultV1_BrokenLinkCheckerOptions } from '@google-cloud/synthetics-sdk-api';
 import { setDefaultOptions } from '../../src/link_utils';
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
 
