@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20]
+        node: [14, 16, 18, 20]
         include:
           # use latest npm by default
           - npm-version: latest
@@ -23,11 +23,11 @@ jobs:
       - run: npm install --ignore-scripts && npm install --ignore-scripts
 
       # Set PUPPETEER_EXECUTABLE_PATH to the path of Chrome executable
-      - name: Set Puppeteer executable path
-        env:
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
-        run: |
-          # You may need to adjust the path based on the actual location of Chrome
-          # The path /usr/bin/google-chrome is an example and might not be accurate
-          echo "PUPPETEER_EXECUTABLE_PATH=$PUPPETEER_EXECUTABLE_PATH" >> $GITHUB_ENV
+      # - name: Set Puppeteer executable path
+      #   env:
+      #     PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome
+      #   run: |
+      #     # You may need to adjust the path based on the actual location of Chrome
+      #     # The path /usr/bin/google-chrome is an example and might not be accurate
+      #     echo "PUPPETEER_EXECUTABLE_PATH=$PUPPETEER_EXECUTABLE_PATH" >> $GITHUB_ENV
       - run: npm run test
