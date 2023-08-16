@@ -13,12 +13,7 @@
 // limitations under the License.
 
 import { expect } from 'chai';
-import puppeteer, {
-  Page,
-  Browser,
-  HTTPResponse,
-  TimeoutError,
-} from 'puppeteer';
+import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
 import sinon from 'sinon';
 import {
@@ -26,6 +21,12 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
+
+describe('blah', () => {
+  it('hello', () => {
+    expect(true).to.be.true;
+  });
+});
 
 describe('TEST GCM Synthetics Broken Links', async () => {
   describe('navigate', async () => {
