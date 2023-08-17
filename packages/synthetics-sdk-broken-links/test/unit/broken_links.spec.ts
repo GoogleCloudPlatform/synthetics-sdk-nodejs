@@ -139,5 +139,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       // not `HTTPResponse`
       expect(result.response.status).to.be.undefined;
     });
+
+    it('able to handle per_link_settings', async () => {});
   });
 });

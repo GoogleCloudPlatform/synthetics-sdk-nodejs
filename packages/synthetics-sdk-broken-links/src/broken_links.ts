@@ -25,6 +25,7 @@ import {
   isHTTPResponse,
   LinkIntermediate,
   setDefaultOptions,
+  NavigateResponse,
 } from './link_utils';
 
 export async function runBrokenLinks(
@@ -122,18 +123,12 @@ export async function navigate(
   expected_status_code: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   }
-): Promise<{
-  response: HTTPResponse | Error | null;
-  passed: boolean;
-  retriesRemaining: number;
-  link_start_time: string;
-  link_end_time: string;
-}> {
+): Promise<NavigateResponse> {
   let link_start_time = '';
   let link_end_time = '';
   let retriesRemaining = options.max_retries!;
   const per_link_timeout_millis =
-    options.per_link_options[options.origin_url]?.link_timeout_millis ||
+    options.per_link_options[link.target_url]?.link_timeout_millis ||
     options.link_timeout_millis!;
 
   let response: HTTPResponse | Error | null = null;

@@ -26,6 +26,14 @@ export interface LinkIntermediate {
   html_element: string;
 }
 
+export interface NavigateResponse {
+  response: HTTPResponse | Error | null;
+  passed: boolean;
+  retriesRemaining: number;
+  link_start_time: string;
+  link_end_time: string;
+}
+
 /**
  * Checks if the given status code is passing w.r.t. expected status class or
  * code
