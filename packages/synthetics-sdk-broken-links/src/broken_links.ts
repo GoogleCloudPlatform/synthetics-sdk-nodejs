@@ -162,8 +162,8 @@ export async function navigate(
     }
 
     passed =
-      (isHTTPResponse(responseOrError) &&
-      checkStatusPassing(expected_status_code, responseOrError.status()));
+      isHTTPResponse(responseOrError) &&
+      checkStatusPassing(expected_status_code, responseOrError.status());
   }
   return {
     responseOrError,
