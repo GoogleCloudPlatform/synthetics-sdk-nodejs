@@ -34,6 +34,12 @@ export interface NavigateResponse {
   link_end_time: string;
 }
 
+export interface FetchLinkResponse {
+  responseOrError: HTTPResponse | Error | null;
+  link_start_time: string;
+  link_end_time: string;
+}
+
 /**
  * Checks if the given status code is passing w.r.t. expected status class or
  * code

@@ -26,7 +26,9 @@ import {
   LinkIntermediate,
   setDefaultOptions,
   NavigateResponse,
+  FetchLinkResponse,
 } from './link_utils';
+import { should } from 'chai';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
@@ -124,54 +126,65 @@ export async function navigate(
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   }
 ): Promise<NavigateResponse> {
-  let link_start_time = '';
-  let link_end_time = '';
+  let fetch_link_output = {} as FetchLinkResponse;
   let retriesRemaining = options.max_retries!;
   // use link_specific timeout if set, else use options.link_timeout_millis
   const per_link_timeout_millis =
     options.per_link_options[link.target_url]?.link_timeout_millis ||
     options.link_timeout_millis!;
 
-  let responseOrError: HTTPResponse | Error | null = null;
-
   let passed = false;
-  let used_retry = false;
+  let used_anchor_retry = false;
   while (retriesRemaining > 0 && !passed) {
     retriesRemaining--;
-    link_start_time = new Date().toISOString();
-    responseOrError = await fetchLink(
+    fetch_link_output = await fetchLink(
       page,
       link.target_url,
       per_link_timeout_millis
     );
-    link_end_time = new Date().toISOString();
 
-    // prevents errors caused by navigating from one url to same url with a
-    // different anchor part (normally returns null)
-    // e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
-    if (responseOrError === null && !used_retry) {
-      link_start_time = new Date().toISOString();
+    // // prevents errors caused by navigating from one url to same url with a
+    // // different anchor part (normally returns null)
+    // // e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
+    // if (fetch_link_output.responseOrError === null && !used_anchor_retry) {
+    //   await page.goto('about:blank');
+    //   fetch_link_output = await fetchLink(
+    //     page,
+    //     link.target_url,
+    //     per_link_timeout_millis
+    //   );
+    //   used_anchor_retry = true;
+    // }
+
+    if (shouldGoToBlankPage(page.url(), link.target_url)) {
       await page.goto('about:blank');
-      responseOrError = await fetchLink(
-        page,
-        link.target_url,
-        per_link_timeout_millis
-      );
-      used_retry = !used_retry;
-      link_end_time = new Date().toISOString();
     }
 
     passed =
-      isHTTPResponse(responseOrError) &&
-      checkStatusPassing(expected_status_code, responseOrError.status());
+      isHTTPResponse(fetch_link_output.responseOrError) &&
+      checkStatusPassing(
+        expected_status_code,
+        fetch_link_output.responseOrError.status()
+      );
   }
   return {
-    responseOrError,
-    passed,
-    retriesRemaining,
-    link_start_time,
-    link_end_time,
+    responseOrError: fetch_link_output.responseOrError,
+    passed: passed,
+    retriesRemaining: retriesRemaining,
+    link_start_time: fetch_link_output.link_start_time,
+    link_end_time: fetch_link_output.link_end_time,
   };
+}
+
+// should be in link_utils.
+// prevents errors caused by navigating from one url to same url with a
+// different anchor part (normally returns null)
+// e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
+function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
+  return (
+    target_url.includes('#') &&
+    current_url.includes(target_url.substring(0, target_url.indexOf('#')))
+  );
 }
 
 /**
@@ -186,15 +199,19 @@ async function fetchLink(
   page: Page,
   target_url: string,
   timeout: number
-): Promise<HTTPResponse | Error | null> {
+): Promise<FetchLinkResponse> {
+  let responseOrError: HTTPResponse | Error | null;
+  const link_start_time = new Date().toISOString();
+
   try {
-    const response = await page.goto(target_url, {
+    responseOrError = await page.goto(target_url, {
       waitUntil: 'load',
       timeout: timeout,
     });
-    return response;
   } catch (err) {
-    if (err instanceof Error) return err;
-    return null;
+    responseOrError = err instanceof Error ? err : null;
   }
+
+  const link_end_time = new Date().toISOString();
+  return { responseOrError, link_start_time, link_end_time };
 }
