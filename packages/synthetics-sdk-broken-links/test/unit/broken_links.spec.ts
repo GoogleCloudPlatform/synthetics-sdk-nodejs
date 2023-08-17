@@ -140,6 +140,11 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       expect(result.responseOrError.status).to.be.undefined;
     });
 
+    it('retry ', async () => {
+      // placeholder
+      expect(true).to.be.true;
+    });
+
     it('able to handle per_link_settings', async () => {
       // placeholder
       expect(true).to.be.true;

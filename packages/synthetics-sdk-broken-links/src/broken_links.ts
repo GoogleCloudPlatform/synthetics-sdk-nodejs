@@ -28,7 +28,6 @@ import {
   NavigateResponse,
   FetchLinkResponse,
 } from './link_utils';
-import { should } from 'chai';
 
 export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
@@ -134,7 +133,7 @@ export async function navigate(
     options.link_timeout_millis!;
 
   let passed = false;
-  let used_anchor_retry = false;
+  // const used_anchor_retry = false;
   while (retriesRemaining > 0 && !passed) {
     retriesRemaining--;
     fetch_link_output = await fetchLink(
