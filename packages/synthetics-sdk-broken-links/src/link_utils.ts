@@ -26,18 +26,15 @@ export interface LinkIntermediate {
   html_element: string;
 }
 
-export interface NavigateResponse {
+export interface CommonResponseProps {
   responseOrError: HTTPResponse | Error | null;
-  passed: boolean;
-  retriesRemaining: number;
   link_start_time: string;
   link_end_time: string;
 }
 
-export interface FetchLinkResponse {
-  responseOrError: HTTPResponse | Error | null;
-  link_start_time: string;
-  link_end_time: string;
+export interface NavigateResponse extends CommonResponseProps {
+  passed: boolean;
+  retriesRemaining: number;
 }
 
 /**
@@ -118,3 +115,27 @@ export function setDefaultOptions(
     response !== null && typeof response === 'object' && 'status' in response
   );
 }
+
+/**
+ * Determines whether navigating from the current URL to the target URL
+ * requires navigating to a blank page. This prevents Puppeteer errors caused by
+ * navigating from one URL to the same URL with a different anchor part (will
+ * normally return `null`).
+ *
+ * @param current_url - The current URL in the browser.
+ * @param target_url - The target URL
+ * @returns True if navigating requires a blank page, false otherwise.
+ * @example
+ * const currentUrl = 'http://example.com/page1#section1';
+ * const targetUrl = 'http://example.com/page1#section2';
+ * const needsBlankPage = shouldGoToBlankPage(currentUrl, targetUrl); // true
+ */
+ export function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
+  // Check if the target URL contains an anchor (#) and if the current URL
+  // includes the same base URL (excluding the anchor part)
+  return (
+    target_url.includes('#') &&
+    current_url.includes(target_url.substring(0, target_url.indexOf('#')))
+  );
+}
+

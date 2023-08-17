@@ -26,6 +26,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
     const options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       origin_url: 'http://origin.com',
       max_retries: 3,
+      link_timeout_millis: 5000,
     } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
     setDefaultOptions(options);
 
@@ -140,14 +141,20 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       expect(result.responseOrError.status).to.be.undefined;
     });
 
-    it('retry ', async () => {
+    it('with `shouldGoToBlankPage` navigation works on first try', async () => {
       // placeholder
-      expect(true).to.be.true;
-    });
+      page.setCacheEnabled(false);
+      await page.goto('https://pptr.dev/');
+      link.target_url = 'https://pptr.dev/#';
 
-    it('able to handle per_link_settings', async () => {
-      // placeholder
-      expect(true).to.be.true;
+      const result = await SyntheticsSdkBrokenLinks.navigate(
+        page,
+        link,
+        options
+      );
+
+      expect(result.retriesRemaining).to.equal(2);
+      expect(result.responseOrError.status()).to.equal(200);
     });
   });
 });
