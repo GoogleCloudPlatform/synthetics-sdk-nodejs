@@ -110,7 +110,7 @@ async function checkLink(
  * @param expected_status_code - The expected HTTP status code.
  * @param options - The options for navigation and retries.
  * @returns Information about navigation attempt:
- *   - `response`: HTTP response or error if navigation fails, or null.
+ *   - `responseOrError`: HTTP response or error if navigation fails, or null.
  *   - `passed`: Boolean indicating if navigation passed per status code.
  *   - `retriesRemaining`: Remaining retries after attempt. (for testing)
  *   - `link_start_time`: Start time of navigation attempt.
@@ -127,27 +127,32 @@ export async function navigate(
   let link_start_time = '';
   let link_end_time = '';
   let retriesRemaining = options.max_retries!;
+  // use link_specific timeout if set, else use options.link_timeout_millis
   const per_link_timeout_millis =
     options.per_link_options[link.target_url]?.link_timeout_millis ||
     options.link_timeout_millis!;
 
-  let response: HTTPResponse | Error | null = null;
+  let responseOrError: HTTPResponse | Error | null = null;
 
   let passed = false;
   let used_retry = false;
   while (retriesRemaining > 0 && !passed) {
     retriesRemaining--;
     link_start_time = new Date().toISOString();
-    response = await fetchLink(page, link.target_url, per_link_timeout_millis);
+    responseOrError = await fetchLink(
+      page,
+      link.target_url,
+      per_link_timeout_millis
+    );
     link_end_time = new Date().toISOString();
 
     // prevents errors caused by navigating from one url to same url with a
     // different anchor part (normally returns null)
     // e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
-    if (response === null && !used_retry) {
+    if (responseOrError === null && !used_retry) {
       link_start_time = new Date().toISOString();
       await page.goto('about:blank');
-      response = await fetchLink(
+      responseOrError = await fetchLink(
         page,
         link.target_url,
         per_link_timeout_millis
@@ -156,15 +161,17 @@ export async function navigate(
       link_end_time = new Date().toISOString();
     }
 
-    if (
-      isHTTPResponse(response) &&
-      checkStatusPassing(expected_status_code, response.status())
-    ) {
-      passed = true;
-      break;
-    }
+    passed =
+      (isHTTPResponse(responseOrError) &&
+      checkStatusPassing(expected_status_code, responseOrError.status()));
   }
-  return { response, passed, retriesRemaining, link_start_time, link_end_time };
+  return {
+    responseOrError,
+    passed,
+    retriesRemaining,
+    link_start_time,
+    link_end_time,
+  };
 }
 
 /**

@@ -27,7 +27,7 @@ export interface LinkIntermediate {
 }
 
 export interface NavigateResponse {
-  response: HTTPResponse | Error | null;
+  responseOrError: HTTPResponse | Error | null;
   passed: boolean;
   retriesRemaining: number;
   link_start_time: string;

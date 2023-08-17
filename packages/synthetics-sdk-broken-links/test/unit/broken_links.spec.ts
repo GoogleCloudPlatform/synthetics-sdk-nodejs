@@ -61,7 +61,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       );
 
       expect(result.passed).to.be.true;
-      expect(result.response.status()).to.equal(200);
+      expect(result.responseOrError.status()).to.equal(200);
       expect(result.retriesRemaining).to.equal(2);
 
       // Assert that link_start_time is less than link_end_time
@@ -88,7 +88,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       );
 
       expect(result.passed).to.be.true;
-      expect(result.response.status()).to.equal(200);
+      expect(result.responseOrError.status()).to.equal(200);
       expect(result.retriesRemaining).to.equal(1);
     });
 
@@ -112,7 +112,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       );
 
       expect(result.passed).to.be.false;
-      expect(result.response.status()).to.equal(404);
+      expect(result.responseOrError.status()).to.equal(404);
       expect(result.retriesRemaining).to.equal(0);
     });
 
@@ -131,15 +131,18 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       expect(result.retriesRemaining).to.equal(0);
 
       // response is a `TimeoutError
-      expect(result.response.name).to.equal('TimeoutError');
-      expect(result.response.message).to.equal(
+      expect(result.responseOrError.name).to.equal('TimeoutError');
+      expect(result.responseOrError.message).to.equal(
         'Navigation timeout of 1 ms exceeded'
       );
 
       // not `HTTPResponse`
-      expect(result.response.status).to.be.undefined;
+      expect(result.responseOrError.status).to.be.undefined;
     });
 
-    it('able to handle per_link_settings', async () => {});
+    it('able to handle per_link_settings', async () => {
+      // placeholder
+      expect(true).to.be.true;
+    });
   });
 });
