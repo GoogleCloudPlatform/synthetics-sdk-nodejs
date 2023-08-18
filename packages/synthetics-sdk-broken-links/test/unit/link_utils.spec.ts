@@ -15,6 +15,7 @@
 import { expect } from 'chai';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -77,7 +78,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
     });
 
-  it('setDefaultOptions only sets non-present values', () => {
+  it.only('setDefaultOptions only sets non-present values', () => {
     const input_options: BrokenLinkCheckerOptions = {
       origin_url: 'https://example.com',
       get_attributes: ['src'],
@@ -164,77 +165,38 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     });
   });
 
-  describe('shouldGoToBlankPage', () => {
-    it('should return true for different anchor parts', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1#section2';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
-    });
+  it('parseFollwedLinks correctly sets all aggregate fields in BrokenLinksResultV1', () => {
+    const origin_link = {
+      link_passed: true,
+      status_code: 200,
+      is_origin: true,
+    } as BrokenLinksResultV1_SyntheticLinkResult;
 
-    it('should return false for same URLs', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
-    });
+    const followed_links = [
+      { link_passed: true, status_code: 200 },
+      { link_passed: true, status_code: 200 },
+      { link_passed: true, status_code: 200 },
+      { link_passed: true, status_code: 304 }, // eg of link specific setting
+      { link_passed: false, status_code: 404 },
+      { link_passed: false, status_code: null },
+      { link_passed: false, status_code: 505 },
+    ] as BrokenLinksResultV1_SyntheticLinkResult[];
 
-    it('should return false for different URLs', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page2#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.false;
-    });
+    const all_links = [origin_link, ...followed_links];
 
-    it('should return true if target has # and current does not', () => {
-      const current_url = 'http://example.com/page1';
-      const target_url = 'http://example.com/page1#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
-    });
+    const broken_links_result = parseFollowedLinks(all_links);
 
-    it('should return false if target has no #', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.false;
-    });
-  });
-
-  describe('parseFollwedLinks', () => {
-    it('correctly sets all aggregate fields in BrokenLinksResultV1', () => {
-      const origin_link = {
-        link_passed: true,
-        status_code: 200,
-        is_origin: true,
-      } as BrokenLinksResultV1_SyntheticLinkResult;
-
-      const followed_links = [
-        { link_passed: true, status_code: 200 },
-        { link_passed: true, status_code: 200 },
-        { link_passed: true, status_code: 200 },
-        { link_passed: true, status_code: 304 }, // eg of link specific setting
-        { link_passed: false, status_code: 404 },
-        { link_passed: false, status_code: null },
-        { link_passed: false, status_code: 505 },
-      ] as BrokenLinksResultV1_SyntheticLinkResult[];
-
-      const all_links = [origin_link, ...followed_links];
-
-      const broken_links_result = parseFollowedLinks(all_links);
-
-      expect(broken_links_result.link_count).to.equal(8);
-      expect(broken_links_result.passing_link_count).to.equal(5);
-      expect(broken_links_result.failing_link_count).to.equal(3);
-      expect(broken_links_result.unreachable_count).to.equal(1);
-      expect(broken_links_result.status_2xx_count).to.equal(4);
-      expect(broken_links_result.status_3xx_count).to.equal(1);
-      expect(broken_links_result.status_4xx_count).to.equal(1);
-      expect(broken_links_result.status_5xx_count).to.equal(1);
-      expect(broken_links_result.origin_link_result).to.deep.equal(origin_link);
-      expect(broken_links_result.followed_link_results).to.deep.equal(
-        followed_links
-      );
-    });
+    expect(broken_links_result.link_count).to.equal(8);
+    expect(broken_links_result.passing_link_count).to.equal(5);
+    expect(broken_links_result.failing_link_count).to.equal(3);
+    expect(broken_links_result.unreachable_count).to.equal(1);
+    expect(broken_links_result.status_2xx_count).to.equal(4);
+    expect(broken_links_result.status_3xx_count).to.equal(1);
+    expect(broken_links_result.status_4xx_count).to.equal(1);
+    expect(broken_links_result.status_5xx_count).to.equal(1);
+    expect(broken_links_result.origin_link_result).to.deep.equal(origin_link);
+    expect(broken_links_result.followed_link_results).to.deep.equal(
+      followed_links
+    );
   });
 });

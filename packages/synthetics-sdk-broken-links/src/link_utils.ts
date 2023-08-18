@@ -19,8 +19,8 @@ import {
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_SyntheticLinkResult,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   SyntheticResult,
   getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
@@ -295,8 +295,8 @@ export function parseFollowedLinks(
 
   for (const link of followed_links) {
     link.is_origin
-  ? (broken_links_result.origin_link_result = link)
-  : broken_links_result.followed_link_results.push(link);
+      ? (broken_links_result.origin_link_result = link)
+      : broken_links_result.followed_link_results.push(link);
 
     broken_links_result.link_count = (broken_links_result.link_count ?? 0) + 1;
 
@@ -346,7 +346,7 @@ export function parseFollowedLinks(
  * @param followed_links - An array of BrokenLinksResultV1_SyntheticLinkResult representing followed links.
  * @returns A SyntheticResult object containing the broken links result, runtime metadata, start time, and end time.
  */
- export function createSyntheticResult(
+export function createSyntheticResult(
   start_time: string,
   runtime_metadata: { [key: string]: string },
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
