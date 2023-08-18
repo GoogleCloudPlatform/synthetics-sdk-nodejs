@@ -32,4 +32,3 @@ jobs:
         if: matrix.node == '14'
         run: |
           npm run test-except-broken-links
-
