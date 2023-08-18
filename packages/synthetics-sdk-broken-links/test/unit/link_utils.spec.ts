@@ -49,7 +49,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_5XX,
   };
 
-  it('returns correctly when passed a number as ResponseStatusCode', () => {
+  it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
     // expecting success
     expect(checkStatusPassing(status_value_200, 200)).to.be.true;
     expect(checkStatusPassing(status_value_200, 404)).to.be.false;
@@ -59,7 +59,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     expect(checkStatusPassing(status_value_404, 404)).to.be.true;
   });
 
-  it('returns correctly when passed a statusClass as ResponseStatusCode', () => {
+  it('checkStatusPassing returns correctly when passed a statusClass as ResponseStatusCode', () => {
     // expecting success
     expect(checkStatusPassing(status_class_1xx, 100)).to.be.true;
     expect(checkStatusPassing(status_class_2xx, 200)).to.be.true;
@@ -67,13 +67,13 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     expect(checkStatusPassing(status_class_4xx, 404)).to.be.true;
     expect(checkStatusPassing(status_class_5xx, 504)).to.be.true;
 
-    // expecting failure
-    expect(checkStatusPassing(status_class_1xx, 200)).to.be.false;
-    expect(checkStatusPassing(status_class_2xx, 404)).to.be.false;
-    expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
-    expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
-    expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
-  });
+      // expecting failure
+      expect(checkStatusPassing(status_class_1xx, 200)).to.be.false;
+      expect(checkStatusPassing(status_class_2xx, 404)).to.be.false;
+      expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
+      expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
+      expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
+    });
 
   it('setDefaultOptions only sets non-present values', () => {
     const input_options: BrokenLinkCheckerOptions = {
@@ -159,6 +159,43 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       const current_url = 'http://example.com/page1#section1';
       const target_url = 'http://example.com/page1';
       expect(shouldGoToBlankPage(current_url, target_url)).to.be.false;
+    });
+  });
+
+  describe('shouldGoToBlankPage', () => {
+    it('should return true for different anchor parts', () => {
+      const current_url = 'http://example.com/page1#section1';
+      const target_url = 'http://example.com/page1#section2';
+      const result = shouldGoToBlankPage(current_url, target_url);
+      expect(result).to.be.true;
+    });
+
+    it('should return false for same URLs', () => {
+      const current_url = 'http://example.com/page1#section1';
+      const target_url = 'http://example.com/page1#section1';
+      const result = shouldGoToBlankPage(current_url, target_url);
+      expect(result).to.be.true;
+    });
+
+    it('should return false for different URLs', () => {
+      const current_url = 'http://example.com/page1#section1';
+      const target_url = 'http://example.com/page2#section1';
+      const result = shouldGoToBlankPage(current_url, target_url);
+      expect(result).to.be.false;
+    });
+
+    it('should return true if target has # and current does not', () => {
+      const current_url = 'http://example.com/page1';
+      const target_url = 'http://example.com/page1#section1';
+      const result = shouldGoToBlankPage(current_url, target_url);
+      expect(result).to.be.true;
+    });
+
+    it('should return false if target has no #', () => {
+      const current_url = 'http://example.com/page1#section1';
+      const target_url = 'http://example.com/page1';
+      const result = shouldGoToBlankPage(current_url, target_url);
+      expect(result).to.be.false;
     });
   });
 });
