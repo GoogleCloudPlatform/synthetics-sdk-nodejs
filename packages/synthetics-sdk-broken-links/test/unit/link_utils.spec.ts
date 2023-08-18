@@ -78,7 +78,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
     });
 
-  it.only('setDefaultOptions only sets non-present values', () => {
+  it('setDefaultOptions only sets non-present values', () => {
     const input_options: BrokenLinkCheckerOptions = {
       origin_url: 'https://example.com',
       get_attributes: ['src'],
