@@ -25,7 +25,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
     const link = { target_url: 'https://example.com' };
     const options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       origin_url: 'http://origin.com',
-      max_retries: 3,
+      max_retries: 2,
       link_timeout_millis: 5000,
     } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
     setDefaultOptions(options);

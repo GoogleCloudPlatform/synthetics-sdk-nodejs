@@ -127,7 +127,7 @@ export async function navigate(
   }
 ): Promise<NavigateResponse> {
   let fetch_link_output = {} as CommonResponseProps;
-  let retriesRemaining = options.max_retries!;
+  let retriesRemaining = options.max_retries! + 1;
   // use link_specific timeout if set, else use options.link_timeout_millis
   const per_link_timeout_millis =
     options.per_link_options[link.target_url]?.link_timeout_millis ||

@@ -85,7 +85,7 @@ export function setDefaultOptions(
     get_attributes: ['href'],
     link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
     link_timeout_millis: 30000,
-    max_retries: 1,
+    max_retries: 0,
     max_redirects: Number.MAX_SAFE_INTEGER, // allows infinite number of redirects
     wait_for_selector: '',
     per_link_options: {},

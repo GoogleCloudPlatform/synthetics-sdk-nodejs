@@ -87,7 +87,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     // Verify that missing values are set to their default values
     expect(options.link_limit).to.equal(50);
     expect(options.query_selector_all).to.equal('a');
-    expect(options.max_retries).to.equal(1);
+    expect(options.max_retries).to.equal(0);
     expect(options.max_redirects).to.equal(Number.MAX_SAFE_INTEGER);
     expect(options.per_link_options).to.deep.equal({});
 
