@@ -16,6 +16,7 @@ import puppeteer, { HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
+  getRuntimeMetadata,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   SyntheticResult,
@@ -25,8 +26,10 @@ import {
   isHTTPResponse,
   LinkIntermediate,
   shouldGoToBlankPage,
+  setDefaultOptions,
   NavigateResponse,
   CommonResponseProps,
+  createSyntheticResult,
 } from './link_utils';
 
 export interface BrokenLinkCheckerOptions {
@@ -65,8 +68,9 @@ export enum StatusClass {
 export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
+  const start_time = new Date().toISOString();
+  const runtime_metadata = getRuntimeMetadata();
   // START - to resolve warnings while under development
-  input_options;
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   await checkLink(
@@ -77,6 +81,9 @@ export async function runBrokenLinks(
   // END - to resolve warnings  while under development
 
   // options object modified directly
+  const options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
+    setDefaultOptions(input_options);
+
   // PSEUDOCODE
 
   // create puppeteer.Browser
@@ -89,10 +96,16 @@ export async function runBrokenLinks(
   // navigate to each link - LOOP:
   //          each call to `checkLinks(...)` will return a `SyntheticLinkResult`
   //          Object added to an array of `followed_links`
+  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
   // returned a SyntheticResult with `options`, `followed_links` &
   // runtimeMetadata
-  return {} as SyntheticResult;
+  return createSyntheticResult(
+    start_time,
+    runtime_metadata,
+    options,
+    followed_links
+  );
 }
 
 async function checkLink(

@@ -21,6 +21,8 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_SyntheticLinkResult,
+  SyntheticResult,
+  getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
 import { BrokenLinkCheckerOptions, StatusClass } from './broken_links';
 
@@ -334,4 +336,34 @@ export function parseFollowedLinks(
   }
 
   return broken_links_result;
+}
+
+/**
+ * Creates a SyntheticResult object representing the result of a synthetic test.
+ *
+ * @param start_time - The start time of the synthetic test in ISO format.
+ * @param options - The BrokenLinkCheckerOptions used for the test.
+ * @param followed_links - An array of BrokenLinksResultV1_SyntheticLinkResult representing followed links.
+ * @returns A SyntheticResult object containing the broken links result, runtime metadata, start time, and end time.
+ */
+ export function createSyntheticResult(
+  start_time: string,
+  runtime_metadata: { [key: string]: string },
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+): SyntheticResult {
+  // Create BrokenLinksResultV1 by parsing followed links and setting options
+  const broken_links_result: BrokenLinksResultV1 =
+    parseFollowedLinks(followed_links);
+  broken_links_result.options = options;
+
+  // Create SyntheticResult object
+  const synthetic_result: SyntheticResult = {
+    synthetic_broken_links_result_v1: broken_links_result,
+    runtime_metadata: runtime_metadata,
+    start_time: start_time,
+    end_time: new Date().toISOString(),
+  };
+
+  return synthetic_result;
 }
