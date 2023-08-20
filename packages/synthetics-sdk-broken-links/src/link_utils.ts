@@ -154,22 +154,18 @@ export function setDefaultOptions(
     options.per_link_options || {}
   )) {
     perLinkOption.expected_status_code;
-    const expected_status_code =
+    const expected_status_code = (
       perLinkOption.expected_status_code !== undefined
         ? typeof perLinkOption.expected_status_code === 'number'
-          ? ({
-              status_value: perLinkOption.expected_status_code,
-            } as ResponseStatusCode)
-          : ({
+          ? { status_value: perLinkOption.expected_status_code }
+          : {
               status_class:
                 ResponseStatusCode_StatusClass[
                   perLinkOption.expected_status_code
                 ],
-            } as ResponseStatusCode)
-        : ({
-            status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
-          } as ResponseStatusCode);
-    console.log('expected_status_code', expected_status_code);
+            }
+        : { status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX }
+    ) as ResponseStatusCode;
 
     const convertedPerLinkOption: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption =
       {
