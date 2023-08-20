@@ -79,10 +79,8 @@ export async function runBrokenLinks(
   // END - to resolve warnings  while under development
 
   // options object modified directly
-  const options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
-    setDefaultOptions(input_options);
+  const options = setDefaultOptions(input_options);
   options;
-
   // PSEUDOCODE
 
   // create puppeteer.Browser

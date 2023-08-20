@@ -49,7 +49,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_5XX,
   };
 
-  it('returns correctly when passed a number as ResponseStatusCode', () => {
+  it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
     // expecting success
     expect(checkStatusPassing(status_value_200, 200)).to.be.true;
     expect(checkStatusPassing(status_value_200, 404)).to.be.false;

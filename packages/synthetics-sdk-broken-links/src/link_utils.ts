@@ -177,9 +177,6 @@ export function setDefaultOptions(
       };
     perLinkOptions[url] = convertedPerLinkOption;
   }
-  output_options.per_link_options = perLinkOptions;
-
-  return output_options;
 }
 
 /**
