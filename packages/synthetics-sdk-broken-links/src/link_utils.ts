@@ -18,7 +18,9 @@ import {
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
 } from '@google-cloud/synthetics-sdk-api';
+import { BrokenLinkCheckerOptions } from './broken_links';
 
 /**
  * Represents an intermediate link with its properties.
@@ -117,8 +119,8 @@ export function checkStatusPassing(
  * @param options - The options object to be filled with default values.
  */
 export function setDefaultOptions(
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
-) {
+  options: BrokenLinkCheckerOptions
+): BrokenLinksResultV1_BrokenLinkCheckerOptions {
   const default_options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     origin_url: '',
     link_limit: 50,
@@ -132,15 +134,55 @@ export function setDefaultOptions(
     per_link_options: {},
   };
 
+  const output_options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
+    {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
   const objKeys = Object.keys(default_options) as Array<
     keyof BrokenLinksResultV1_BrokenLinkCheckerOptions
   >;
   for (const key of objKeys) {
-    if (!(key in options) && key !== 'origin_url') {
-      /* eslint-disable */
-      (options as any)[key] = default_options[key];
-    }
+    (output_options as any)[key] =
+      !(key in options) || key === 'per_link_options'
+        ? default_options[key]
+        : options[key];
   }
+
+  // Convert per_link_options to the appropriate type
+  const perLinkOptions: {
+    [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption;
+  } = {};
+  for (const [url, perLinkOption] of Object.entries(
+    options.per_link_options || {}
+  )) {
+    perLinkOption.expected_status_code;
+    const expected_status_code =
+      perLinkOption.expected_status_code !== undefined
+        ? typeof perLinkOption.expected_status_code === 'number'
+          ? ({
+              status_value: perLinkOption.expected_status_code,
+            } as ResponseStatusCode)
+          : ({
+              status_class:
+                ResponseStatusCode_StatusClass[
+                  perLinkOption.expected_status_code
+                ],
+            } as ResponseStatusCode)
+        : ({
+            status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+          } as ResponseStatusCode);
+    console.log('expected_status_code', expected_status_code);
+
+    const convertedPerLinkOption: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption =
+      {
+        expected_status_code: expected_status_code,
+        link_timeout_millis:
+          perLinkOption.link_timeout_millis ||
+          output_options.link_timeout_millis,
+      };
+    perLinkOptions[url] = convertedPerLinkOption;
+  }
+  output_options.per_link_options = perLinkOptions;
+
+  return output_options;
 }
 
 /**
@@ -149,7 +191,7 @@ export function setDefaultOptions(
  * @param response - The object to be checked.
  * @returns `true` if the object is an instance of HTTPResponse, `false` otherwise.
  */
- export function isHTTPResponse(
+export function isHTTPResponse(
   response: HTTPResponse | Error | null
 ): response is HTTPResponse {
   return (
@@ -171,7 +213,10 @@ export function setDefaultOptions(
  * const targetUrl = 'http://example.com/page1#section2';
  * const needsBlankPage = shouldGoToBlankPage(currentUrl, targetUrl); // true
  */
- export function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
+export function shouldGoToBlankPage(
+  current_url: string,
+  target_url: string
+): boolean {
   // Check if the target URL contains an anchor (#) and if the current URL
   // includes the same base URL (excluding the anchor part)
   return (
@@ -179,4 +224,3 @@ export function setDefaultOptions(
     current_url.includes(target_url.substring(0, target_url.indexOf('#')))
   );
 }
-

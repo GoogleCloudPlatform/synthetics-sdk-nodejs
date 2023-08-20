@@ -30,8 +30,41 @@ import {
   CommonResponseProps,
 } from './link_utils';
 
+export interface BrokenLinkCheckerOptions {
+  origin_url: string;
+  link_limit?: number;
+  query_selector_all?: string;
+  get_attributes?: string[];
+  link_order?: LinkOrder;
+  link_timeout_millis?: number | undefined;
+  max_retries?: number | undefined;
+  max_redirects?: number | undefined;
+  wait_for_selector?: string;
+  per_link_options?: { [key: string]: PerLinkOption };
+}
+
+export interface PerLinkOption {
+  link_timeout_millis?: number;
+  expected_status_code?: StatusClass | number;
+}
+
+export enum LinkOrder {
+  'FIRST_N',
+  'RANDOM',
+}
+
+export enum StatusClass {
+  STATUS_CLASS_UNSPECIFIED = 'STATUS_CLASS_UNSPECIFIED',
+  STATUS_CLASS_1XX = 'STATUS_CLASS_1XX',
+  STATUS_CLASS_2XX = 'STATUS_CLASS_2XX',
+  STATUS_CLASS_3XX = 'STATUS_CLASS_3XX',
+  STATUS_CLASS_4XX = 'STATUS_CLASS_4XX',
+  STATUS_CLASS_5XX = 'STATUS_CLASS_5XX',
+  STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
+}
+
 export async function runBrokenLinks(
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // START - to resolve warnings while under development
   checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
@@ -46,7 +79,7 @@ export async function runBrokenLinks(
   // END - to resolve warnings  while under development
 
   // options object modified directly
-  setDefaultOptions(options);
+  const options = setDefaultOptions(input_options);
 
   // PSEUDOCODE
 
