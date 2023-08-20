@@ -140,6 +140,7 @@ export function setDefaultOptions(
     keyof BrokenLinksResultV1_BrokenLinkCheckerOptions
   >;
   for (const key of objKeys) {
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
     (output_options as any)[key] =
       !(key in options) || key === 'per_link_options'
         ? default_options[key]
