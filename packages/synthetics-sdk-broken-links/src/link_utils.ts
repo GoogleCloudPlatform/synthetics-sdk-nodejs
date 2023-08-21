@@ -23,7 +23,7 @@ import {
 /**
  * Represents an intermediate link with its properties.
  */
- export interface LinkIntermediate {
+export interface LinkIntermediate {
   /**
    * The target URL of the link.
    */
