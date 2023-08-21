@@ -20,5 +20,16 @@ jobs:
       - run: node --version
       - name: Upgrade to latest npm to support lockfile v2
         run: npm install -g npm@${{ matrix.npm-version }}
-      - run: npm install --ignore-scripts && npm install --ignore-scripts
-      - run: npm run test
+      - run: npm install && npm install
+      # Run all tests for Node versions other than 14.
+      - name: Run all tests for Node versions other than 14
+        if: matrix.node != '14'
+        run: |
+          npm run test
+
+      # Run tests except synthetics-sdk-broken-links for Node version 14
+      - name: Run tests except synthetics-sdk-broken-links for Node version 14
+        if: matrix.node == '14'
+        run: |
+          npm run test-except-broken-links
+

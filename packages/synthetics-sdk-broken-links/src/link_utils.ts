@@ -12,12 +12,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { HTTPResponse } from 'puppeteer';
 import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
 } from '@google-cloud/synthetics-sdk-api';
+
+/**
+ * Represents an intermediate link with its properties.
+ */
+export interface LinkIntermediate {
+  /**
+   * The target URL of the link.
+   */
+  target_url: string;
+
+  /**
+   * The anchor text of the link.
+   */
+  anchor_text: string;
+
+  /**
+   * The HTML element of the link.
+   */
+  html_element: string;
+}
+
+/**
+ * Represents common response properties for navigation (currently:`fetchLink()`
+ *  and `navigate()`)
+ */
+export interface CommonResponseProps {
+  /**
+   * The response or error received during navigation. Essentially a wrapper
+   * around `page.goto()`.
+   */
+  responseOrError: HTTPResponse | Error | null;
+
+  /**
+   * The start time of the link navigation.
+   */
+  link_start_time: string;
+
+  /**
+   * The end time of the link navigation.
+   */
+  link_end_time: string;
+}
+
+/**
+ * Represents the response from a navigation attempt (currently: `navigate()`)
+ */
+export interface NavigateResponse extends CommonResponseProps {
+  /**
+   * Indicates whether the link passed successfully (taking into account per
+   * link options, if present).
+   */
+  passed: boolean;
+
+  /**
+   * The number of navigation retries remaining for the link.
+   */
+  retriesRemaining: number;
+}
 
 /**
  * Checks if the given status code is passing w.r.t. expected status class or
@@ -67,7 +126,7 @@ export function setDefaultOptions(
     get_attributes: ['href'],
     link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
     link_timeout_millis: 30000,
-    max_retries: 1,
+    max_retries: 0,
     max_redirects: Number.MAX_SAFE_INTEGER, // allows infinite number of redirects
     wait_for_selector: '',
     per_link_options: {},
@@ -83,3 +142,41 @@ export function setDefaultOptions(
     }
   }
 }
+
+/**
+ * Type guard function to check if an object is an instance of HTTPResponse.
+ *
+ * @param response - The object to be checked.
+ * @returns `true` if the object is an instance of HTTPResponse, `false` otherwise.
+ */
+ export function isHTTPResponse(
+  response: HTTPResponse | Error | null
+): response is HTTPResponse {
+  return (
+    response !== null && typeof response === 'object' && 'status' in response
+  );
+}
+
+/**
+ * Determines whether navigating from the current URL to the target URL
+ * requires navigating to a blank page. This prevents Puppeteer errors caused by
+ * navigating from one URL to the same URL with a different anchor part (will
+ * normally return `null`).
+ *
+ * @param current_url - The current URL in the browser.
+ * @param target_url - The target URL
+ * @returns True if navigating requires a blank page, false otherwise.
+ * @example
+ * const currentUrl = 'http://example.com/page1#section1';
+ * const targetUrl = 'http://example.com/page1#section2';
+ * const needsBlankPage = shouldGoToBlankPage(currentUrl, targetUrl); // true
+ */
+ export function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
+  // Check if the target URL contains an anchor (#) and if the current URL
+  // includes the same base URL (excluding the anchor part)
+  return (
+    target_url.includes('#') &&
+    current_url.includes(target_url.substring(0, target_url.indexOf('#')))
+  );
+}
+
