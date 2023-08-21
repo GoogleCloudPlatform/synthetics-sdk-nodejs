@@ -14,8 +14,8 @@
 
 import { expect } from 'chai';
 import {
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -30,6 +30,7 @@ import {
   setDefaultOptions,
   shouldGoToBlankPage,
   parseFollowedLinks,
+  createSyntheticResult,
 } from '../../src/link_utils';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
@@ -70,13 +71,13 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     expect(checkStatusPassing(status_class_4xx, 404)).to.be.true;
     expect(checkStatusPassing(status_class_5xx, 504)).to.be.true;
 
-      // expecting failure
-      expect(checkStatusPassing(status_class_1xx, 200)).to.be.false;
-      expect(checkStatusPassing(status_class_2xx, 404)).to.be.false;
-      expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
-      expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
-      expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
-    });
+    // expecting failure
+    expect(checkStatusPassing(status_class_1xx, 200)).to.be.false;
+    expect(checkStatusPassing(status_class_2xx, 404)).to.be.false;
+    expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
+    expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
+    expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
+  });
 
   it('setDefaultOptions only sets non-present values', () => {
     const input_options: BrokenLinkCheckerOptions = {
@@ -165,7 +166,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     });
   });
 
-  it('parseFollwedLinks correctly sets all aggregate fields in BrokenLinksResultV1', () => {
+  it('createSyntheticResult correctly sets all aggregate fields in BrokenLinksResultV1', () => {
     const origin_link = {
       link_passed: true,
       status_code: 200,
@@ -183,20 +184,56 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     ] as BrokenLinksResultV1_SyntheticLinkResult[];
 
     const all_links = [origin_link, ...followed_links];
+    const start_time = new Date().toISOString();
+    const runtime_metadata = {
+      K_SERVICE: 'fake-service',
+      K_REVISION: 'fake-revision',
+    };
+    const options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
+      setDefaultOptions({
+        origin_url: 'https://example.com',
+        get_attributes: ['src'],
+        link_order: LinkOrder.RANDOM,
+        link_timeout_millis: 5000,
+        wait_for_selector: '.content',
+        per_link_options: {
+          'fake-link1': { expected_status_code: StatusClass.STATUS_CLASS_4XX },
+          'fake-link2': { expected_status_code: 304 },
+          'fake-link3': { link_timeout_millis: 10 },
+          'fake-link4': {
+            expected_status_code: StatusClass.STATUS_CLASS_3XX,
+            link_timeout_millis: 10,
+          },
+        },
+      });
 
-    const broken_links_result = parseFollowedLinks(all_links);
-
-    expect(broken_links_result.link_count).to.equal(8);
-    expect(broken_links_result.passing_link_count).to.equal(5);
-    expect(broken_links_result.failing_link_count).to.equal(3);
-    expect(broken_links_result.unreachable_count).to.equal(1);
-    expect(broken_links_result.status_2xx_count).to.equal(4);
-    expect(broken_links_result.status_3xx_count).to.equal(1);
-    expect(broken_links_result.status_4xx_count).to.equal(1);
-    expect(broken_links_result.status_5xx_count).to.equal(1);
-    expect(broken_links_result.origin_link_result).to.deep.equal(origin_link);
-    expect(broken_links_result.followed_link_results).to.deep.equal(
-      followed_links
+    const syntheticResult = createSyntheticResult(
+      start_time,
+      runtime_metadata,
+      options,
+      all_links
     );
+
+    // BrokenLinkResultV1 expectations (testing `parseFollowedLinks`)
+    const broken_links_result =
+      syntheticResult.synthetic_broken_links_result_v1;
+    expect(broken_links_result).to.deep.equal({
+      link_count: 8,
+      passing_link_count: 5,
+      failing_link_count: 3,
+      unreachable_count: 1,
+      status_2xx_count: 4,
+      status_3xx_count: 1,
+      status_4xx_count: 1,
+      status_5xx_count: 1,
+      options: options,
+      origin_link_result: origin_link,
+      followed_link_results: followed_links,
+    });
+
+    expect(new Date(syntheticResult.start_time).getTime()).to.be.lessThanOrEqual(
+      new Date(syntheticResult.end_time).getTime()
+    );
+    expect(syntheticResult.runtime_metadata).to.not.be.undefined;
   });
 });

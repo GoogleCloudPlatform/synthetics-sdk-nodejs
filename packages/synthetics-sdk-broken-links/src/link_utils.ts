@@ -22,7 +22,6 @@ import {
   BrokenLinksResultV1_SyntheticLinkResult,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   SyntheticResult,
-  getRuntimeMetadata,
 } from '@google-cloud/synthetics-sdk-api';
 import { BrokenLinkCheckerOptions, StatusClass } from './broken_links';
 
@@ -339,7 +338,8 @@ export function parseFollowedLinks(
 }
 
 /**
- * Creates a SyntheticResult object representing the result of a synthetic test.
+ * Creates a SyntheticResult object representing the result of a broken link
+ * synthetic execution.
  *
  * @param start_time - The start time of the synthetic test in ISO format.
  * @param options - The BrokenLinkCheckerOptions used for the test.
