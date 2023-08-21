@@ -20,20 +20,61 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
 } from '@google-cloud/synthetics-sdk-api';
 
-export interface LinkIntermediate {
+/**
+ * Represents an intermediate link with its properties.
+ */
+ export interface LinkIntermediate {
+  /**
+   * The target URL of the link.
+   */
   target_url: string;
+
+  /**
+   * The anchor text of the link.
+   */
   anchor_text: string;
+
+  /**
+   * The HTML element of the link.
+   */
   html_element: string;
 }
 
+/**
+ * Represents common response properties for navigation (currently:`fetchLink()`
+ *  and `navigate()`)
+ */
 export interface CommonResponseProps {
+  /**
+   * The response or error received during navigation. Essentially a wrapper
+   * around `page.goto()`.
+   */
   responseOrError: HTTPResponse | Error | null;
+
+  /**
+   * The start time of the link navigation.
+   */
   link_start_time: string;
+
+  /**
+   * The end time of the link navigation.
+   */
   link_end_time: string;
 }
 
+/**
+ * Represents the response from a navigation attempt (currently: `navigate()`)
+ */
 export interface NavigateResponse extends CommonResponseProps {
+  /**
+   * Indicates whether the link passed successfully (taking into account per
+   * link options, if present).
+   */
   passed: boolean;
+
+  /**
+   * The number of navigation retries remaining for the link.
+   */
   retriesRemaining: number;
 }
 

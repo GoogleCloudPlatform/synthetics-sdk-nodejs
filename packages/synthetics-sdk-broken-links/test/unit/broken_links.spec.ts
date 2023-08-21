@@ -122,23 +122,22 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       const options_with_timeout = Object.assign({}, options);
       options_with_timeout.link_timeout_millis = 1;
 
-      const result = await SyntheticsSdkBrokenLinks.navigate(
-        page,
-        link,
-        options_with_timeout
-      );
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      const { link_start_time, link_end_time, ...result } =
+        await SyntheticsSdkBrokenLinks.navigate(
+          page,
+          link,
+          options_with_timeout
+        );
 
-      expect(result.passed).to.be.false;
-      expect(result.retriesRemaining).to.equal(0);
-
-      // response is a `TimeoutError
-      expect(result.responseOrError.name).to.equal('TimeoutError');
-      expect(result.responseOrError.message).to.equal(
-        'Navigation timeout of 1 ms exceeded'
-      );
-
-      // not `HTTPResponse`
-      expect(result.responseOrError.status).to.be.undefined;
+      // response is a `TimeoutError`
+      const error = new Error('Navigation timeout of 1 ms exceeded');
+      error.name = 'TimeoutError';
+      expect(result).to.deep.equal({
+        passed: false,
+        retriesRemaining: 0,
+        responseOrError: error,
+      });
     });
 
     it('with `shouldGoToBlankPage` navigation works on first try', async () => {
@@ -153,8 +152,9 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
         options
       );
 
-      expect(result.retriesRemaining).to.equal(2);
+      expect(result.passed).to.be.true;
       expect(result.responseOrError.status()).to.equal(200);
+      expect(result.retriesRemaining).to.equal(2);
     });
   });
 });

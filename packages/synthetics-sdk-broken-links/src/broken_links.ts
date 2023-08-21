@@ -34,7 +34,6 @@ export async function runBrokenLinks(
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // START - to resolve warnings while under development
-  options;
   checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
 
   const browser = await puppeteer.launch({ headless: 'new' });
@@ -133,12 +132,20 @@ export async function navigate(
     options.per_link_options[link.target_url]?.link_timeout_millis ||
     options.link_timeout_millis!;
 
+  // see function description for why this is necessary
   if (shouldGoToBlankPage(page.url(), link.target_url)) {
     await page.goto('about:blank');
   }
 
   let passed = false;
-  // const used_anchor_retry = false;
+  /**
+   * Expected behavior: if the link fails for any reason, see
+   * fetch_link_output.responseOrError, we should retry the entire process (i.e.
+   *  `fetch_link`). This is a product decision in case users are dealing with
+   * network jitters or other conditions. If any of these tries are successful,
+   * we do not need to check again that link again.
+   * Note: Default behavior is to check a link only once!
+   */
   while (retriesRemaining > 0 && !passed) {
     retriesRemaining--;
     fetch_link_output = await fetchLink(
@@ -162,17 +169,6 @@ export async function navigate(
     link_end_time: fetch_link_output.link_end_time,
   };
 }
-
-// should be in link_utils.
-// prevents errors caused by navigating from one url to same url with a
-// different anchor part (normally returns null)
-// e.g. mywebsite.com#heading1 --> mywebsite.com#heading2
-// function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
-//   return (
-//     target_url.includes('#') &&
-//     current_url.includes(target_url.substring(0, target_url.indexOf('#')))
-//   );
-// }
 
 /**
  * Fetches the target URL using Puppeteer's page.goto method.

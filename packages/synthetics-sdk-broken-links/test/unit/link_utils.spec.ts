@@ -27,8 +27,8 @@ import {
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
   describe('checkStatusPassing', () => {
-    const success_status_value: ResponseStatusCode = { status_value: 200 };
-    const failure_status_value: ResponseStatusCode = { status_value: 404 };
+    const status_value_200: ResponseStatusCode = { status_value: 200 };
+    const status_value_404: ResponseStatusCode = { status_value: 404 };
     const status_class_1xx: ResponseStatusCode = {
       status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_1XX,
     };
@@ -47,12 +47,12 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
     it('returns correctly when passed a number as ResponseStatusCode', () => {
       // expecting success
-      expect(checkStatusPassing(success_status_value, 200)).to.be.true;
-      expect(checkStatusPassing(success_status_value, 404)).to.be.false;
+      expect(checkStatusPassing(status_value_200, 200)).to.be.true;
+      expect(checkStatusPassing(status_value_200, 404)).to.be.false;
 
       // expecting failure
-      expect(checkStatusPassing(failure_status_value, 200)).to.be.false;
-      expect(checkStatusPassing(failure_status_value, 404)).to.be.true;
+      expect(checkStatusPassing(status_value_404, 200)).to.be.false;
+      expect(checkStatusPassing(status_value_404, 404)).to.be.true;
     });
 
     it('returns correctly when passed a statusClass as ResponseStatusCode', () => {
@@ -105,36 +105,31 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     it('should return true for different anchor parts', () => {
       const current_url = 'http://example.com/page1#section1';
       const target_url = 'http://example.com/page1#section2';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
+      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
     });
 
     it('should return false for same URLs', () => {
       const current_url = 'http://example.com/page1#section1';
       const target_url = 'http://example.com/page1#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
+      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
     });
 
     it('should return false for different URLs', () => {
       const current_url = 'http://example.com/page1#section1';
       const target_url = 'http://example.com/page2#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.false;
+      expect(shouldGoToBlankPage(current_url, target_url)).to.be.false;
     });
 
     it('should return true if target has # and current does not', () => {
       const current_url = 'http://example.com/page1';
       const target_url = 'http://example.com/page1#section1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.true;
+      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
     });
 
     it('should return false if target has no #', () => {
       const current_url = 'http://example.com/page1#section1';
       const target_url = 'http://example.com/page1';
-      const result = shouldGoToBlankPage(current_url, target_url);
-      expect(result).to.be.false;
+      expect(shouldGoToBlankPage(current_url, target_url)).to.be.false;
     });
   });
 });
