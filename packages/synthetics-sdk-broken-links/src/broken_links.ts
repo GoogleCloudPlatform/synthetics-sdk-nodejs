@@ -65,10 +65,11 @@ export enum StatusClass {
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
 
+/* c8 ignore start */
 export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
-  // Init
+  // init
   const start_time = new Date().toISOString();
   const runtime_metadata = getRuntimeMetadata();
 
@@ -91,8 +92,22 @@ export async function runBrokenLinks(
 
   // TODO
   // scrape origin_url for all links
-  // (shuffle links if necessary and) truncate at link_limit
+  try {
+    // eslint-disable-next-line  @typescript-eslint/no-unused-vars
+    const retrieved_links: LinkIntermediate[] = await retrieveLinksFromPage(
+      origin_page,
+      options.query_selector_all,
+      options.get_attributes
+    );
 
+    // TODO shuffle links if link_order is `RANDOM`
+    // TODO always truncate to lint_limit
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+    // TODO throw generic error with `failure to scrape links`
+  }
+
+  // TODO
   // create new page to be used for all scraped links
   // navigate to each link - LOOP:
   //          each call to `checkLink(...)` will return a `SyntheticLinkResult`
@@ -108,7 +123,62 @@ export async function runBrokenLinks(
     followed_links
   );
 }
+/* c8 ignore stop */
 
+/**
+ * Retrieves all links on the page using Puppeteer, handling relative and
+ * protocol-relative links and filtering for HTTP/HTTPS links.
+ *
+ * @param page - The Puppeteer page instance to retrieve the links from.
+ * @param query_selector_all - The CSS selector to identify link elements.
+ * @param get_attributes - An array of attribute names to retrieve from the link elements.
+ * @returns An array of LinkIntermediate objects representing the links found.
+ */
+export async function retrieveLinksFromPage(
+  page: Page,
+  query_selector_all: string,
+  get_attributes: string[]
+): Promise<LinkIntermediate[]> {
+  const origin_url = await page.url();
+  // `page.evaluate()` runs in a different context, isolated from main Node.js,
+  // so c8 is not able to track coverage.
+  /* c8 ignore start */
+  return await page.evaluate(
+    (
+      query_selector_all: string,
+      get_attributes: string[],
+      origin_url: string
+    ) => {
+      const link_elements: HTMLElement[] = Array.from(
+        document.querySelectorAll(query_selector_all)
+      );
+      return link_elements.flatMap((link_element: HTMLElement) => {
+        const anchor_text = link_element?.textContent?.trim() ?? '';
+
+        return get_attributes
+          .map((attr) => (link_element.getAttribute(attr) || '').toString())
+          .filter((value) => {
+            const qualifed_url = new URL(value, origin_url);
+            return value && qualifed_url.href.startsWith('http');
+          })
+          .map((value) => {
+            const qualifed_url = new URL(value, origin_url);
+            return {
+              target_url: qualifed_url.href,
+              anchor_text: anchor_text,
+              html_element: link_element.tagName.toLocaleLowerCase(),
+            };
+          });
+      });
+    },
+    query_selector_all,
+    get_attributes,
+    origin_url
+  );
+  /* c8 ignore stop */
+}
+
+/* c8 ignore start */
 export async function checkLink(
   page: Page,
   link: LinkIntermediate,
@@ -145,6 +215,7 @@ export async function checkLink(
   // return `SynheticLinkResult` with all calculated information
   return {} as BrokenLinksResultV1_SyntheticLinkResult;
 }
+/* c8 ignore stop */
 
 /**
  * Navigates to a target URL with retries and timeout handling.
@@ -172,7 +243,7 @@ export async function navigate(
   let retriesRemaining = options.max_retries! + 1;
   // use link_specific timeout if set, else use options.link_timeout_millis
   const per_link_timeout_millis =
-    options.per_link_options[link.target_url]?.link_timeout_millis ||
+    options.per_link_options[link.target_url]?.link_timeout_millis ??
     options.link_timeout_millis!;
 
   // see function description for why this is necessary

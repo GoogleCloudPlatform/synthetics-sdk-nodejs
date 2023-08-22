@@ -1,0 +1,26 @@
+[
+  {
+    "me": "I finally understand the difference between null and undefined!",
+    "JavaScript": "Hold my beer."
+  },
+  {
+    "...": [
+      {
+        "me": " 0=='0' ",
+        "JavaScript": "true"
+      },
+      {
+        "me": " 0==[] ",
+        "JavaScript": "true"
+      },
+      {
+        "me": "Ok so '0'==[] right? Makes sense to me..",
+        "JavaScript": "false"
+      },
+      {
+        "me": "GET OUT!..",
+        "JavaScript": null
+      }
+    ]
+  }
+]

@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './broken_links';
+export {
+  runBrokenLinks,
+  BrokenLinkCheckerOptions,
+  PerLinkOption,
+  StatusClass,
+  LinkOrder,
+} from './broken_links';
 export * from './handlers';
 export * from '@google-cloud/synthetics-sdk-api';
