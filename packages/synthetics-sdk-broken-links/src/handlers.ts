@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { runBrokenLinks } from './broken_links';
-import { BrokenLinksResultV1_BrokenLinkCheckerOptions } from '@google-cloud/synthetics-sdk-api';
+import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 import { Request, Response } from 'express';
 
 /**
@@ -24,9 +23,7 @@ import { Request, Response } from 'express';
  * @returns ExpressJS compatible middleware that invokes SyntheticsSDK broken links, and
  * returns the results via res.send
  */
-export function runBrokenLinkHandler(
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
-) {
+export function runBrokenLinkHandler(options: BrokenLinkCheckerOptions) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
     res.send(await runBrokenLinks(options));

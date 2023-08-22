@@ -18,7 +18,9 @@ import {
   ResponseStatusCode_StatusClass,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
 } from '@google-cloud/synthetics-sdk-api';
+import { BrokenLinkCheckerOptions, StatusClass } from './broken_links';
 
 /**
  * Represents an intermediate link with its properties.
@@ -117,9 +119,9 @@ export function checkStatusPassing(
  * @param options - The options object to be filled with default values.
  */
 export function setDefaultOptions(
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
-) {
-  const default_options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinksResultV1_BrokenLinkCheckerOptions {
+  const defaulOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     origin_url: '',
     link_limit: 50,
     query_selector_all: 'a',
@@ -132,15 +134,76 @@ export function setDefaultOptions(
     per_link_options: {},
   };
 
-  const objKeys = Object.keys(default_options) as Array<
+  const outputOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions =
+    {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+  const optionsKeys = Object.keys(defaulOptions) as Array<
     keyof BrokenLinksResultV1_BrokenLinkCheckerOptions
   >;
-  for (const key of objKeys) {
-    if (!(key in options) && key !== 'origin_url') {
-      /* eslint-disable */
-      (options as any)[key] = default_options[key];
+  for (const optionName of optionsKeys) {
+    // per_link_options is handled below
+    if (!(optionName in inputOptions) || optionName === 'per_link_options') {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (outputOptions as any)[optionName] = defaulOptions[optionName];
+    } else {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (outputOptions as any)[optionName] = inputOptions[optionName];
     }
   }
+
+  // Convert `input_options.per_link_options`, type: {[key: string]: PerLinkOption}
+  // to `output_options.per_links_options`, type: {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
+  const perLinkOptions: {
+    [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption;
+  } = {};
+  for (const [url, perLinkOption] of Object.entries(
+    inputOptions.per_link_options || {}
+  )) {
+    const expected_status_code = inputExpectedStatusToResponseStatusCode(
+      perLinkOption.expected_status_code
+    );
+
+    const convertedPerLinkOption: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption =
+      {
+        expected_status_code: expected_status_code,
+        link_timeout_millis:
+          perLinkOption.link_timeout_millis ||
+          outputOptions.link_timeout_millis,
+      };
+    perLinkOptions[url] = convertedPerLinkOption;
+  }
+  outputOptions.per_link_options = perLinkOptions;
+  return outputOptions;
+}
+
+/**
+ * Converts a `PerLinkOption.expected_status_code` object into a
+ * `ResponseStatusCode` object.
+ *
+ * @param perLinkOption - The `PerLinkOption` to be converted ()
+ * @returns The converted `ResponseStatusCode` object.
+ */
+function inputExpectedStatusToResponseStatusCode(
+  input_expected_status_code: number | StatusClass | undefined
+): ResponseStatusCode {
+  let output_expected_status_code;
+  if (input_expected_status_code !== undefined) {
+    if (typeof input_expected_status_code === 'number') {
+      output_expected_status_code = {
+        status_value: input_expected_status_code,
+      };
+    } else {
+      output_expected_status_code = {
+        status_class:
+          ResponseStatusCode_StatusClass[input_expected_status_code],
+      };
+    }
+  } else {
+    output_expected_status_code = {
+      status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+    };
+  }
+  return output_expected_status_code as ResponseStatusCode;
 }
 
 /**
@@ -149,7 +212,7 @@ export function setDefaultOptions(
  * @param response - The object to be checked.
  * @returns `true` if the object is an instance of HTTPResponse, `false` otherwise.
  */
- export function isHTTPResponse(
+export function isHTTPResponse(
   response: HTTPResponse | Error | null
 ): response is HTTPResponse {
   return (
@@ -171,7 +234,10 @@ export function setDefaultOptions(
  * const targetUrl = 'http://example.com/page1#section2';
  * const needsBlankPage = shouldGoToBlankPage(currentUrl, targetUrl); // true
  */
- export function shouldGoToBlankPage(current_url: string, target_url: string): boolean {
+export function shouldGoToBlankPage(
+  current_url: string,
+  target_url: string
+): boolean {
   // Check if the target URL contains an anchor (#) and if the current URL
   // includes the same base URL (excluding the anchor part)
   return (
@@ -179,4 +245,3 @@ export function setDefaultOptions(
     current_url.includes(target_url.substring(0, target_url.indexOf('#')))
   );
 }
-
