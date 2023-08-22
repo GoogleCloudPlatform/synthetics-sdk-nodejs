@@ -15,20 +15,20 @@
 import { expect } from 'chai';
 import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 import sinon from 'sinon';
-import { BrokenLinksResultV1_BrokenLinkCheckerOptions } from '@google-cloud/synthetics-sdk-api';
 import { setDefaultOptions } from '../../src/link_utils';
+import type { BrokenLinkCheckerOptions } from '../../src/broken_links';
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
 
 describe('GCM Synthetics Broken Links Core Functionality', async () => {
   describe('navigate', async () => {
     // constants
     const link = { target_url: 'https://example.com' };
-    const options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
+    const input_options: BrokenLinkCheckerOptions = {
       origin_url: 'http://origin.com',
       max_retries: 2,
       link_timeout_millis: 5000,
-    } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-    setDefaultOptions(options);
+    };
+    const options = setDefaultOptions(input_options);
 
     const failedResponse: Partial<HTTPResponse> = { status: () => 404 };
     const successfulResponse: Partial<HTTPResponse> = { status: () => 200 };
