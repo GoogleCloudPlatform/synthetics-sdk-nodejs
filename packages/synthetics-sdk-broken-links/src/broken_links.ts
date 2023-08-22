@@ -24,7 +24,6 @@ import {
   checkStatusPassing,
   isHTTPResponse,
   LinkIntermediate,
-  setDefaultOptions,
   shouldGoToBlankPage,
   NavigateResponse,
   CommonResponseProps,
@@ -67,8 +66,7 @@ export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // START - to resolve warnings while under development
-  checkStatusPassing({ status_value: 200 } as ResponseStatusCode, 200);
-
+  input_options;
   const browser = await puppeteer.launch({ headless: 'new' });
   const page = await browser.newPage();
   await checkLink(
@@ -79,8 +77,6 @@ export async function runBrokenLinks(
   // END - to resolve warnings  while under development
 
   // options object modified directly
-  const options = setDefaultOptions(input_options);
-  options;
   // PSEUDOCODE
 
   // create puppeteer.Browser

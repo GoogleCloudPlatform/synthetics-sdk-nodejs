@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { runBrokenLinks } from './broken_links';
-import { BrokenLinkCheckerOptions } from './broken_links';
+import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 import { Request, Response } from 'express';
 
 /**

@@ -20,7 +20,7 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
 } from '@google-cloud/synthetics-sdk-api';
-import { BrokenLinkCheckerOptions } from './broken_links';
+import { BrokenLinkCheckerOptions, StatusClass } from './broken_links';
 
 /**
  * Represents an intermediate link with its properties.
@@ -119,9 +119,9 @@ export function checkStatusPassing(
  * @param options - The options object to be filled with default values.
  */
 export function setDefaultOptions(
-  options: BrokenLinkCheckerOptions
+  inputOptions: BrokenLinkCheckerOptions
 ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
-  const default_options: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
+  const defaulOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     origin_url: '',
     link_limit: 50,
     query_selector_all: 'a',
@@ -134,51 +134,76 @@ export function setDefaultOptions(
     per_link_options: {},
   };
 
-  const output_options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
+  const outputOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions =
     {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-  const objKeys = Object.keys(default_options) as Array<
+
+  const optionsKeys = Object.keys(defaulOptions) as Array<
     keyof BrokenLinksResultV1_BrokenLinkCheckerOptions
   >;
-  for (const key of objKeys) {
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-    (output_options as any)[key] =
-      !(key in options) || key === 'per_link_options'
-        ? default_options[key]
-        : options[key];
+  for (const optionName of optionsKeys) {
+    // per_link_options is handled below
+    if (!(optionName in inputOptions) || optionName === 'per_link_options') {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (outputOptions as any)[optionName] = defaulOptions[optionName];
+    } else {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (outputOptions as any)[optionName] = inputOptions[optionName];
+    }
   }
 
-  // Convert per_link_options to the appropriate type
+  // Convert `input_options.per_link_options`, type: {[key: string]: PerLinkOption}
+  // to `output_options.per_links_options`, type: {[key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption}
   const perLinkOptions: {
     [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption;
   } = {};
   for (const [url, perLinkOption] of Object.entries(
-    options.per_link_options || {}
+    inputOptions.per_link_options || {}
   )) {
-    perLinkOption.expected_status_code;
-    const expected_status_code = (
-      perLinkOption.expected_status_code !== undefined
-        ? typeof perLinkOption.expected_status_code === 'number'
-          ? { status_value: perLinkOption.expected_status_code }
-          : {
-              status_class:
-                ResponseStatusCode_StatusClass[
-                  perLinkOption.expected_status_code
-                ],
-            }
-        : { status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX }
-    ) as ResponseStatusCode;
+    const expected_status_code = inputExpectedStatusToResponseStatusCode(
+      perLinkOption.expected_status_code
+    );
 
     const convertedPerLinkOption: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption =
       {
         expected_status_code: expected_status_code,
         link_timeout_millis:
           perLinkOption.link_timeout_millis ||
-          output_options.link_timeout_millis,
+          outputOptions.link_timeout_millis,
       };
     perLinkOptions[url] = convertedPerLinkOption;
   }
-  output_options.per_link_options = perLinkOptions;
-  return output_options;
+  outputOptions.per_link_options = perLinkOptions;
+  return outputOptions;
+}
+
+/**
+ * Converts a `PerLinkOption.expected_status_code` object into a
+ * `ResponseStatusCode` object.
+ *
+ * @param perLinkOption - The `PerLinkOption` to be converted ()
+ * @returns The converted `ResponseStatusCode` object.
+ */
+function inputExpectedStatusToResponseStatusCode(
+  input_expected_status_code: number | StatusClass | undefined
+): ResponseStatusCode {
+  let output_expected_status_code;
+  if (input_expected_status_code !== undefined) {
+    if (typeof input_expected_status_code === 'number') {
+      output_expected_status_code = {
+        status_value: input_expected_status_code,
+      };
+    } else {
+      output_expected_status_code = {
+        status_class:
+          ResponseStatusCode_StatusClass[input_expected_status_code],
+      };
+    }
+  } else {
+    output_expected_status_code = {
+      status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+    };
+  }
+  return output_expected_status_code as ResponseStatusCode;
 }
 
 /**
