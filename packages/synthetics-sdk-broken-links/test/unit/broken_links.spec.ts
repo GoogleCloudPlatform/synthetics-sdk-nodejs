@@ -32,15 +32,12 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
 
     const failedResponse: Partial<HTTPResponse> = { status: () => 404 };
     const successfulResponse: Partial<HTTPResponse> = { status: () => 200 };
-    SyntheticsSdkBrokenLinks.BrokenLinkCheckerOptions;
 
     // Puppeteer constants
     let browser: Browser;
     let page: Page;
     before(async () => {
-      SyntheticsSdkBrokenLinks.BrokenLinkCheckerOptions;
       browser = await puppeteer.launch({
-        // executablePath: process.env.PUPPETEER_EXEC_PATH, // maybe change to `/usr/bin/google-chrome`
         headless: 'new',
       });
     });

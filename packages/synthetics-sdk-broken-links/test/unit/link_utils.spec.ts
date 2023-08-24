@@ -29,7 +29,6 @@ import {
   checkStatusPassing,
   setDefaultOptions,
   shouldGoToBlankPage,
-  parseFollowedLinks,
   createSyntheticResult,
 } from '../../src/link_utils';
 
@@ -231,9 +230,9 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       followed_link_results: followed_links,
     });
 
-    expect(new Date(syntheticResult.start_time).getTime()).to.be.lessThanOrEqual(
-      new Date(syntheticResult.end_time).getTime()
-    );
+    expect(
+      new Date(syntheticResult.start_time).getTime()
+    ).to.be.lessThanOrEqual(new Date(syntheticResult.end_time).getTime());
     expect(syntheticResult.runtime_metadata).to.not.be.undefined;
   });
 });

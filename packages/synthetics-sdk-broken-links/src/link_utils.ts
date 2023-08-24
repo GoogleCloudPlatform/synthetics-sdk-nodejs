@@ -83,23 +83,6 @@ export interface NavigateResponse extends CommonResponseProps {
   retriesRemaining: number;
 }
 
-export interface LinkIntermediate {
-  target_url: string;
-  anchor_text: string;
-  html_element: string;
-}
-
-export interface CommonResponseProps {
-  responseOrError: HTTPResponse | Error | null;
-  link_start_time: string;
-  link_end_time: string;
-}
-
-export interface NavigateResponse extends CommonResponseProps {
-  passed: boolean;
-  retriesRemaining: number;
-}
-
 /**
  * Checks if the given status code is passing w.r.t. expected status class or
  * code
@@ -275,7 +258,7 @@ export function shouldGoToBlankPage(
  * @returns An aggregated BrokenLinksResultV1 containing overall statistics of
  *          the parsed links.
  */
-export function parseFollowedLinks(
+function parseFollowedLinks(
   followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
 ) {
   const broken_links_result: BrokenLinksResultV1 = {
@@ -299,11 +282,13 @@ export function parseFollowedLinks(
 
     broken_links_result.link_count = (broken_links_result.link_count ?? 0) + 1;
 
-    link.link_passed === true
-      ? (broken_links_result.passing_link_count =
-          (broken_links_result.passing_link_count ?? 0) + 1)
-      : (broken_links_result.failing_link_count =
-          (broken_links_result.failing_link_count ?? 0) + 1);
+    if (link.link_passed) {
+      broken_links_result.passing_link_count =
+        (broken_links_result.passing_link_count ?? 0) + 1;
+    } else {
+      broken_links_result.failing_link_count =
+        (broken_links_result.failing_link_count ?? 0) + 1;
+    }
 
     switch (Math.floor(link.status_code! / 100)) {
       case 2:
