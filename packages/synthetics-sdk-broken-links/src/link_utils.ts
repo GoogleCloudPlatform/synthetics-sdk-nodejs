@@ -16,9 +16,12 @@ import { HTTPResponse } from 'puppeteer';
 import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
+  BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_SyntheticLinkResult,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
+  SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import { BrokenLinkCheckerOptions, StatusClass } from './broken_links';
 
@@ -244,4 +247,108 @@ export function shouldGoToBlankPage(
     target_url.includes('#') &&
     current_url.includes(target_url.substring(0, target_url.indexOf('#')))
   );
+}
+
+/**
+ * Parses an array of followed BrokenLinksResultV1_SyntheticLinkResult's and
+ * aggregates statistics into a single BrokenLinksResultV1 object.
+ *
+ * @param followed_links - An array of BrokenLinksResultV1_SyntheticLinkResult
+ *                         containing link results.
+ * @returns An aggregated BrokenLinksResultV1 containing overall statistics of
+ *          the parsed links.
+ */
+function parseFollowedLinks(
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+) {
+  const broken_links_result: BrokenLinksResultV1 = {
+    link_count: 0,
+    passing_link_count: 0,
+    failing_link_count: 0,
+    unreachable_count: 0,
+    status_2xx_count: 0,
+    status_3xx_count: 0,
+    status_4xx_count: 0,
+    status_5xx_count: 0,
+    options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
+    origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
+    followed_link_results: [],
+  };
+
+  for (const link of followed_links) {
+    link.is_origin
+      ? (broken_links_result.origin_link_result = link)
+      : broken_links_result.followed_link_results.push(link);
+
+    broken_links_result.link_count = (broken_links_result.link_count ?? 0) + 1;
+
+    if (link.link_passed) {
+      broken_links_result.passing_link_count =
+        (broken_links_result.passing_link_count ?? 0) + 1;
+    } else {
+      broken_links_result.failing_link_count =
+        (broken_links_result.failing_link_count ?? 0) + 1;
+    }
+
+    switch (Math.floor(link.status_code! / 100)) {
+      case 2:
+        broken_links_result.status_2xx_count =
+          (broken_links_result.status_2xx_count ?? 0) + 1;
+        break;
+
+      case 3:
+        broken_links_result.status_3xx_count =
+          (broken_links_result.status_3xx_count ?? 0) + 1;
+        break;
+
+      case 4:
+        broken_links_result.status_4xx_count =
+          (broken_links_result.status_4xx_count ?? 0) + 1;
+        break;
+
+      case 5:
+        broken_links_result.status_5xx_count =
+          (broken_links_result.status_5xx_count ?? 0) + 1;
+        break;
+
+      default:
+        // Handle other status codes if needed
+        broken_links_result.unreachable_count =
+          (broken_links_result.unreachable_count ?? 0) + 1;
+        break;
+    }
+  }
+
+  return broken_links_result;
+}
+
+/**
+ * Creates a SyntheticResult object representing the result of a broken link
+ * synthetic execution.
+ *
+ * @param start_time - The start time of the synthetic test in ISO format.
+ * @param options - The BrokenLinkCheckerOptions used for the test.
+ * @param followed_links - An array of BrokenLinksResultV1_SyntheticLinkResult representing followed links.
+ * @returns A SyntheticResult object containing the broken links result, runtime metadata, start time, and end time.
+ */
+export function createSyntheticResult(
+  start_time: string,
+  runtime_metadata: { [key: string]: string },
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+): SyntheticResult {
+  // Create BrokenLinksResultV1 by parsing followed links and setting options
+  const broken_links_result: BrokenLinksResultV1 =
+    parseFollowedLinks(followed_links);
+  broken_links_result.options = options;
+
+  // Create SyntheticResult object
+  const synthetic_result: SyntheticResult = {
+    synthetic_broken_links_result_v1: broken_links_result,
+    runtime_metadata: runtime_metadata,
+    start_time: start_time,
+    end_time: new Date().toISOString(),
+  };
+
+  return synthetic_result;
 }

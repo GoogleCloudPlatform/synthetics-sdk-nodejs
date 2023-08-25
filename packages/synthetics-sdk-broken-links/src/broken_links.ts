@@ -16,6 +16,7 @@ import puppeteer, { HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
+  getRuntimeMetadata,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   SyntheticResult,
@@ -25,8 +26,10 @@ import {
   isHTTPResponse,
   LinkIntermediate,
   shouldGoToBlankPage,
+  setDefaultOptions,
   NavigateResponse,
   CommonResponseProps,
+  createSyntheticResult,
 } from './link_utils';
 
 export interface BrokenLinkCheckerOptions {
@@ -65,37 +68,48 @@ export enum StatusClass {
 export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
-  // START - to resolve warnings while under development
-  input_options;
-  const browser = await puppeteer.launch({ headless: 'new' });
-  const page = await browser.newPage();
-  await checkLink(
-    page,
-    {} as LinkIntermediate,
-    {} as BrokenLinksResultV1_BrokenLinkCheckerOptions
-  );
-  // END - to resolve warnings  while under development
+  // Init
+  const start_time = new Date().toISOString();
+  const runtime_metadata = getRuntimeMetadata();
+
+  // TODO validate input_options
 
   // options object modified directly
-  // PSEUDOCODE
+  const options = setDefaultOptions(input_options);
 
-  // create puppeteer.Browser
-  // create puppeteer.Page & navigate to origin_url, w/ origin specific settings
+  // create Browser & origin page then navigate to origin_url, w/ origin
+  // specific settings
+  const browser = await puppeteer.launch({ headless: 'new' });
+  const origin_page = await browser.newPage();
 
+  // TODO check origin_link
+
+  if (options.wait_for_selector) {
+    // TODO set timeout here to be timeout - time from checking origin link above
+    await origin_page.waitForSelector(options.wait_for_selector);
+  }
+
+  // TODO
   // scrape origin_url for all links
   // (shuffle links if necessary and) truncate at link_limit
 
   // create new page to be used for all scraped links
   // navigate to each link - LOOP:
-  //          each call to `checkLinks(...)` will return a `SyntheticLinkResult`
+  //          each call to `checkLink(...)` will return a `SyntheticLinkResult`
   //          Object added to an array of `followed_links`
+  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
   // returned a SyntheticResult with `options`, `followed_links` &
   // runtimeMetadata
-  return {} as SyntheticResult;
+  return createSyntheticResult(
+    start_time,
+    runtime_metadata,
+    options,
+    followed_links
+  );
 }
 
-async function checkLink(
+export async function checkLink(
   page: Page,
   link: LinkIntermediate,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
