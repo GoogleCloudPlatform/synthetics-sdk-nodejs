@@ -53,6 +53,9 @@ message TestResult {
 
     // A list of StackFrame messages that indicate a single trace of code.
     repeated StackFrame stack_frames = 3;
+
+    // The raw stack trace associated with the error.
+    string stack_trace = 4;
   }
 
   // The error that was the result of a test failure.
@@ -86,12 +89,14 @@ message GenericResultV1 {
     // lookup".
     string error_message = 2;
 
-    // The name of the function where the error occurred
+    // The name of the function where the error occurred.
     string function_name = 3;
     // The name of the file that reported the error.
     string file_path = 4;
     // Line number that reported the error.
     optional int64 line = 5;
+    // The raw stack trace that is associated with this error.
+    string stack_trace = 6;
   }
 
   // Error that was associated with this result, causing it to fail.

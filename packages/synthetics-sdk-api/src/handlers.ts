@@ -52,6 +52,8 @@ const runSynthetic = async (syntheticCode: () => any) => {
           line: firstFrame?.lineNumber,
           function_name: firstFrame?.functionName,
         });
+
+      synthetic_generic_result.generic_error.stack_trace = err.stack ?? '';
     }
   }
 
