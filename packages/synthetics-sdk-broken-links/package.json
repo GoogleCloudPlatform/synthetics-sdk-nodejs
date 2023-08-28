@@ -32,8 +32,10 @@
     "chai": "^4.3.7",
     "express": "^4.18.2",
     "sinon": "^15.2.0",
-    "supertest": "^6.3.3",
-    "synthetics-sdk-broken-links": "file:./"
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=16"
   },
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
