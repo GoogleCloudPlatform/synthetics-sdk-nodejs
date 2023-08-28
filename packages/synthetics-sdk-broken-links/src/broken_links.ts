@@ -65,6 +65,7 @@ export enum StatusClass {
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
 
+/* c8 ignore start */
 export async function runBrokenLinks(
   input_options: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
@@ -122,6 +123,7 @@ export async function runBrokenLinks(
     followed_links
   );
 }
+/* c8 ignore stop */
 
 /**
  * Retrieves all links on the page using Puppeteer, handling relative and
@@ -138,6 +140,9 @@ export async function retrieveLinksFromPage(
   get_attributes: string[]
 ): Promise<LinkIntermediate[]> {
   const origin_url = await page.url();
+  // `page.evaluate()` runs in a different context, isolated from main Node.js,
+  // so c8 is not able to track coverage.
+  /* c8 ignore start */
   return await page.evaluate(
     (
       query_selector_all: string,
@@ -170,6 +175,7 @@ export async function retrieveLinksFromPage(
     get_attributes,
     origin_url
   );
+  /* c8 ignore stop */
 }
 
 /**
@@ -183,6 +189,7 @@ export async function retrieveLinksFromPage(
  * @returns A promise that resolves to a SyntheticLinkResult with all info
  *          required by api spec.
  */
+/* c8 ignore start */
 export async function checkLink(
   page: Page,
   link: LinkIntermediate,
@@ -248,6 +255,7 @@ export async function checkLink(
     is_origin: isOrigin,
   };
 }
+/* c8 ignore stop */
 
 /**
  * Navigates to a target URL with retries and timeout handling.

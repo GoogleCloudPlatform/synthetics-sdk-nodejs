@@ -28,7 +28,7 @@ jobs:
           npm run test
 
       # Run tests except synthetics-sdk-broken-links for Node version 14
-      - name: Run tests except synthetics-sdk-broken-links for Node version 14
+      - name: Run mocha and api package for Node version 14 (exclude broken links)
         if: matrix.node == '14'
         run: |
-          npm run test-except-broken-links
+          npm run test-mocha-and-api

@@ -6,15 +6,16 @@
     "ts-mocha": "^10.0.0",
     "ts-proto": "^1.143.0",
     "typedoc": "^0.24.7",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "c8": "^8.0.1"
   },
   "workspaces": [
     "./packages/*"
   ],
   "scripts": {
     "docs": "typedoc",
-    "test": "npm run test --workspaces",
-    "test-except-broken-links": "npm run test --workspace=@google-cloud/synthetics-sdk-api && npm run test --workspace=@google-cloud/synthetics-sdk-mocha"
+    "test": "c8 npm run test --workspaces",
+    "test-mocha-and-api": "c8 npm run test --workspace=@google-cloud/synthetics-sdk-api && c8 npm run test --workspace=@google-cloud/synthetics-sdk-mocha"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"
