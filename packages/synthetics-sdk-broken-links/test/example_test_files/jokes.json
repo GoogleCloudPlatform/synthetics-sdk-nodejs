@@ -22,5 +22,12 @@
         "JavaScript": null
       }
     ]
+  },
+  {
+    "me": "What is NaN",
+    "Google": "NaN means Not a Number",
+    "me": "Ohhh interesting. Hey Javascript `typeof Nan`",
+    "JavaScript": "number",
+    "me": "...bruh..."
   }
 ]
