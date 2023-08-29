@@ -1,0 +1,13 @@
+{
+  "initial-version": "0.1.0",
+  "packages": {
+    "packages/synthetics-sdk-api": {},
+    "packages/synthetics-sdk-mocha": {},
+  },
+  "plugins": [
+    {
+      "type": "sentence-case"
+    }
+  ],
+  "release-type": "node"
+}
