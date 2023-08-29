@@ -12,19 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { expect } from 'chai';
+import { expect, use } from 'chai';
+import chaiExclude from 'chai-exclude';
+use(chaiExclude);
+
 import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
 import sinon from 'sinon';
 const path = require('path');
+import {
+  BrokenLinksResultV1_SyntheticLinkResult,
+  ResponseStatusCode,
+  ResponseStatusCode_StatusClass,
+} from '@google-cloud/synthetics-sdk-api';
 import { LinkIntermediate, setDefaultOptions } from '../../src/link_utils';
 import {
   BrokenLinkCheckerOptions,
+  checkLink,
   navigate,
   retrieveLinksFromPage,
 } from '../../src/broken_links';
 
 describe('GCM Synthetics Broken Links Core Functionality', async () => {
-  describe('navigate', async () => {
+  describe('puppeteer complete navigation & api spec response ', async () => {
     // constants
     const link: LinkIntermediate = {
       target_url: 'https://example.com',
@@ -38,8 +47,14 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
     };
     const options = setDefaultOptions(input_options);
 
-    const failedResponse: Partial<HTTPResponse> = { status: () => 404 };
-    const successfulResponse: Partial<HTTPResponse> = { status: () => 200 };
+    const response4xx: Partial<HTTPResponse> = { status: () => 404 };
+    const response2xx: Partial<HTTPResponse> = { status: () => 200 };
+    const status_class_2xx: ResponseStatusCode = {
+      status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+    };
+    const status_class_4xx: ResponseStatusCode = {
+      status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_4XX,
+    };
 
     // Puppeteer constants
     let browser: Browser;
@@ -53,6 +68,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
     beforeEach(async () => {
       // Create a new page for each test
       page = await browser.newPage();
+      page.setCacheEnabled(false);
     });
 
     after(async () => {
@@ -60,112 +76,220 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       await browser.close();
     });
 
-    it('should pass on the first attempt', async () => {
-      // Navigation to "https://example.com" should pass on the first attempt
-      const result = await navigate(page, link, options);
+    describe('navigate', async () => {
+      it('should pass after retries', async () => {
+        const pageStub = sinon.createStubInstance(Page);
+        pageStub.url.returns('fake-current-url');
 
-      expect(result.passed).to.be.true;
-      expect(result.responseOrError).to.be.an.instanceOf(HTTPResponse);
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
-      expect(result.retriesRemaining).to.equal(2);
+        // Configure the stub to simulate a failed navigation on the first call
+        // and a successful one on the second
+        pageStub.goto
+          .onFirstCall()
+          .resolves(response4xx as HTTPResponse)
+          .onSecondCall()
+          .resolves(response2xx as HTTPResponse);
 
-      // Assert that link_start_time is less than link_end_time
-      const startTime = new Date(result.link_start_time).getTime();
-      const endTime = new Date(result.link_end_time).getTime();
-      expect(startTime).to.be.lessThan(endTime);
+        const result = await navigate(pageStub, link, options);
+
+        expect(result.passed).to.be.true;
+        expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
+        expect(result.retriesRemaining).to.equal(1);
+      });
+
+      it('should fail after maximum retries', async () => {
+        const pageStub = sinon.createStubInstance(Page);
+        pageStub.url.returns('fake-current-url');
+
+        // Configure the stub to simulate a failed navigation on three
+        // consecutive calls
+        pageStub.goto
+          .onFirstCall()
+          .resolves(response4xx as HTTPResponse)
+          .onSecondCall()
+          .resolves(response4xx as HTTPResponse)
+          .onThirdCall()
+          .resolves(response4xx as HTTPResponse);
+
+        const result = await navigate(pageStub, link, options);
+
+        expect(result.passed).to.be.false;
+        expect((result.responseOrError as HTTPResponse).status()).to.equal(404);
+        expect(result.retriesRemaining).to.equal(0);
+      });
+
+      it('with `shouldGoToBlankPage` navigation works on first try', async () => {
+        await page.goto('https://pptr.dev/');
+        const puppeteer_link: LinkIntermediate = {
+          target_url: 'https://pptr.dev/#',
+          anchor_text: '',
+          html_element: '',
+        };
+        const result = await navigate(page, puppeteer_link, options);
+
+        expect(result.passed).to.be.true;
+        expect(result.responseOrError).to.be.an.instanceOf(HTTPResponse);
+        expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
+        expect(result.retriesRemaining).to.equal(2);
+      }).timeout(2500);
     });
 
-    it('passes when navigating to .json', async () => {
-      const json_link : LinkIntermediate = {
-        target_url: link.target_url = `file:${path.join(
-          __dirname,
-          '../example_test_files/jokes.json'
-        )}`,
-        anchor_text: '',
-        html_element: '',
-      }
-      const result = await navigate(page, json_link, options);
+    describe('checkLink', async () => {
+      it('passes when navigating to real url', async () => {
+        const synLinkResult = await checkLink(page, link, options);
 
-      expect(result.passed).to.be.true;
-      expect(result.responseOrError).to.be.an.instanceOf(HTTPResponse);
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
-      expect(result.retriesRemaining).to.equal(2);
-    });
+        const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
+          link_passed: true,
+          expected_status_code: status_class_2xx,
+          origin_url: 'http://origin.com',
+          target_url: 'https://example.com',
+          html_element: '',
+          anchor_text: '',
+          status_code: 200,
+          error_type: '',
+          error_message: '',
+          link_start_time: 'NA',
+          link_end_time: 'NA',
+          is_origin: false,
+        };
 
-    it('should pass after retries', async () => {
-      const pageStub = sinon.createStubInstance(Page);
+        expect(synLinkResult)
+          .excluding(['link_start_time', 'link_end_time'])
+          .deep.equal(expectations);
 
-      // Configure the stub to simulate a failed navigation on the first call
-      // and a successful one on the second
-      pageStub.goto
-        .onFirstCall()
-        .resolves(failedResponse as HTTPResponse)
-        .onSecondCall()
-        .resolves(successfulResponse as HTTPResponse);
+        // Assert that link_start_time is less than link_end_time
+        const startTime = new Date(synLinkResult.link_start_time).getTime();
+        const endTime = new Date(synLinkResult.link_end_time).getTime();
+        expect(startTime).to.be.lessThan(endTime);
+      });
 
-      const result = await navigate(pageStub, link, options);
+      it('passes when navigating to .json', async () => {
+        const json_link: LinkIntermediate = {
+          target_url: `file:${path.join(
+            __dirname,
+            '../example_test_files/jokes.json'
+          )}`,
+          anchor_text: '',
+          html_element: '',
+        };
+        const synLinkResult = await checkLink(page, json_link, options);
 
-      expect(result.passed).to.be.true;
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
-      expect(result.retriesRemaining).to.equal(1);
-    });
+        const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
+          link_passed: true,
+          expected_status_code: status_class_2xx,
+          origin_url: 'http://origin.com',
+          target_url: `file:${path.join(
+            __dirname,
+            '../example_test_files/jokes.json'
+          )}`,
+          html_element: '',
+          anchor_text: '',
+          status_code: 200,
+          error_type: '',
+          error_message: '',
+          link_start_time: 'NA',
+          link_end_time: 'NA',
+          is_origin: false,
+        };
 
-    it('should fail after maximum retries', async () => {
-      const pageStub = sinon.createStubInstance(Page);
+        expect(synLinkResult)
+          .excluding(['link_start_time', 'link_end_time'])
+          .deep.equal(expectations);
+      });
 
-      // Configure the stub to simulate a failed navigation on three consecutive
-      // calls
-      pageStub.goto
-        .onFirstCall()
-        .resolves(failedResponse as HTTPResponse)
-        .onSecondCall()
-        .resolves(failedResponse as HTTPResponse)
-        .onThirdCall()
-        .resolves(failedResponse as HTTPResponse);
+      it('catches and returns a TimeoutError', async () => {
+        // set timeout
+        const options_with_timeout = Object.assign({}, options);
+        options_with_timeout.link_timeout_millis = 1;
 
-      const result = await navigate(pageStub, link, options);
+        const timeout_link: LinkIntermediate = {
+          target_url: 'https://example.com',
+          anchor_text: "Hello I'm an example",
+          html_element: 'img',
+        };
 
-      expect(result.passed).to.be.false;
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(404);
-      expect(result.retriesRemaining).to.equal(0);
-    });
+        const synLinkResult = await checkLink(
+          page,
+          timeout_link,
+          options_with_timeout
+        );
 
-    it('should catch and return an TimeoutError after maximum retries', async () => {
-      // set timeout
-      const options_with_timeout = Object.assign({}, options);
-      options_with_timeout.link_timeout_millis = 1;
+        const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
+          link_passed: false,
+          expected_status_code: status_class_2xx,
+          origin_url: 'http://origin.com',
+          target_url: 'https://example.com',
+          html_element: 'img',
+          anchor_text: "Hello I'm an example",
+          status_code: undefined,
+          error_type: 'TimeoutError',
+          error_message: 'Navigation timeout of 1 ms exceeded',
+          link_start_time: 'NA',
+          link_end_time: 'NA',
+          is_origin: false,
+        };
 
-      /* eslint-disable @typescript-eslint/no-unused-vars */
-      const { link_start_time, link_end_time, ...result } = await navigate(
-        page,
-        link,
-        options_with_timeout
-      );
+        expect(synLinkResult)
+          .excluding(['link_start_time', 'link_end_time'])
+          .deep.equal(expectations);
+      });
 
-      // response is a `TimeoutError`
-      const error = new Error('Navigation timeout of 1 ms exceeded');
-      error.name = 'TimeoutError';
-      expect(result).to.deep.equal({
-        passed: false,
-        retriesRemaining: 0,
-        responseOrError: error,
+      it('eturns error when the actual response code does not match the expected', async () => {
+        // add expected 404 status to options of broken link checker
+        const optionsExp404 = Object.assign({}, options);
+        const per_link_expected_404 = {
+          expected_status_code: {
+            status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_4XX,
+          },
+          link_timeout_millis: options.link_timeout_millis,
+        };
+        optionsExp404.per_link_options['https://expecting404.com'] =
+          per_link_expected_404;
+
+        // LinkIntermediate that will be navigated to
+        const timeoutLink: LinkIntermediate = {
+          target_url: 'https://expecting404.com',
+          anchor_text: 'return 404',
+          html_element: 'a',
+        };
+
+        const pageStub = sinon.createStubInstance(Page);
+        pageStub.goto
+          .onFirstCall()
+          .resolves(response2xx as HTTPResponse)
+          .onSecondCall()
+          .resolves(response2xx as HTTPResponse)
+          .onThirdCall()
+          .resolves(response2xx as HTTPResponse);
+
+        const synLinkResult = await checkLink(
+          pageStub,
+          timeoutLink,
+          optionsExp404
+        );
+
+        const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
+          link_passed: false,
+          expected_status_code: status_class_4xx,
+          origin_url: 'http://origin.com',
+          target_url: 'https://expecting404.com',
+          html_element: 'a',
+          anchor_text: 'return 404',
+          status_code: 200,
+          error_type: 'BrokenLinksSynthetic_IncorrectStatusCode',
+          error_message:
+            'https://expecting404.com returned status code 200 when a 400 status class was expected.',
+          link_start_time: 'NA',
+          link_end_time: 'NA',
+          is_origin: false,
+        };
+
+        expect(synLinkResult)
+          .excluding(['link_start_time', 'link_end_time'])
+          .deep.equal(expectations);
       });
     });
-
-    it('with `shouldGoToBlankPage` navigation works on first try', async () => {
-      // placeholder
-      page.setCacheEnabled(false);
-      await page.goto('https://pptr.dev/');
-      link.target_url = 'https://pptr.dev/#';
-
-      const result = await navigate(page, link, options);
-
-      expect(result.passed).to.be.true;
-      expect(result.responseOrError).to.be.an.instanceOf(HTTPResponse);
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
-      expect(result.retriesRemaining).to.equal(2);
-    });
   });
+
   describe('retrieveLinksFromPage', async () => {
     // Puppeteer constants
     let browser: Browser;

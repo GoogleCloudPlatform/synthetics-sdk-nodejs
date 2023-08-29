@@ -213,8 +213,9 @@ message BrokenLinksResultV1 {
     string html_element = 6;
     // Status code returned by the target_url.
     optional int64 status_code = 7;
-    // The class of the error, eg 'connectionaborted', docs:
-    // https://pptr.dev/api/puppeteer.errorcode
+    // 'BrokenLinksSynthetic_IncorrectStatusCode' if the expected and actual
+    // status codes differ. Otherwise, the class of the error thrown, eg
+    // 'connectionaborted', docs: https://pptr.dev/api/puppeteer.errorcode.
     string error_type = 8;
     // Error Message, if any
     string error_message = 9;

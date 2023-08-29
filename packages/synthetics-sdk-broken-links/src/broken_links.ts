@@ -172,41 +172,81 @@ export async function retrieveLinksFromPage(
   );
 }
 
+/**
+ * Checks the status of a link and returns a synthetic link result.
+ *
+ * @param page - The Puppeteer Page instance to use for navigation.
+ * @param link - The link.target_url to check
+ * @param options - global options object with all broken link checker options.
+ * @param isOrigin=false - Indicates if the link is the origin URL.
+ *
+ * @returns A promise that resolves to a SyntheticLinkResult with all info
+ *          required by api spec.
+ */
 export async function checkLink(
   page: Page,
   link: LinkIntermediate,
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  isOrigin = false
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
-  // START - to resolve warnings while under development
-  page;
-  link;
-  options;
-  // END - to resolve warnings  while under development
+  // Determine the expected status code for the link, using per-link setting if
+  // available, else use default 2xx class
+  const expectedStatusCode: ResponseStatusCode = options.per_link_options[
+    link.target_url
+  ]?.expected_status_code ?? {
+    status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
+  };
 
-  // PSEUDOCODE
+  // Perform the navigation and retrieves info to return
+  const {
+    responseOrError,
+    passed,
+    // eslint-disable-next-line  @typescript-eslint/no-unused-vars
+    retriesRemaining,
+    linkStartTime,
+    linkEndTime,
+  } = await navigate(page, link, options, expectedStatusCode);
 
-  // determine expected_status_code—determined here rather than `navigate(...)`
-  // since it will be used later when creating
-  // `BrokenLinksResultV1_SyntheticLinkResult` Object
+  // Initialize variables for error information
+  let errorType = '';
+  let errorMessage = '';
 
-  // call `navigate(...)`
-  /**
-   * const {
-   *    response: responseOrError,
-   *    passed,
-   *    testing_only,
-   *    link_start_time,
-   *    link_end_time,
-   * } = await navigate(page, link, expected_status_code, options);
-   */
+  if (responseOrError instanceof Error) {
+    errorType = responseOrError.name;
+    errorMessage = responseOrError.message;
+  } else if (!passed) {
+    // The link did not pass and no Puppeteer Error was thrown, manually set
+    // error information
+    errorType = 'BrokenLinksSynthetic_IncorrectStatusCode';
 
-  // Error handling based on `responseOrError` & passed:
-  //    if      `responseOrError` is type `Error` set `error_type` and
-  //            `error_message` in `SyntheticLinkResult` accordingly
-  //    else if `passed === false`. Set error `SYNTHETIC_INCORRECT_STATUS_CODE`
+    const classOrCode = expectedStatusCode.status_class ? 'class' : 'code';
+    const expectedStatus =
+      expectedStatusCode.status_class ?? expectedStatusCode.status_value;
 
-  // return `SynheticLinkResult` with all calculated information
-  return {} as BrokenLinksResultV1_SyntheticLinkResult;
+    errorMessage =
+      `${link?.target_url} returned status code ` +
+      `${responseOrError?.status()} when a ${expectedStatus} status ` +
+      `${classOrCode} was expected.`;
+  }
+
+  const response = isHTTPResponse(responseOrError)
+    ? (responseOrError as HTTPResponse)
+    : null;
+
+  return {
+    link_passed: passed,
+    expected_status_code: expectedStatusCode,
+    origin_url: options.origin_url,
+    target_url: link.target_url,
+    html_element: link.html_element,
+    anchor_text: link.anchor_text,
+    status_code: response?.status(),
+    error_type: errorType,
+    error_message: errorMessage,
+    link_start_time: linkStartTime,
+    link_end_time: linkEndTime,
+    is_origin: isOrigin,
+  };
 }
 
 /**
@@ -239,7 +279,7 @@ export async function navigate(
     options.link_timeout_millis!;
 
   // see function description for why this is necessary
-  if (shouldGoToBlankPage(page.url(), link.target_url)) {
+  if (shouldGoToBlankPage(await page.url(), link.target_url)) {
     await page.goto('about:blank');
   }
 
@@ -271,8 +311,8 @@ export async function navigate(
     responseOrError: fetch_link_output.responseOrError,
     passed: passed,
     retriesRemaining: retriesRemaining,
-    link_start_time: fetch_link_output.link_start_time,
-    link_end_time: fetch_link_output.link_end_time,
+    linkStartTime: fetch_link_output.linkStartTime,
+    linkEndTime: fetch_link_output.linkEndTime,
   };
 }
 
@@ -290,7 +330,7 @@ async function fetchLink(
   timeout: number
 ): Promise<CommonResponseProps> {
   let responseOrError: HTTPResponse | Error | null;
-  const link_start_time = new Date().toISOString();
+  const linkStartTime = new Date().toISOString();
 
   try {
     responseOrError = await page.goto(target_url, {
@@ -301,6 +341,6 @@ async function fetchLink(
     responseOrError = err instanceof Error ? err : null;
   }
 
-  const link_end_time = new Date().toISOString();
-  return { responseOrError, link_start_time, link_end_time };
+  const linkEndTime = new Date().toISOString();
+  return { responseOrError, linkStartTime, linkEndTime };
 }

@@ -59,12 +59,12 @@ export interface CommonResponseProps {
   /**
    * The start time of the link navigation.
    */
-  link_start_time: string;
+  linkStartTime: string;
 
   /**
    * The end time of the link navigation.
    */
-  link_end_time: string;
+  linkEndTime: string;
 }
 
 /**
