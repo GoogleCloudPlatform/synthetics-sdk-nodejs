@@ -30,6 +30,7 @@ import {
   setDefaultOptions,
   shouldGoToBlankPage,
   createSyntheticResult,
+  validateInputOptions,
 } from '../../src/link_utils';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
@@ -131,6 +132,319 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       },
     };
     expect(options.per_link_options).to.deep.equal(link_options);
+  });
+
+  describe('validateInputOptions', () => {
+    it('throws error if origin_url is missing', () => {
+      const options = {} as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'Missing origin_url in options');
+    });
+    it('throws error if origin_url does not start with http', () => {
+      const options = { origin_url: 'blah' } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'origin_url must start with `http`');
+    });
+    it('throws error if link_limit is not a number', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_limit: 'invalid',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_limit value, must be a number greater than 0'
+      );
+    });
+    it('throws error if link_limit is less than 1', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_limit: 0,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_limit value, must be a number greater than 0'
+      );
+    });
+    it('throws error if query_selector_all is not a string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        query_selector_all: 123,
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid query_selector_all value, must be a non-empty string'
+      );
+    });
+    it('throws error if query_selector_all is an empty string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        query_selector_all: '',
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid query_selector_all value, must be a non-empty string'
+      );
+    });
+    it('throws error if get_attributes is not an array of strings', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        get_attributes: ['href', 123],
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid get_attributes value, must be an array of only strings'
+      );
+    });
+    it('throws error if link_order is not a valid LinkOrder value', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_order: 'invalid',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_order value, must be `FIRST_N` or `RANDOM`'
+      );
+    });
+    it('link_order accepts string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_order: 'RANDOM',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.not.throw();
+    });
+    it('throws error if link_timeout_millis is not a number', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_timeout_millis: 'invalid',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_timeout_millis value, must be a number greater than 0'
+      );
+    });
+    it('throws error if link_timeout_millis is less than 1', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_timeout_millis: 0,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_timeout_millis value, must be a number greater than 0'
+      );
+    });
+    it('throws error if max_retries is not a number', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        max_retries: 'invalid',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid max_retries value, must be a number greater than -1'
+      );
+    });
+    it('throws error if max_retries is less than -1', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        max_retries: -2,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid max_retries value, must be a number greater than -1'
+      );
+    });
+    it('throws error if max_redirects is not a number', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        max_redirects: 'invalid',
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'Invalid max_redirects');
+    });
+    it('throws error if max_redirects is less than -1', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        max_redirects: -2,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid max_redirects value, must be a number greater than -1'
+      );
+    });
+    it('throws error if wait_for_selector is not a string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        wait_for_selector: 123,
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid wait_for_selector value, must be a non-empty string'
+      );
+    });
+    it('throws error if wait_for_selector is an empty string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        wait_for_selector: '',
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid wait_for_selector value, must be a non-empty string'
+      );
+    });
+    it('throws error if per_link_options contains an invalid URL', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        per_link_options: {
+          'invalid-url': {
+            link_timeout_millis: 5000,
+          },
+        },
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid url in per_link_options, urls must start with `http`'
+      );
+    });
+    it('throws error if per_link_options contains an invalid link_timeout_millis value', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        per_link_options: {
+          'http://example.com': {
+            link_timeout_millis: -1,
+          },
+        },
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid link_timeout_millis value in per_link_options set for http://example.com, must be a number greater than 0'
+      );
+    });
+    it('throws error if per_link_options contains an invalid expected_status_code number', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        per_link_options: {
+          'http://example.com': {
+            expected_status_code: 50,
+          },
+        },
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid expected_status_code in per_link_options for http://example.com, must be a number between 100 and 599 (inclusive) or a string present in StatusClass enum'
+      );
+    });
+    it('throws error if per_link_options contains an invalid expected_status_code string', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        per_link_options: {
+          'http://example.com': {
+            expected_status_code: 'STATUS_CLASS_WOOHOO',
+          },
+        },
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid expected_status_code in per_link_options for http://example.com, must be a number between 100 and 599 (inclusive) or a string present in StatusClass enum'
+      );
+    });
+    it('per_link_options accepts valid string as StatusClass', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        per_link_options: {
+          'http://example.com': {
+            expected_status_code: 'STATUS_CLASS_4XX',
+          },
+        },
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.not.throw();
+    });
+    it('validates input options when all values are valid', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        link_limit: 10,
+        query_selector_all: 'a',
+        get_attributes: ['href'],
+        link_order: LinkOrder.FIRST_N,
+        link_timeout_millis: 5000,
+        max_retries: 3,
+        max_redirects: 5,
+        wait_for_selector: 'a.link',
+        per_link_options: {
+          'http://example.com': {
+            link_timeout_millis: 3000,
+            expected_status_code: StatusClass.STATUS_CLASS_2XX,
+          },
+        },
+      } as BrokenLinkCheckerOptions;
+
+      expect(() => {
+        validateInputOptions(options);
+      }).not.to.throw();
+    });
+    it('validates input options and gets rid of extra fields', () => {
+      const options = {
+        origin_url: 'http://example.com',
+        fake_field: 'hello',
+      } as any as BrokenLinkCheckerOptions;
+
+      const expectations = {
+        origin_url: 'http://example.com',
+        link_limit: undefined,
+        query_selector_all: undefined,
+        get_attributes: undefined,
+        link_order: undefined,
+        link_timeout_millis: undefined,
+        max_retries: undefined,
+        max_redirects: undefined,
+        wait_for_selector: undefined,
+        per_link_options: undefined,
+      } as BrokenLinkCheckerOptions;
+
+      expect(() => {
+        validateInputOptions(options);
+      }).not.to.throw();
+      expect(validateInputOptions(options)).to.deep.equal(expectations);
+    });
   });
 
   describe('shouldGoToBlankPage', () => {
