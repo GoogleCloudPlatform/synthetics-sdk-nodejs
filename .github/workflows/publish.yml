@@ -20,6 +20,6 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://wombat-dressing-room.appspot.com/'
-      - run: npm publish --workspaces
+      - run: npm publish --workspace packages/synthetics-sdk-api/ || npm publish --workspace packages/synthetics-sdk-mocha/
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
