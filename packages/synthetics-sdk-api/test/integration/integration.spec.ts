@@ -68,6 +68,8 @@ describe('CloudFunctionV2 Running Synthetics', async () => {
     expect(generic_result?.generic_error?.file_path).to.equal('/user/code/location.js');
     expect(generic_result?.generic_error?.function_name).to.equal('async fn');
     expect(generic_result?.generic_error?.line).to.equal(8);
+    expect(generic_result?.generic_error?.stack_trace).to.equal(
+      `AssertionError: Did not assert\n\    at internalFn (node:internal)\n\    at async fn (/user/code/location.js:8:3)`);
 
     expect(runtime_metadata).to.not.be.undefined;
   });

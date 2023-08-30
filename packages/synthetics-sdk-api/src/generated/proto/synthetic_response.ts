@@ -53,6 +53,8 @@ export interface TestResult_TestError {
   error_message: string;
   /** A list of StackFrame messages that indicate a single trace of code. */
   stack_frames: TestResult_TestError_StackFrame[];
+  /** The raw stack trace associated with the error. */
+  stack_trace: string;
 }
 
 /** An individual stack frame that represents a line of code within a file. */
@@ -114,12 +116,16 @@ export interface GenericResultV1_GenericError {
    * lookup".
    */
   error_message: string;
-  /** The name of the function where the error occurred */
+  /** The name of the function where the error occurred. */
   function_name: string;
   /** The name of the file that reported the error. */
   file_path: string;
   /** Line number that reported the error. */
-  line?: number | undefined;
+  line?:
+    | number
+    | undefined;
+  /** The raw stack trace that is associated with this error. */
+  stack_trace: string;
 }
 
 export interface SyntheticResult {
@@ -282,7 +288,7 @@ export const TestResult = {
 };
 
 function createBaseTestResult_TestError(): TestResult_TestError {
-  return { error_type: "", error_message: "", stack_frames: [] };
+  return { error_type: "", error_message: "", stack_frames: [], stack_trace: "" };
 }
 
 export const TestResult_TestError = {
@@ -295,6 +301,9 @@ export const TestResult_TestError = {
     }
     for (const v of message.stack_frames) {
       TestResult_TestError_StackFrame.encode(v!, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.stack_trace !== "") {
+      writer.uint32(34).string(message.stack_trace);
     }
     return writer;
   },
@@ -327,6 +336,13 @@ export const TestResult_TestError = {
 
           message.stack_frames.push(TestResult_TestError_StackFrame.decode(reader, reader.uint32()));
           continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.stack_trace = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -343,6 +359,7 @@ export const TestResult_TestError = {
       stack_frames: Array.isArray(object?.stack_frames)
         ? object.stack_frames.map((e: any) => TestResult_TestError_StackFrame.fromJSON(e))
         : [],
+      stack_trace: isSet(object.stack_trace) ? String(object.stack_trace) : "",
     };
   },
 
@@ -355,6 +372,7 @@ export const TestResult_TestError = {
     } else {
       obj.stack_frames = [];
     }
+    message.stack_trace !== undefined && (obj.stack_trace = message.stack_trace);
     return obj;
   },
 
@@ -367,6 +385,7 @@ export const TestResult_TestError = {
     message.error_type = object.error_type ?? "";
     message.error_message = object.error_message ?? "";
     message.stack_frames = object.stack_frames?.map((e) => TestResult_TestError_StackFrame.fromPartial(e)) || [];
+    message.stack_trace = object.stack_trace ?? "";
     return message;
   },
 };
@@ -684,7 +703,7 @@ export const GenericResultV1 = {
 };
 
 function createBaseGenericResultV1_GenericError(): GenericResultV1_GenericError {
-  return { error_type: "", error_message: "", function_name: "", file_path: "", line: undefined };
+  return { error_type: "", error_message: "", function_name: "", file_path: "", line: undefined, stack_trace: "" };
 }
 
 export const GenericResultV1_GenericError = {
@@ -703,6 +722,9 @@ export const GenericResultV1_GenericError = {
     }
     if (message.line !== undefined) {
       writer.uint32(40).int64(message.line);
+    }
+    if (message.stack_trace !== "") {
+      writer.uint32(50).string(message.stack_trace);
     }
     return writer;
   },
@@ -749,6 +771,13 @@ export const GenericResultV1_GenericError = {
 
           message.line = longToNumber(reader.int64() as Long);
           continue;
+        case 6:
+          if (tag !== 50) {
+            break;
+          }
+
+          message.stack_trace = reader.string();
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -765,6 +794,7 @@ export const GenericResultV1_GenericError = {
       function_name: isSet(object.function_name) ? String(object.function_name) : "",
       file_path: isSet(object.file_path) ? String(object.file_path) : "",
       line: isSet(object.line) ? Number(object.line) : undefined,
+      stack_trace: isSet(object.stack_trace) ? String(object.stack_trace) : "",
     };
   },
 
@@ -775,6 +805,7 @@ export const GenericResultV1_GenericError = {
     message.function_name !== undefined && (obj.function_name = message.function_name);
     message.file_path !== undefined && (obj.file_path = message.file_path);
     message.line !== undefined && (obj.line = Math.round(message.line));
+    message.stack_trace !== undefined && (obj.stack_trace = message.stack_trace);
     return obj;
   },
 
@@ -789,6 +820,7 @@ export const GenericResultV1_GenericError = {
     message.function_name = object.function_name ?? "";
     message.file_path = object.file_path ?? "";
     message.line = object.line ?? undefined;
+    message.stack_trace = object.stack_trace ?? "";
     return message;
   },
 };

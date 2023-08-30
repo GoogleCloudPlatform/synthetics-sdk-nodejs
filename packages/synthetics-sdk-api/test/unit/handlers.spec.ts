@@ -77,8 +77,9 @@ describe('GCM Synthetics Handler', async () => {
   it('Assigns first stack frame with user code to the error', async () => {
     const now = new Date();
 
+    let e: Error | undefined;
     const handlerFunction = () => {
-      const e = new AssertionError('Did not assert');
+      e = new AssertionError('Did not assert');
       const splitStack = e.stack?.split('\n', 2) ?? '';
       e.stack = [
         splitStack?.[0],
@@ -113,6 +114,8 @@ describe('GCM Synthetics Handler', async () => {
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.file_path).to.equal('/user/code/location.js');
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.line).to.equal(8);
     expect(syntheticResult?.runtime_metadata).to.not.be.undefined;
+
+    expect(syntheticResult?.synthetic_generic_result_v1?.generic_error?.stack_trace).to.equal((e as Error).stack);
   });
 
   describe('firstUserErrorStackFrame', () => {
