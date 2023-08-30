@@ -1,4 +1,5 @@
 {
   "packages/synthetics-sdk-api": "0.1.0",
-  "packages/synthetics-sdk-mocha": "0.1.1"
+  "packages/synthetics-sdk-mocha": "0.1.1",
+  ".": "1.0.0"
 }
