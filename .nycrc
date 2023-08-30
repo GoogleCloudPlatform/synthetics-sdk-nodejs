@@ -1,0 +1,8 @@
+{
+  "include": [
+    "packages/**/src/*.ts"
+  ],
+  "lines": 95,
+  "functions": 100,
+  "per-file": true
+}
