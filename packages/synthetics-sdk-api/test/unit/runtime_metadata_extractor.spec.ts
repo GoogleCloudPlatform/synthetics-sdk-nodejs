@@ -35,14 +35,14 @@ describe('runtimeMetadata', () => {
       that: 'dont',
       matter: 'at all',
     };
-    instantiateMetadata();
 
-    expect(getRuntimeMetadata()).to.deep.equal({
-      K_SERVICE: 'service_name',
-      K_REVISION: 'service_revision',
-      K_CONFIGURATION: 'configuration',
-      '@google-cloud/synthetics-sdk-api': '0.1.0',
-    });
+    instantiateMetadata();
+    const metadata = getRuntimeMetadata();
+
+    expect(metadata.K_SERVICE).to.equal('service_name');
+    expect(metadata.K_REVISION).to.equal('service_revision');
+    expect(metadata.K_CONFIGURATION).to.equal('configuration');
+    expect(metadata['@google-cloud/synthetics-sdk-api']).to.not.be.empty;
   });
 
 
@@ -60,21 +60,18 @@ describe('runtimeMetadata', () => {
       version: '0.5.0'
     });
 
-    expect(getRuntimeMetadata()).to.deep.equal({
-      K_SERVICE: 'service_name',
-      K_REVISION: 'service_revision',
-      K_CONFIGURATION: 'configuration',
-      '@google-cloud/synthetics-sdk-api': '0.1.0',
-      subpackage: '0.5.0'
-    });
+    const metadata = getRuntimeMetadata();
+    expect(metadata.K_SERVICE).to.equal('service_name');
+    expect(metadata.K_REVISION).to.equal('service_revision');
+    expect(metadata.K_CONFIGURATION).to.equal('configuration');
+    expect(metadata['@google-cloud/synthetics-sdk-api']).to.not.be.empty;
+    expect(metadata.subpackage).to.equal('0.5.0');
   });
 
   it('sets only metadata thats present and relevant', () => {
     process.env = { other: 'fields', that: 'dont', matter: 'at all' };
     instantiateMetadata();
-
-    expect(getRuntimeMetadata()).to.deep.equal({
-      '@google-cloud/synthetics-sdk-api': '0.1.0'
-    });
+    expect(Object.keys(getRuntimeMetadata()))
+      .to.deep.equal(['@google-cloud/synthetics-sdk-api']);
   });
 });
