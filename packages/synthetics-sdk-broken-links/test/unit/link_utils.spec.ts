@@ -22,14 +22,14 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   BrokenLinkCheckerOptions,
-  StatusClass,
   LinkOrder,
+  StatusClass,
 } from '../../src/broken_links';
 import {
   checkStatusPassing,
+  createSyntheticResult,
   setDefaultOptions,
   shouldGoToBlankPage,
-  createSyntheticResult,
   validateInputOptions,
 } from '../../src/link_utils';
 
@@ -135,6 +135,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
   });
 
   describe('validateInputOptions', () => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     it('throws error if origin_url is missing', () => {
       const options = {} as BrokenLinkCheckerOptions;
       expect(() => {
@@ -445,6 +446,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       }).not.to.throw();
       expect(validateInputOptions(options)).to.deep.equal(expectations);
     });
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   });
 
   describe('shouldGoToBlankPage', () => {

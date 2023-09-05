@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPResponse } from 'puppeteer';
+import { Browser, HTTPResponse } from 'puppeteer';
 import {
-  ResponseStatusCode,
-  ResponseStatusCode_StatusClass,
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_SyntheticLinkResult,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
+  BrokenLinksResultV1_SyntheticLinkResult,
+  ResponseStatusCode,
+  ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
   BrokenLinkCheckerOptions,
-  StatusClass,
   LinkOrder,
+  StatusClass,
 } from './broken_links';
 
 /**
@@ -126,7 +126,9 @@ export function checkStatusPassing(
  * @returns The sanitized input options if validation passes.
  * @throws {Error} If any of the input options fail validation.
  */
-export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
+export function validateInputOptions(
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinkCheckerOptions {
   if (!inputOptions.origin_url) {
     throw new Error('Missing origin_url in options');
   } else if (!inputOptions.origin_url.startsWith('http')) {
@@ -521,4 +523,15 @@ export function createSyntheticResult(
   };
 
   return synthetic_result;
+}
+
+export async function openNewPage(browser: Browser) {
+  try {
+    const page = await browser.newPage();
+    page.setCacheEnabled(false);
+    return page;
+  } catch (pageError) {
+    if (pageError instanceof Error) process.stderr.write(pageError.message);
+    throw new Error('An error occurred while opening a new puppeteer.Page.');
+  }
 }
