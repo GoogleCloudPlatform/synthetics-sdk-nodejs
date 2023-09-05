@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
+    "plimit-lit": "^1.5.0",
     "puppeteer": "^21.0.2"
   }
 }

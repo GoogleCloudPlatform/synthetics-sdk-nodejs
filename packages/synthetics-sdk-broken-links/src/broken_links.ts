@@ -12,25 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import puppeteer, { HTTPResponse, Page } from 'puppeteer';
+import puppeteer, { Browser, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   getRuntimeMetadata,
-  ResponseStatusCode,
-  ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
-  checkStatusPassing,
-  isHTTPResponse,
-  LinkIntermediate,
-  shouldGoToBlankPage,
-  setDefaultOptions,
-  NavigateResponse,
-  CommonResponseProps,
+  closeBrowser,
   createSyntheticResult,
+  LinkIntermediate,
+  openNewPage,
+  setDefaultOptions,
+  shuffleAndTruncate,
+  validateInputOptions,
 } from './link_utils';
+import {
+  checkLink,
+  checkLinks,
+  retrieveLinksFromPage,
+  getGenericSyntheticResult,
+} from './navigation_func';
 
 export interface BrokenLinkCheckerOptions {
   origin_url: string;
@@ -66,281 +69,124 @@ export enum StatusClass {
 }
 
 export async function runBrokenLinks(
-  input_options: BrokenLinkCheckerOptions
+  inputOptions: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // init
-  const start_time = new Date().toISOString();
+  const startTime = new Date().toISOString();
   const runtime_metadata = getRuntimeMetadata();
 
-  // TODO validate input_options
-
-  // options object modified directly
-  const options = setDefaultOptions(input_options);
-
-  // create Browser & origin page then navigate to origin_url, w/ origin
-  // specific settings
-  const browser = await puppeteer.launch({ headless: 'new' });
-  const origin_page = await browser.newPage();
-
-  // TODO check origin_link
-
-  if (options.wait_for_selector) {
-    // TODO set timeout here to be timeout - time from checking origin link above
-    await origin_page.waitForSelector(options.wait_for_selector);
-  }
-
-  // TODO
-  // scrape origin_url for all links
+  let browser: Browser;
   try {
-    // eslint-disable-next-line  @typescript-eslint/no-unused-vars
-    const retrieved_links: LinkIntermediate[] = await retrieveLinksFromPage(
-      origin_page,
-      options.query_selector_all,
-      options.get_attributes
+    const options = processOptions(inputOptions);
+
+    // create Browser & origin page then navigate to origin_url, w/ origin
+    // specific settings
+    browser = await puppeteer.launch({ headless: 'new' });
+    const originPage = await openNewPage(browser);
+
+    const followed_links = [await checkOriginLink(originPage, options)];
+    // if orgin link did not pass exit and return the singular link result
+    if (!followed_links[0].link_passed) {
+      return createSyntheticResult(
+        startTime,
+        runtime_metadata,
+        options,
+        followed_links
+      );
+    }
+
+    // scrape and organize links to check
+    const linksToFollow: LinkIntermediate[] = await scrapeLinks(
+      originPage,
+      options
     );
 
-    // TODO shuffle links if link_order is `RANDOM`
-    // TODO always truncate to lint_limit
+    // check all links
+    followed_links.push(...(await checkLinks(browser, linksToFollow, options)));
+
+    // returned a SyntheticResult with `options`, `followed_links` &
+    // runtimeMetadata
+    return createSyntheticResult(
+      startTime,
+      runtime_metadata,
+      options,
+      followed_links
+    );
   } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
-    // TODO throw generic error with `failure to scrape links`
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : `An error occurred while starting or running the broken link checker on ${inputOptions.origin_url}. Please reference server logs for further information.`;
+    return getGenericSyntheticResult(startTime, errorMessage);
+  } finally {
+    if (browser! !== undefined) await closeBrowser(browser!);
   }
-
-  // TODO
-  // create new page to be used for all scraped links
-  // navigate to each link - LOOP:
-  //          each call to `checkLink(...)` will return a `SyntheticLinkResult`
-  //          Object added to an array of `followed_links`
-  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
-
-  // returned a SyntheticResult with `options`, `followed_links` &
-  // runtimeMetadata
-  return createSyntheticResult(
-    start_time,
-    runtime_metadata,
-    options,
-    followed_links
-  );
 }
 
 /**
- * Retrieves all links on the page using Puppeteer, handling relative and
- * protocol-relative links and filtering for HTTP/HTTPS links.
+ * Checks the origin link and returns the result.
  *
- * @param page - The Puppeteer page instance to retrieve the links from.
- * @param query_selector_all - The CSS selector to identify link elements.
- * @param get_attributes - An array of attribute names to retrieve from the link elements.
- * @returns An array of LinkIntermediate objects representing the links found.
+ * @param originPage - The Puppeteer page object representing the origin page.
+ * @param options - The broken link checker options.
+ * @returns The result of checking the origin link.
  */
-export async function retrieveLinksFromPage(
-  page: Page,
-  query_selector_all: string,
-  get_attributes: string[]
-): Promise<LinkIntermediate[]> {
-  const origin_url = await page.url();
-  return await page.evaluate(
-    (
-      query_selector_all: string,
-      get_attributes: string[],
-      origin_url: string
-    ) => {
-      const link_elements: HTMLElement[] = Array.from(
-        document.querySelectorAll(query_selector_all)
-      );
-      return link_elements.flatMap((link_element: HTMLElement) => {
-        const anchor_text = link_element?.textContent?.trim() ?? '';
-
-        return get_attributes
-          .map((attr) => (link_element.getAttribute(attr) || '').toString())
-          .filter((value) => {
-            const qualifed_url = new URL(value, origin_url);
-            return value && qualifed_url.href.startsWith('http');
-          })
-          .map((value) => {
-            const qualifed_url = new URL(value, origin_url);
-            return {
-              target_url: qualifed_url.href,
-              anchor_text: anchor_text,
-              html_element: link_element.tagName.toLocaleLowerCase(),
-            };
-          });
-      });
-    },
-    query_selector_all,
-    get_attributes,
-    origin_url
-  );
-}
-
-/**
- * Checks the status of a link and returns a synthetic link result.
- *
- * @param page - The Puppeteer Page instance to use for navigation.
- * @param link - The link.target_url to check
- * @param options - global options object with all broken link checker options.
- * @param isOrigin=false - Indicates if the link is the origin URL.
- *
- * @returns A promise that resolves to a SyntheticLinkResult with all info
- *          required by api spec.
- */
-export async function checkLink(
-  page: Page,
-  link: LinkIntermediate,
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  isOrigin = false
+async function checkOriginLink(
+  originPage: Page,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
-  // Determine the expected status code for the link, using per-link setting if
-  // available, else use default 2xx class
-  const expectedStatusCode: ResponseStatusCode = options.per_link_options[
-    link.target_url
-  ]?.expected_status_code ?? {
-    status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
-  };
-
-  // Perform the navigation and retrieves info to return
-  const {
-    responseOrError,
-    passed,
-    // eslint-disable-next-line  @typescript-eslint/no-unused-vars
-    retriesRemaining,
-    linkStartTime,
-    linkEndTime,
-  } = await navigate(page, link, options, expectedStatusCode);
-
-  // Initialize variables for error information
-  let errorType = '';
-  let errorMessage = '';
-
-  if (responseOrError instanceof Error) {
-    errorType = responseOrError.name;
-    errorMessage = responseOrError.message;
-  } else if (!passed) {
-    // The link did not pass and no Puppeteer Error was thrown, manually set
-    // error information
-    errorType = 'BrokenLinksSynthetic_IncorrectStatusCode';
-
-    const classOrCode = expectedStatusCode.status_class ? 'class' : 'code';
-    const expectedStatus =
-      expectedStatusCode.status_class ?? expectedStatusCode.status_value;
-
-    errorMessage =
-      `${link?.target_url} returned status code ` +
-      `${responseOrError?.status()} when a ${expectedStatus} status ` +
-      `${classOrCode} was expected.`;
-  }
-
-  const response = isHTTPResponse(responseOrError)
-    ? (responseOrError as HTTPResponse)
-    : null;
-
-  return {
-    link_passed: passed,
-    expected_status_code: expectedStatusCode,
-    origin_url: options.origin_url,
-    target_url: link.target_url,
-    html_element: link.html_element,
-    anchor_text: link.anchor_text,
-    status_code: response?.status(),
-    error_type: errorType,
-    error_message: errorMessage,
-    link_start_time: linkStartTime,
-    link_end_time: linkEndTime,
-    is_origin: isOrigin,
-  };
+  // check origin_link
+  const originLinkResult = await checkLink(
+    originPage,
+    { target_url: options.origin_url, anchor_text: '', html_element: '' },
+    options,
+    true
+  );
+  return originLinkResult;
 }
 
 /**
- * Navigates to a target URL with retries and timeout handling.
+ * Scrapes links from the origin page and returns them.
+ * If applicable:
+ *     - wait for `options.wait_for_selector` element before scraping.
+ *     - shuffle and truncate based on `options`
  *
- * @param page - The Puppeteer Page instance.
- * @param link - The LinkIntermediate containing the target URL.
- * @param expected_status_code - The expected HTTP status code.
- * @param options - The options for navigation and retries.
- * @returns Information about navigation attempt:
- *   - `responseOrError`: HTTP response or error if navigation fails, or null.
- *   - `passed`: Boolean indicating if navigation passed per status code.
- *   - `retriesRemaining`: Remaining retries after attempt. (for testing)
- *   - `link_start_time`: Start time of navigation attempt.
- *   - `link_end_time`: End time of navigation attempt.
+ * @param originPage - The Puppeteer page object representing the origin page.
+ * @param options - The broken link checker options.
+ * @returns An array of scraped links in accordance with link_limit and link_order.
  */
-export async function navigate(
-  page: Page,
-  link: LinkIntermediate,
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  expected_status_code: ResponseStatusCode = {
-    status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
-  }
-): Promise<NavigateResponse> {
-  let fetch_link_output = {} as CommonResponseProps;
-  let retriesRemaining = options.max_retries! + 1;
-  // use link_specific timeout if set, else use options.link_timeout_millis
-  const per_link_timeout_millis =
-    options.per_link_options[link.target_url]?.link_timeout_millis ??
-    options.link_timeout_millis!;
-
-  // see function description for why this is necessary
-  if (shouldGoToBlankPage(await page.url(), link.target_url)) {
-    await page.goto('about:blank');
-  }
-
-  let passed = false;
-  /**
-   * Expected behavior: if the link fails for any reason, see
-   * fetch_link_output.responseOrError, we should retry the entire process (i.e.
-   *  `fetch_link`). This is a product decision in case users are dealing with
-   * network jitters or other conditions. If any of these tries are successful,
-   * we do not need to check again that link again.
-   * Note: Default behavior is to check a link only once!
-   */
-  while (retriesRemaining > 0 && !passed) {
-    retriesRemaining--;
-    fetch_link_output = await fetchLink(
-      page,
-      link.target_url,
-      per_link_timeout_millis
-    );
-
-    passed =
-      isHTTPResponse(fetch_link_output.responseOrError) &&
-      checkStatusPassing(
-        expected_status_code,
-        fetch_link_output.responseOrError.status()
-      );
-  }
-  return {
-    responseOrError: fetch_link_output.responseOrError,
-    passed: passed,
-    retriesRemaining: retriesRemaining,
-    linkStartTime: fetch_link_output.linkStartTime,
-    linkEndTime: fetch_link_output.linkEndTime,
-  };
-}
-
-/**
- * Fetches the target URL using Puppeteer's page.goto method.
- *
- * @param page - The Puppeteer Page instance.
- * @param target_url - The URL to navigate to.
- * @param timeout - The timeout for the navigation.
- * @returns The HTTP response, an error if navigation fails, or null if no response.
- */
-async function fetchLink(
-  page: Page,
-  target_url: string,
-  timeout: number
-): Promise<CommonResponseProps> {
-  let responseOrError: HTTPResponse | Error | null;
-  const linkStartTime = new Date().toISOString();
-
-  try {
-    responseOrError = await page.goto(target_url, {
-      waitUntil: 'load',
-      timeout: timeout,
+async function scrapeLinks(
+  originPage: Page,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+): Promise<LinkIntermediate[]> {
+  if (options.wait_for_selector) {
+    await originPage.waitForSelector(options.wait_for_selector, {
+      timeout: options.link_timeout_millis,
     });
-  } catch (err) {
-    responseOrError = err instanceof Error ? err : null;
   }
 
-  const linkEndTime = new Date().toISOString();
-  return { responseOrError, linkStartTime, linkEndTime };
+  // scrape links on originUrl
+  const retrievedLinks: LinkIntermediate[] = await retrieveLinksFromPage(
+    originPage,
+    options.query_selector_all,
+    options.get_attributes
+  );
+
+  return shuffleAndTruncate(
+    retrievedLinks,
+    options.link_limit!,
+    options.link_order
+  );
+}
+
+/**
+ * Validates input options and sets defaults in `options`.
+ *
+ * @param inputOptions - The input options for the broken link checker.
+ * @returns The processed broken link checker options.
+ */
+function processOptions(
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinksResultV1_BrokenLinkCheckerOptions {
+  const validOptions = validateInputOptions(inputOptions);
+  return setDefaultOptions(validOptions);
 }
