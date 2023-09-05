@@ -51,8 +51,8 @@ export interface PerLinkOption {
 }
 
 export enum LinkOrder {
-  'FIRST_N',
-  'RANDOM',
+  FIRST_N = 'FIRST_N',
+  RANDOM = 'RANDOM',
 }
 
 export enum StatusClass {
