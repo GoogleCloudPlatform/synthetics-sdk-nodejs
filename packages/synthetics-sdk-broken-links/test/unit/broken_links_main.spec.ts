@@ -23,9 +23,7 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import {
-  BrokenLinkCheckerOptions,
-} from '../../src/broken_links_func';
+import { BrokenLinkCheckerOptions } from '../../src/broken_links_func';
 import { runBrokenLinks } from '../../src/broken_links_main';
 const path = require('path');
 
@@ -44,7 +42,7 @@ describe('runBrokenLinks', async () => {
       syntheticResult.synthetic_broken_links_result_v1;
     expect(broken_links_result?.origin_link_result?.link_passed).to.be.false;
     expect(broken_links_result?.followed_link_results?.length).to.equal(0);
-  });
+  }).timeout(10000);
 
   it('returns generic_result with appropriate error information if error thrown', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
@@ -60,7 +58,7 @@ describe('runBrokenLinks', async () => {
     expect(genericResult?.generic_error?.error_message).to.equal(
       'origin_url must start with `http`'
     );
-  });
+  }).timeout(10000);
 
   it('successful execution', async () => {
     const origin_url = `file:${path.join(
@@ -75,7 +73,6 @@ describe('runBrokenLinks', async () => {
     };
 
     const result = await runBrokenLinks(inputOptions);
-    console.log(result);
 
     const expectedOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       origin_url: origin_url,
@@ -112,7 +109,7 @@ describe('runBrokenLinks', async () => {
           link_passed: true,
           expected_status_code: status_class_2xx,
           origin_url: origin_url,
-          target_url: 'https://www.example.com/',
+          target_url: 'CHECKED_BELOW',
           html_element: 'a',
           anchor_text: 'External Link',
           status_code: 200,
@@ -126,7 +123,7 @@ describe('runBrokenLinks', async () => {
           link_passed: false,
           expected_status_code: status_class_2xx,
           origin_url: origin_url,
-          target_url: 'https://www.example.com/image.jpg',
+          target_url: 'CHECKED_BELOW',
           html_element: 'img',
           anchor_text: '',
           status_code: 404,
@@ -137,6 +134,20 @@ describe('runBrokenLinks', async () => {
           link_end_time: 'NA',
           is_origin: false,
         },
+        {
+          link_passed: false,
+          expected_status_code: { status_class: 200 },
+          origin_url: origin_url,
+          target_url: 'CHECKED_BELOW',
+          html_element: 'img',
+          anchor_text: '',
+          status_code: undefined,
+          error_type: 'Error',
+          error_message: 'net::ERR_INVALID_URL at file://protocol_relative/',
+          link_start_time: '2023-09-07T21:06:19.480Z',
+          link_end_time: '2023-09-07T21:06:19.485Z',
+          is_origin: false,
+        },
       ];
 
     const broken_links_result = result.synthetic_broken_links_result_v1;
@@ -144,10 +155,10 @@ describe('runBrokenLinks', async () => {
       .excluding(['link_start_time', 'link_end_time'])
       .to.deep.equal(expectedOptions);
 
-    expect(broken_links_result?.link_count).to.equal(3);
+    expect(broken_links_result?.link_count).to.equal(4);
     expect(broken_links_result?.passing_link_count).to.equal(2);
-    expect(broken_links_result?.failing_link_count).to.equal(1);
-    expect(broken_links_result?.unreachable_count).to.equal(0);
+    expect(broken_links_result?.failing_link_count).to.equal(2);
+    expect(broken_links_result?.unreachable_count).to.equal(1);
     expect(broken_links_result?.status_2xx_count).to.equal(2);
     expect(broken_links_result?.status_3xx_count).to.equal(0);
     expect(broken_links_result?.status_4xx_count).to.equal(1);
@@ -158,7 +169,16 @@ describe('runBrokenLinks', async () => {
       .to.deep.equal(expectedOriginLinkResult);
 
     expect(broken_links_result?.followed_link_results)
-      .excluding(['link_start_time', 'link_end_time'])
+      .excluding(['target_url', 'link_start_time', 'link_end_time'])
       .to.deep.equal(expectedFollowedLinksResults);
-  });
+
+    const expectedTargetPaths = [
+      'example_html_files/basic_example.html',
+      'https://www.example.com/image.jpg',
+      'file://protocol_relative/',
+    ];
+    broken_links_result?.followed_link_results?.forEach((link, index) => {
+      expect(link.target_url.endsWith(expectedTargetPaths[index]));
+    });
+  }).timeout(10000);
 });

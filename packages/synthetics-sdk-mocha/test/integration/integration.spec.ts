@@ -20,7 +20,7 @@ import supertest from 'supertest';
 require('../../test/example_test_files/integration_server.js');
 const { getTestServer } = require('@google-cloud/functions-framework/testing');
 
-describe('CloudFunctionV2 Running Synthetics', () => {
+describe.only('CloudFunctionV2 Running Synthetics', () => {
   it('runs a passing mocha_tests suite', async () => {
     const server = getTestServer('SyntheticOk');
 

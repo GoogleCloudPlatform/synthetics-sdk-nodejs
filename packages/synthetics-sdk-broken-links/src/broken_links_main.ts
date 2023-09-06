@@ -15,6 +15,7 @@
 import puppeteer from 'puppeteer';
 import {
   getRuntimeMetadata,
+  instantiateMetadata,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
@@ -34,6 +35,9 @@ import {
   getGenericSyntheticResult,
 } from './broken_links_func';
 
+const synthetics_sdk_broken_links_package = require('../package.json');
+instantiateMetadata(synthetics_sdk_broken_links_package);
+
 export async function runBrokenLinks(
   inputOptions: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
@@ -49,7 +53,7 @@ export async function runBrokenLinks(
     // create Browser & origin page then navigate to origin_url, w/ origin
     // specific settings
     const browser = await puppeteer.launch({ headless: 'new' });
-    const originPage = await browser.newPage();
+    const originPage = await openNewPage(browser);
 
     // check origin_link
     const originLinkResult = await checkLink(

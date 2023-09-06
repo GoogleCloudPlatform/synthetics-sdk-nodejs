@@ -11,6 +11,6 @@
     "module": "commonjs"
   },
   "include": ["src/**/*", "test/**/*", "package.json"],
-  "exclude": ["test/example_test_files/*"],
+  "exclude": ["test/example_html_files/*"],
   "references": [{ "path": "../synthetics-sdk-api" }]
 }

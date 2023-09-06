@@ -584,7 +584,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       const truncatedLinks = shuffleAndTruncate(links, link_limit, firstN);
       // Expect that the truncatedLinks array has a length equal to link_limit-1
       // (this is to account for the origin_url being included in link_limit)
-      expect(truncatedLinks).to.have.lengthOf(link_limit-1);
+      expect(truncatedLinks).to.have.lengthOf(link_limit - 1);
     });
   });
 });

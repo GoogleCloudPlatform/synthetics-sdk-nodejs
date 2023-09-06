@@ -527,7 +527,6 @@ export function createSyntheticResult(
     end_time: new Date().toISOString(),
   };
 
-  console.log('syn_result');
   return synthetic_result;
 }
 

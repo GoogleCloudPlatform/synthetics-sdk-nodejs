@@ -331,20 +331,20 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       const expectations: LinkIntermediate[] = [
         {
           // Fully qualified external link
-          target_url: 'https://www.example.com/',
+          target_url: 'https://mocked.com/basic_example.html',
           anchor_text: 'External Link',
           html_element: 'a',
         },
         {
           // Internal Relative Link
-          target_url: 'https://mocked.com/about',
+          target_url: 'https://mocked.com/nested_html_files/about.html',
           anchor_text: 'Internal Relative Link',
           html_element: 'a',
         },
         {
-          // Protocol-Relative Link
-          target_url: 'https://example.com/protocol-relative',
-          anchor_text: 'Protocol-Relative Link',
+          // Other Link
+          target_url: 'https://mocked.com/basic_example.html',
+          anchor_text: 'Other Link',
           html_element: 'a',
         },
         {
@@ -361,7 +361,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
         },
         {
           // Image with href attribute
-          target_url: 'https://mocked.com/relative-link-img-href',
+          target_url: 'https://protocol_relative/',
           anchor_text: '',
           html_element: 'img',
         },
@@ -383,12 +383,12 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
 
       const expectations: LinkIntermediate[] = [
         {
-          target_url: 'https://www.example.com/',
+          target_url: 'https://mocked.com/basic_example.html',
           anchor_text: 'External Link',
           html_element: 'a',
         },
         {
-          target_url: 'https://mocked.com/relative-link-img-href',
+          target_url: 'https://protocol_relative/',
           anchor_text: '',
           html_element: 'img',
         },

@@ -94,13 +94,19 @@ export async function retrieveLinksFromPage(
         return get_attributes
           .map((attr) => (link_element.getAttribute(attr) || '').toString())
           .filter((value) => {
-            const qualifed_url = new URL(value, origin_url);
-            return value && qualifed_url.href.startsWith('http');
+            const qualifed_url = new URL(value, origin_url).href;
+            return (
+              value &&
+              (qualifed_url.startsWith('http') ||
+                qualifed_url.startsWith('file:'))
+            );
           })
           .map((value) => {
-            const qualifed_url = new URL(value, origin_url);
+            const qualifed_url = value.startsWith('file:')
+              ? value
+              : new URL(value, origin_url).href;
             return {
-              target_url: qualifed_url.href,
+              target_url: qualifed_url,
               anchor_text: anchor_text,
               html_element: link_element.tagName.toLocaleLowerCase(),
             };
