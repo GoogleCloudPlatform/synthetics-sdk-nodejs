@@ -28,8 +28,10 @@ import {
 import {
   checkStatusPassing,
   createSyntheticResult,
+  LinkIntermediate,
   setDefaultOptions,
   shouldGoToBlankPage,
+  shuffleAndTruncate,
   validateInputOptions,
 } from '../../src/link_utils';
 
@@ -142,12 +144,21 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         validateInputOptions(options);
       }).to.throw(Error, 'Missing origin_url in options');
     });
+
+    it('throws error if origin_url is not a string', () => {
+      const options = { origin_url: 4 } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
+    });
+
     it('throws error if origin_url does not start with http', () => {
       const options = { origin_url: 'blah' } as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'origin_url must start with `http`');
+      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
     });
+
     it('throws error if link_limit is not a number', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -160,6 +171,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_limit value, must be a number greater than 0'
       );
     });
+
     it('throws error if link_limit is less than 1', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -172,6 +184,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_limit value, must be a number greater than 0'
       );
     });
+
     it('throws error if query_selector_all is not a string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -184,6 +197,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid query_selector_all value, must be a non-empty string'
       );
     });
+
     it('throws error if query_selector_all is an empty string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -196,6 +210,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid query_selector_all value, must be a non-empty string'
       );
     });
+
     it('throws error if get_attributes is not an array of strings', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -208,6 +223,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid get_attributes value, must be an array of only strings'
       );
     });
+
     it('throws error if link_order is not a valid LinkOrder value', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -220,6 +236,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_order value, must be `FIRST_N` or `RANDOM`'
       );
     });
+
     it('link_order accepts string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -229,6 +246,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         validateInputOptions(options);
       }).to.not.throw();
     });
+
     it('throws error if link_timeout_millis is not a number', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -241,6 +259,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_timeout_millis value, must be a number greater than 0'
       );
     });
+
     it('throws error if link_timeout_millis is less than 1', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -253,6 +272,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_timeout_millis value, must be a number greater than 0'
       );
     });
+
     it('throws error if max_retries is not a number', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -265,6 +285,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid max_retries value, must be a number greater than -1'
       );
     });
+
     it('throws error if max_retries is less than -1', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -277,6 +298,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid max_retries value, must be a number greater than -1'
       );
     });
+
     it('throws error if max_redirects is not a number', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -286,6 +308,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         validateInputOptions(options);
       }).to.throw(Error, 'Invalid max_redirects');
     });
+
     it('throws error if max_redirects is less than -1', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -298,6 +321,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid max_redirects value, must be a number greater than -1'
       );
     });
+
     it('throws error if wait_for_selector is not a string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -310,6 +334,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid wait_for_selector value, must be a non-empty string'
       );
     });
+
     it('throws error if wait_for_selector is an empty string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -322,6 +347,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid wait_for_selector value, must be a non-empty string'
       );
     });
+
     it('throws error if per_link_options contains an invalid URL', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -338,6 +364,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid url in per_link_options, urls must start with `http`'
       );
     });
+
     it('throws error if per_link_options contains an invalid link_timeout_millis value', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -354,6 +381,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid link_timeout_millis value in per_link_options set for http://example.com, must be a number greater than 0'
       );
     });
+
     it('throws error if per_link_options contains an invalid expected_status_code number', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -370,6 +398,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid expected_status_code in per_link_options for http://example.com, must be a number between 100 and 599 (inclusive) or a string present in StatusClass enum'
       );
     });
+
     it('throws error if per_link_options contains an invalid expected_status_code string', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -386,6 +415,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         'Invalid expected_status_code in per_link_options for http://example.com, must be a number between 100 and 599 (inclusive) or a string present in StatusClass enum'
       );
     });
+
     it('per_link_options accepts valid string as StatusClass', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -399,6 +429,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         validateInputOptions(options);
       }).to.not.throw();
     });
+
     it('validates input options when all values are valid', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -422,6 +453,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
         validateInputOptions(options);
       }).not.to.throw();
     });
+
     it('validates input options and gets rid of extra fields', () => {
       const options = {
         origin_url: 'http://example.com',
@@ -550,5 +582,44 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       new Date(syntheticResult.start_time).getTime()
     ).to.be.lessThanOrEqual(new Date(syntheticResult.end_time).getTime());
     expect(syntheticResult.runtime_metadata).to.not.be.undefined;
+  });
+
+  describe('shuffleAndTruncate', () => {
+    const links: LinkIntermediate[] = [
+      { target_url: 'link1', html_element: '', anchor_text: '' },
+      { target_url: 'link2', html_element: '', anchor_text: '' },
+      { target_url: 'link3', html_element: '', anchor_text: '' },
+      { target_url: 'link4', html_element: '', anchor_text: '' },
+      { target_url: 'link5', html_element: '', anchor_text: '' },
+    ];
+    const random =
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM;
+    const firstN =
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N;
+
+    it('shuffles links when link_order is RANDOM', () => {
+      const link_limit = 6;
+
+      const shuffledLinks = shuffleAndTruncate(links, link_limit, random);
+      // Expect that the shuffledLinks array is not equal to the original links array
+      expect(shuffledLinks).to.not.deep.equal(links);
+    });
+
+    it('does not shuffle links when link_order is not RANDOM', () => {
+      const link_limit = 6;
+
+      const unshuffledLinks = shuffleAndTruncate(links, link_limit, firstN);
+      // Expect that the shuffledLinks array is equal to the original links array
+      expect(unshuffledLinks).to.deep.equal(links);
+    });
+
+    it('truncates to link_limit if less than the number of links', () => {
+      const link_limit = 3; // Less than the number of links
+
+      const truncatedLinks = shuffleAndTruncate(links, link_limit, firstN);
+      // Expect that the truncatedLinks array has a length equal to link_limit-1
+      // (this is to account for the origin_url being included in link_limit)
+      expect(truncatedLinks).to.have.lengthOf(link_limit - 1);
+    });
   });
 });
