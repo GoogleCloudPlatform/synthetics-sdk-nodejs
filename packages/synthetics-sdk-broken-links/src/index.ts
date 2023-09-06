@@ -13,11 +13,11 @@
 // limitations under the License.
 
 export {
-  runBrokenLinks,
   BrokenLinkCheckerOptions,
   PerLinkOption,
   StatusClass,
   LinkOrder,
-} from './broken_links';
+} from './broken_links_func';
+export { runBrokenLinks } from './broken_links_main';
 export * from './handlers';
 export * from '@google-cloud/synthetics-sdk-api';

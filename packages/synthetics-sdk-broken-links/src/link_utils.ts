@@ -27,7 +27,7 @@ import {
   BrokenLinkCheckerOptions,
   LinkOrder,
   StatusClass,
-} from './broken_links';
+} from './broken_links_func';
 
 /**
  * Represents an intermediate link with its properties.
@@ -131,7 +131,10 @@ export function validateInputOptions(
 ): BrokenLinkCheckerOptions {
   if (!inputOptions.origin_url) {
     throw new Error('Missing origin_url in options');
-  } else if (!inputOptions.origin_url.startsWith('http')) {
+  } else if (
+    !inputOptions.origin_url.startsWith('http') &&
+    !inputOptions.origin_url.endsWith('.html')
+  ) {
     throw new Error('origin_url must start with `http`');
   }
 
@@ -304,6 +307,8 @@ export function setDefaultOptions(
     // per_link_options and linkorder are handled below
     if (
       !(optionName in inputOptions) ||
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (inputOptions as any)[optionName] === undefined ||
       optionName === 'per_link_options' ||
       optionName === 'link_order'
     ) {
@@ -522,9 +527,19 @@ export function createSyntheticResult(
     end_time: new Date().toISOString(),
   };
 
+  console.log('syn_result');
   return synthetic_result;
 }
 
+/**
+ * Opens a new Puppeteer page within the provided browser instance, disables caching, and returns the created page.
+ *
+ * @param browser - The Puppeteer browser instance in which to open a new page.
+ * @returns A Promise that resolves with the newly created Puppeteer page or
+ *          rejects if an error occurs during page creation.
+ * @throws {Error} If an error occurs while opening a new page, it throws an
+ *                 error with an appropriate message.
+ */
 export async function openNewPage(browser: Browser) {
   try {
     const page = await browser.newPage();
@@ -534,4 +549,47 @@ export async function openNewPage(browser: Browser) {
     if (pageError instanceof Error) process.stderr.write(pageError.message);
     throw new Error('An error occurred while opening a new puppeteer.Page.');
   }
+}
+
+/**
+ * Closes the provided Puppeteer browser instance and handles any errors
+ * gracefully. No error is thrown as even if this errors we do not need to fail
+ * the entire execution as Cloud Functions will handle the cleanup.
+ *
+ * @param browser - The Puppeteer browser instance to close.
+ */
+export async function closeBrowser(browser: Browser) {
+  try {
+    await browser.close();
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+  }
+}
+
+/**
+ * If the `link_order` is set to `RANDOM`, the links will be shuffled randomly.
+ * Otherwise, the links will be copied without shuffling. Truncate to
+ * `link_limit` regardless
+ *
+ * @param links - The array of links to process.
+ * @param link_limit - The maximum number of links to retain.
+ * @param link_order - Whether or not to shuffle links (enum value).
+ * @returns A new array of links that have been truncated based on the `link_limit`.
+ */
+export function shuffleAndTruncate(
+  links: LinkIntermediate[],
+  link_limit: number,
+  link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder
+): LinkIntermediate[] {
+  // shuffle links if link_order is `RANDOM` and truncate to link_limit
+  // const links_to_follow: LinkIntermediate[] = [];
+
+  // Shuffle the links if link_order is RANDOM, or copy the original array
+  const linksToFollow =
+    link_order === BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM
+      ? [...links].sort(() => Math.random() - 0.5)
+      : [...links];
+
+  // Truncate the processed array to match the link_limit
+  return linksToFollow.slice(0, link_limit! - 1);
 }
