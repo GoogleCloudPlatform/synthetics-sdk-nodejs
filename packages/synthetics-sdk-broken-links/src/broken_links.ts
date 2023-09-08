@@ -21,6 +21,7 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   closeBrowser,
+  closePagePool,
   createSyntheticResult,
   LinkIntermediate,
   openNewPage,
@@ -79,30 +80,40 @@ export async function runBrokenLinks(
   try {
     const options = processOptions(inputOptions);
 
-    // create Browser & origin page then navigate to origin_url, w/ origin
-    // specific settings
-    browser = await puppeteer.launch({ headless: 'new' });
-    const originPage = await openNewPage(browser);
+    const timeLimitPromise = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 250000); // MINUS TIME PASSED!!
+    });
 
-    const followed_links = [await checkOriginLink(originPage, options)];
-    // if orgin link did not pass exit and return the singular link result
-    if (!followed_links[0].link_passed) {
-      return createSyntheticResult(
-        startTime,
-        runtime_metadata,
-        options,
-        followed_links
-      );
-    }
+    const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+    await Promise.race([
+      timeLimitPromise,
+      (async () => {
+        // create Browser & origin page then navigate to origin_url, w/ origin
+        // specific settings
+        browser = await puppeteer.launch({ headless: 'new' });
+        const originPage = await openNewPage(browser);
 
-    // scrape and organize links to check
-    const linksToFollow: LinkIntermediate[] = await scrapeLinks(
-      originPage,
-      options
-    );
+        followed_links.push(await checkOriginLink(originPage, options));
+        // if orgin link did not pass exit and return the singular link result
+        if (!followed_links[0].link_passed) {
+          return;
+        }
 
-    // check all links
-    followed_links.push(...(await checkLinks(browser, linksToFollow, options)));
+        // scrape and organize links to check
+        const linksToFollow: LinkIntermediate[] = await scrapeLinks(
+          originPage,
+          options
+        );
+
+        // check all links
+        followed_links.push(
+          ...(await checkLinks(browser, linksToFollow, options, startTime))
+        );
+        return;
+      })(),
+    ]);
 
     // returned a SyntheticResult with `options`, `followed_links` &
     // runtimeMetadata
@@ -119,7 +130,10 @@ export async function runBrokenLinks(
         : `An error occurred while starting or running the broken link checker on ${inputOptions.origin_url}. Please reference server logs for further information.`;
     return getGenericSyntheticResult(startTime, errorMessage);
   } finally {
-    await closeBrowser(browser!);
+    if (browser! !== undefined) {
+      await closePagePool(await browser!.pages());
+      await closeBrowser(browser!);
+    }
   }
 }
 

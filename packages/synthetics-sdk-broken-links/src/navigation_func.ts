@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import { Browser, HTTPResponse, Page } from 'puppeteer';
+import { pLimit } from 'plimit-lit';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -62,13 +63,19 @@ export async function retrieveLinksFromPage(
         return get_attributes
           .map((attr) => (link_element.getAttribute(attr) || '').toString())
           .filter((value) => {
-            const qualifed_url = new URL(value, origin_url);
-            return value && qualifed_url.href.startsWith('http');
+            const qualifed_url = new URL(value, origin_url).href;
+            return (
+              value &&
+              (qualifed_url.startsWith('http') ||
+                qualifed_url.startsWith('file:'))
+            );
           })
           .map((value) => {
-            const qualifed_url = new URL(value, origin_url);
+            const qualifed_url = value.startsWith('file:')
+              ? value
+              : new URL(value, origin_url).href;
             return {
-              target_url: qualifed_url.href,
+              target_url: qualifed_url,
               anchor_text: anchor_text,
               html_element: link_element.tagName.toLocaleLowerCase(),
             };
@@ -82,10 +89,10 @@ export async function retrieveLinksFromPage(
 }
 
 /**
- * Checks a list of links on a Puppeteer page, records the results, and throws a
- * detailed if necessary.
+ * Concurrently checks a list of links on multiple Puppeteer pages, records the results,
+ * and throws a detailed error if necessary.
  *
- * @param page - The Puppeteer page on which to check the links.
+ * @param browser - The Puppeteer browser instance used to create pages.
  * @param links - An array of links to check.
  * @param options - global options object with all broken link checker options.
  * @returns A Promise that resolves with an array of successfully checked link
@@ -96,22 +103,52 @@ export async function retrieveLinksFromPage(
 export async function checkLinks(
   browser: Browser,
   links: LinkIntermediate[],
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  startTime: string
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
-  const page = await openNewPage(browser);
+  const time_used = Date.now() - new Date(startTime).getTime();
+  console.log('time_used', time_used);
 
-  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
-  for (const link of links) {
-    try {
-      followed_links.push(await checkLink(page, link, options));
-    } catch (err) {
-      if (err instanceof Error) process.stderr.write(err.message);
-      throw new Error(
-        `An error occurred while checking ${link}. Please reference server logs for further information.`
-      );
-    }
-  }
-  return followed_links;
+  const timeLimitPromise = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 250000 - time_used - 1000); // MINUS TIME PASSED!!
+  });
+
+  return new Promise<BrokenLinksResultV1_SyntheticLinkResult[]>((resolve) => {
+    const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+    const limit = pLimit(options.link_limit! / 10);
+
+    // Initialize a pool of pages
+    const pagePool: Page[] = [];
+
+    const checkLinkPromises = links.map(async (link) => {
+      await limit(async () => {
+        try {
+          // Get a page from the pool or create a new one if the pool is empty
+          const page = pagePool.pop() || (await openNewPage(browser));
+
+          followed_links.push(await checkLink(page, link, options));
+          console.log('25000', followed_links.length);
+
+
+          // Add the used page back to the pool
+          pagePool.push(page);
+        } catch (err) {
+          if (err instanceof Error) process.stderr.write(err.message);
+          throw new Error(
+            `An error occurred while checking ${link}. Please reference server logs for further information.`
+          );
+        }
+      });
+    });
+
+    Promise.race([timeLimitPromise, Promise.all(checkLinkPromises)]).then(
+      () => {
+        resolve(followed_links);
+      }
+    );
+  });
 }
 
 /**
@@ -279,6 +316,7 @@ async function fetchLink(
       waitUntil: 'load',
       timeout: timeout,
     });
+    console.log('fetched');
   } catch (err) {
     responseOrError = err instanceof Error ? err : null;
   }

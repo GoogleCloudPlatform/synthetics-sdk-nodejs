@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Browser, HTTPResponse } from 'puppeteer';
+import { Browser, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
@@ -562,6 +562,22 @@ export async function openNewPage(browser: Browser) {
 export async function closeBrowser(browser: Browser) {
   try {
     await browser.close();
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+  }
+}
+
+/**
+ * Closes the provided Puppeteer pages handles any errors
+ * gracefully. No error is thrown as even if this errors we do not need to fail
+ * the entire execution as Cloud Functions will handle the cleanup.
+ *
+ * @param browser - The Puppeteer browser instance to close.
+ */
+export async function closePagePool(pagePool: Page[]) {
+  try {
+    // Close all pages in the pool
+    await Promise.all(pagePool.map(async (page) => await page.close()));
   } catch (err) {
     if (err instanceof Error) process.stderr.write(err.message);
   }
