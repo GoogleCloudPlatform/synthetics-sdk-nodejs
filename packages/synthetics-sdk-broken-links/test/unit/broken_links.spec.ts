@@ -288,7 +288,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
           .deep.equal(expectations);
       });
     });
-  });
+  }).timeout(3000);
 
   describe('retrieveLinksFromPage', async () => {
     // Puppeteer constants

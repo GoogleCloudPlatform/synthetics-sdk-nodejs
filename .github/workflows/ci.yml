@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [14, 16, 18, 20]
+        node: [18, 20]
         include:
           # use latest npm by default
           - npm-version: latest
@@ -21,14 +21,6 @@ jobs:
       - name: Upgrade to latest npm to support lockfile v2
         run: npm install -g npm@${{ matrix.npm-version }}
       - run: npm install && npm install
-      # Run all tests for Node versions other than 14.
-      - name: Run all tests for Node versions other than 14
-        if: matrix.node != '14'
+      - name: Run all tests
         run: |
           npm run test
-
-      # Run tests except synthetics-sdk-broken-links for Node version 14
-      - name: Run tests except synthetics-sdk-broken-links for Node version 14
-        if: matrix.node == '14'
-        run: |
-          npm run test-except-broken-links
