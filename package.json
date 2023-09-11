@@ -13,8 +13,7 @@
   ],
   "scripts": {
     "docs": "typedoc",
-    "test": "npm run test --workspaces",
-    "test-except-broken-links": "npm run test --workspace=@google-cloud/synthetics-sdk-api && npm run test --workspace=@google-cloud/synthetics-sdk-mocha"
+    "test": "npm run test --workspaces"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"
