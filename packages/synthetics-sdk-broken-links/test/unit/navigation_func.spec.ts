@@ -24,15 +24,16 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import { LinkIntermediate, setDefaultOptions } from '../../src/link_utils';
+import { LinkIntermediate } from '../../src/link_utils';
+import { BrokenLinkCheckerOptions } from '../../src/broken_links';
 import {
-  BrokenLinkCheckerOptions,
   checkLink,
   navigate,
   retrieveLinksFromPage,
-} from '../../src/broken_links';
+} from '../../src/navigation_func';
+import { setDefaultOptions } from '../../src/options_func';
 
-describe('GCM Synthetics Broken Links Core Functionality', async () => {
+describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   describe('puppeteer complete navigation & api spec response ', async () => {
     // constants
     const link: LinkIntermediate = {
@@ -411,4 +412,4 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       expect(results).to.deep.equal(expectations);
     });
   });
-});
+}).timeout(3000);
