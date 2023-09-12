@@ -304,6 +304,7 @@ async function fetchLink(
   return { responseOrError, linkStartTime, linkEndTime };
 }
 
+// TODO move this to utils
 const getGenericError = (genericErrorMessage: string): GenericResultV1 => ({
   ok: false,
   generic_error: {

@@ -23,17 +23,20 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import { LinkIntermediate, setDefaultOptions } from '../../src/link_utils';
+import { LinkIntermediate } from '../../src/link_utils';
+import {
+  runBrokenLinks,
+  BrokenLinkCheckerOptions,
+} from '../../src/broken_links';
+const path = require('path');
 import {
   checkLink,
   navigate,
   retrieveLinksFromPage,
 } from '../../src/navigation_func';
-import { BrokenLinkCheckerOptions } from '../../src/broken_links';
-const path = require('path');
+import { setDefaultOptions } from '../../src/options_func';
 
-describe('GCM Synthetics Broken Links Core Functionality', async () => {
-  describe('puppeteer complete navigation & api spec response ', async () => {
+describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     // constants
     const link: LinkIntermediate = {
       target_url: 'https://example.com',
@@ -288,7 +291,7 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
           .deep.equal(expectations);
       });
     });
-  });
+  }).timeout(3000);
 
   describe('retrieveLinksFromPage', async () => {
     // Puppeteer constants
@@ -410,5 +413,4 @@ describe('GCM Synthetics Broken Links Core Functionality', async () => {
       const expectations: LinkIntermediate[] = [];
       expect(results).to.deep.equal(expectations);
     });
-  });
-});
+}).timeout(3000);
