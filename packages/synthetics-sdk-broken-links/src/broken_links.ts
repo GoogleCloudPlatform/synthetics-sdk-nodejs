@@ -21,6 +21,7 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   closeBrowser,
+  closePagePool,
   createSyntheticResult,
   getGenericSyntheticResult,
   LinkIntermediate,
@@ -118,7 +119,10 @@ export async function runBrokenLinks(
         : `An error occurred while starting or running the broken link checker on ${inputOptions.origin_url}. Please reference server logs for further information.`;
     return getGenericSyntheticResult(startTime, errorMessage);
   } finally {
-    if (browser! !== undefined) await closeBrowser(browser!);
+    if (browser! !== undefined) {
+      await closeBrowser(browser);
+      await closePagePool(await browser.pages());
+    }
   }
 }
 

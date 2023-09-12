@@ -22,7 +22,6 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   checkStatusPassing,
-  closePagePool,
   CommonResponseProps,
   isHTTPResponse,
   LinkIntermediate,
@@ -124,7 +123,6 @@ export async function checkLinks(
     })
   );
 
-  await closePagePool(pagePool);
   return followed_links;
 }
 
