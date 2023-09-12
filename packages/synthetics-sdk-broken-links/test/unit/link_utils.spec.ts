@@ -19,18 +19,13 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import {
-  StatusClass,
-  LinkOrder,
-} from '../../src/broken_links';
+import { LinkOrder, StatusClass } from '../../src/broken_links';
 import {
   checkStatusPassing,
   shouldGoToBlankPage,
   createSyntheticResult,
 } from '../../src/link_utils';
-import {
-  setDefaultOptions,
-} from '../../src/options_func';
+import { setDefaultOptions } from '../../src/options_func';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
   const status_value_200: ResponseStatusCode = { status_value: 200 };
