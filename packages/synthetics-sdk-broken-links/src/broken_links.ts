@@ -14,6 +14,7 @@
 
 import puppeteer, { Browser, Page } from 'puppeteer';
 import {
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   getRuntimeMetadata,
   SyntheticResult,
@@ -21,6 +22,7 @@ import {
 import {
   closeBrowser,
   createSyntheticResult,
+  getGenericSyntheticResult,
   LinkIntermediate,
   openNewPage,
   shuffleAndTruncate,
@@ -29,7 +31,6 @@ import {
   checkLink,
   checkLinks,
   retrieveLinksFromPage,
-  getGenericSyntheticResult,
 } from './navigation_func';
 import { setDefaultOptions, validateInputOptions } from './options_func';
 

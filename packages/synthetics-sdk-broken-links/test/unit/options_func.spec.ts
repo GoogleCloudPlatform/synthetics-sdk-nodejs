@@ -112,7 +112,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
       const options = { origin_url: 'blah' } as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'origin_url must start with `http`');
+      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
     });
     it('throws error if link_limit is not a number', () => {
       const options = {

@@ -17,17 +17,13 @@ import {
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_SyntheticLinkResult,
+  GenericResultV1,
+  getRuntimeMetadata,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
-import {
-  BrokenLinkCheckerOptions,
-  LinkOrder,
-  StatusClass,
-} from './broken_links';
 
 /**
  * Represents an intermediate link with its properties.
@@ -340,3 +336,24 @@ export function shuffleAndTruncate(
   // Truncate the processed array to match the link_limit
   return linksToFollow.slice(0, link_limit! - 1);
 }
+
+const getGenericError = (genericErrorMessage: string): GenericResultV1 => ({
+  ok: false,
+  generic_error: {
+    error_type: 'Error',
+    error_message: genericErrorMessage,
+    function_name: '',
+    file_path: '',
+    line: 0,
+  },
+});
+
+export const getGenericSyntheticResult = (
+  startTime: string,
+  genericErrorMessage: string
+): SyntheticResult => ({
+  synthetic_generic_result_v1: getGenericError(genericErrorMessage),
+  runtime_metadata: getRuntimeMetadata(),
+  start_time: startTime,
+  end_time: new Date().toISOString(),
+});

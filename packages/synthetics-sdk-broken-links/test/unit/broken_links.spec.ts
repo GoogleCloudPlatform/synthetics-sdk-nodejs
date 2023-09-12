@@ -155,7 +155,7 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-        }
+        },
       ];
 
     const broken_links_result = result.synthetic_broken_links_result_v1;
@@ -176,10 +176,12 @@ describe('runBrokenLinks', async () => {
       .excluding(['link_start_time', 'link_end_time'])
       .to.deep.equal(expectedOriginLinkResult);
 
-    expect(broken_links_result?.followed_link_results)
+    const sorted_followed_links_result =
+      broken_links_result?.followed_link_results.sort((a, b) =>
+        a.target_url.localeCompare(b.target_url)
+      );
+    expect(sorted_followed_links_result)
       .excluding(['link_start_time', 'link_end_time'])
       .to.deep.equal(expectedFollowedLinksResults);
-
-
   }).timeout(10000);
 });
