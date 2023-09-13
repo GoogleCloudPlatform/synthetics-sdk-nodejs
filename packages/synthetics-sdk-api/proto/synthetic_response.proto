@@ -159,10 +159,12 @@ message BrokenLinksResultV1 {
 
     // Possible orders for checking links that have been scraped.
     enum LinkOrder {
+      // Default value that indicates no order.
+      LINK_ORDER_UNSPECIFIED = 0;
       // First "n" number of links scraped.
-      FIRST_N = 0;
+      FIRST_N = 1;
       // Random selection of links scraped.
-      RANDOM = 1;
+      RANDOM = 2;
     }
 
     // order to check links scraped
