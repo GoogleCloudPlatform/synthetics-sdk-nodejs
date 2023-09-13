@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Browser, HTTPResponse, Page } from 'puppeteer';
+import { HTTPResponse } from 'puppeteer';
 import {
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
@@ -257,57 +257,6 @@ export function createSyntheticResult(
   };
 
   return synthetic_result;
-}
-
-/**
- * Opens a new Puppeteer page within the provided browser instance, disables caching, and returns the created page.
- *
- * @param browser - The Puppeteer browser instance in which to open a new page.
- * @returns A Promise that resolves with the newly created Puppeteer page or
- *          rejects if an error occurs during page creation.
- * @throws {Error} If an error occurs while opening a new page, it throws an
- *                 error with an appropriate message.
- */
-export async function openNewPage(browser: Browser) {
-  try {
-    const page = await browser.newPage();
-    page.setCacheEnabled(false);
-    return page;
-  } catch (pageError) {
-    if (pageError instanceof Error) process.stderr.write(pageError.message);
-    throw new Error('An error occurred while opening a new puppeteer.Page.');
-  }
-}
-
-/**
- * Closes the provided Puppeteer browser instance and handles any errors
- * gracefully. No error is thrown as even if this errors we do not need to fail
- * the entire execution as Cloud Functions will handle the cleanup.
- *
- * @param browser - The Puppeteer browser instance to close.
- */
-export async function closeBrowser(browser: Browser) {
-  try {
-    await browser.close();
-  } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
-  }
-}
-
-/**
- * Closes the provided Puppeteer pages handles any errors
- * gracefully. No error is thrown as even if this errors we do not need to fail
- * the entire execution as Cloud Functions will handle the cleanup.
- *
- * @param browser - The Puppeteer browser instance to close.
- */
-export async function closePagePool(pagePool: Page[]) {
-  try {
-    // Close all pages in the pool
-    await Promise.all(pagePool.map(async (page) => await page.close()));
-  } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
-  }
 }
 
 /**

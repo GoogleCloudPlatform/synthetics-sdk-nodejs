@@ -20,18 +20,18 @@ import {
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
-  closeBrowser,
-  closePagePool,
   createSyntheticResult,
   getGenericSyntheticResult,
   LinkIntermediate,
-  openNewPage,
   shuffleAndTruncate,
 } from './link_utils';
 import {
   checkLink,
   checkLinks,
+  closeBrowser,
+  closePagePool,
   retrieveLinksFromPage,
+  openNewPage,
 } from './navigation_func';
 import { setDefaultOptions, validateInputOptions } from './options_func';
 
@@ -127,7 +127,7 @@ export async function runBrokenLinks(
 }
 
 /**
- * Checks the origin link and returns the result.
+ * Checks the origin link (waits for wait_for_selector) and returns the result.
  *
  * @param originPage - The Puppeteer page object representing the origin page.
  * @param options - The broken link checker options.
@@ -144,6 +144,22 @@ async function checkOriginLink(
     options,
     true
   );
+
+  try {
+    if (options.wait_for_selector) {
+      await originPage.waitForSelector(options.wait_for_selector, {
+        timeout: options.link_timeout_millis,
+      });
+    }
+  } catch (err) {
+    originLinkResult.link_passed = false;
+    if (err instanceof Error) {
+      originLinkResult.error_type = err.name;
+      originLinkResult.error_message = err.message;
+      process.stderr.write(err.message);
+    }
+  }
+
   return originLinkResult;
 }
 
@@ -161,12 +177,6 @@ async function scrapeLinks(
   originPage: Page,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<LinkIntermediate[]> {
-  if (options.wait_for_selector) {
-    await originPage.waitForSelector(options.wait_for_selector, {
-      timeout: options.link_timeout_millis,
-    });
-  }
-
   // scrape links on originUrl
   const retrievedLinks: LinkIntermediate[] = await retrieveLinksFromPage(
     originPage,

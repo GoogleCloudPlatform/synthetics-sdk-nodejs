@@ -24,9 +24,7 @@ import {
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
 import { LinkIntermediate } from '../../src/link_utils';
-import {
-  BrokenLinkCheckerOptions,
-} from '../../src/broken_links';
+import { BrokenLinkCheckerOptions } from '../../src/broken_links';
 const path = require('path');
 import {
   checkLink,
@@ -333,7 +331,7 @@ describe('retrieveLinksFromPage', async () => {
     const expectations: LinkIntermediate[] = [
       {
         // Fully qualified external link
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
@@ -356,14 +354,13 @@ describe('retrieveLinksFromPage', async () => {
         html_element: 'a',
       },
       {
-        // Image with src attribute
-        target_url: 'https://www.example.com/image.jpg',
+        target_url: 'https://mocked.com/jokes.json',
         anchor_text: '',
         html_element: 'img',
       },
       {
-        // Image with href attribute
-        target_url: 'https://mocked.com/relative-link-img-href',
+        // Image with src attribute
+        target_url: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },
@@ -385,12 +382,12 @@ describe('retrieveLinksFromPage', async () => {
 
     const expectations: LinkIntermediate[] = [
       {
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
       {
-        target_url: 'https://mocked.com/relative-link-img-href',
+        target_url: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },
