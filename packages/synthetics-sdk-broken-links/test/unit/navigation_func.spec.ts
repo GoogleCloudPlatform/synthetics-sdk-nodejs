@@ -333,7 +333,7 @@ describe('retrieveLinksFromPage', async () => {
     const expectations: LinkIntermediate[] = [
       {
         // Fully qualified external link
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
@@ -357,13 +357,7 @@ describe('retrieveLinksFromPage', async () => {
       },
       {
         // Image with src attribute
-        target_url: 'https://www.example.com/image.jpg',
-        anchor_text: '',
-        html_element: 'img',
-      },
-      {
-        // Image with href attribute
-        target_url: 'https://mocked.com/relative-link-img-href',
+        target_url: 'https://www.google.com/teapot',
         anchor_text: '',
         html_element: 'img',
       },
@@ -385,7 +379,7 @@ describe('retrieveLinksFromPage', async () => {
 
     const expectations: LinkIntermediate[] = [
       {
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },

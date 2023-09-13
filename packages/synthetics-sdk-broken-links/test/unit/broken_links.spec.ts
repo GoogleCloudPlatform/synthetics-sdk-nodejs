@@ -145,13 +145,13 @@ describe('runBrokenLinks', async () => {
           link_passed: false,
           expected_status_code: status_class_2xx,
           origin_url: origin_url,
-          target_url: 'https://www.example.com/image.jpg',
+          target_url: 'https://www.google.com/teapot',
           html_element: 'img',
           anchor_text: '',
-          status_code: 404,
+          status_code: 418,
           error_type: 'BrokenLinksSynthetic_IncorrectStatusCode',
           error_message:
-            'https://www.example.com/image.jpg returned status code 404 when a 200 status class was expected.',
+            'https://www.google.com/teapot returned status code 418 when a 200 status class was expected.',
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
@@ -162,6 +162,8 @@ describe('runBrokenLinks', async () => {
     expect(broken_links_result?.options)
       .excluding(['link_start_time', 'link_end_time'])
       .to.deep.equal(expectedOptions);
+
+    console.log(broken_links_result?.followed_link_results);
 
     expect(broken_links_result?.link_count).to.equal(3);
     expect(broken_links_result?.passing_link_count).to.equal(2);
