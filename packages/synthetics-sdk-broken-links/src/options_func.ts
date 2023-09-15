@@ -35,8 +35,12 @@ import {
 export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
   if (!inputOptions.origin_url) {
     throw new Error('Missing origin_url in options');
-  } else if (!inputOptions.origin_url.startsWith('http')) {
-    throw new Error('origin_url must start with `http`');
+  } else if (
+    typeof inputOptions.origin_url !== 'string' ||
+    (!inputOptions.origin_url.startsWith('http') &&
+      !inputOptions.origin_url.endsWith('.html'))
+  ) {
+    throw new Error('origin_url must be a string that starts with `http`');
   }
 
   // check link_limit
@@ -206,10 +210,13 @@ export function setDefaultOptions(
   >;
   for (const optionName of optionsKeys) {
     // per_link_options and linkorder are handled below
+    if (optionName === 'per_link_options' || optionName === 'link_order')
+      continue;
+
     if (
       !(optionName in inputOptions) ||
-      optionName === 'per_link_options' ||
-      optionName === 'link_order'
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      (inputOptions as any)[optionName] === undefined
     ) {
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       (outputOptions as any)[optionName] = defaulOptions[optionName];

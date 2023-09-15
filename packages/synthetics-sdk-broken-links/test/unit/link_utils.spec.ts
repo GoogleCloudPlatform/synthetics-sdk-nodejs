@@ -15,6 +15,7 @@
 import { expect } from 'chai';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -22,8 +23,10 @@ import {
 import { LinkOrder, StatusClass } from '../../src/broken_links';
 import {
   checkStatusPassing,
-  shouldGoToBlankPage,
   createSyntheticResult,
+  LinkIntermediate,
+  shouldGoToBlankPage,
+  shuffleAndTruncate,
 } from '../../src/link_utils';
 import { setDefaultOptions } from '../../src/options_func';
 
@@ -173,5 +176,44 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       new Date(syntheticResult.start_time).getTime()
     ).to.be.lessThanOrEqual(new Date(syntheticResult.end_time).getTime());
     expect(syntheticResult.runtime_metadata).to.not.be.undefined;
+  });
+
+  describe('shuffleAndTruncate', () => {
+    const links: LinkIntermediate[] = [
+      { target_url: 'link1', html_element: '', anchor_text: '' },
+      { target_url: 'link2', html_element: '', anchor_text: '' },
+      { target_url: 'link3', html_element: '', anchor_text: '' },
+      { target_url: 'link4', html_element: '', anchor_text: '' },
+      { target_url: 'link5', html_element: '', anchor_text: '' },
+    ];
+    const random =
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM;
+    const firstN =
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N;
+
+    it('shuffles links when link_order is RANDOM', () => {
+      const link_limit = 6;
+
+      const shuffledLinks = shuffleAndTruncate(links, link_limit, random);
+      // Expect that the shuffledLinks array is not equal to the original links array
+      expect(shuffledLinks).to.not.deep.equal(links);
+    });
+
+    it('does not shuffle links when link_order is not RANDOM', () => {
+      const link_limit = 6;
+
+      const unshuffledLinks = shuffleAndTruncate(links, link_limit, firstN);
+      // Expect that the shuffledLinks array is equal to the original links array
+      expect(unshuffledLinks).to.deep.equal(links);
+    });
+
+    it('truncates to link_limit if less than the number of links', () => {
+      const link_limit = 3; // Less than the number of links
+
+      const truncatedLinks = shuffleAndTruncate(links, link_limit, firstN);
+      // Expect that the truncatedLinks array has a length equal to link_limit-1
+      // (this is to account for the origin_url being included in link_limit)
+      expect(truncatedLinks).to.have.lengthOf(link_limit - 1);
+    });
   });
 });

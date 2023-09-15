@@ -102,11 +102,17 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(Error, 'Missing origin_url in options');
     });
+    it('throws error if origin_url is not a string', () => {
+      const options = { origin_url: 4 } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
+    });
     it('throws error if origin_url does not start with http', () => {
       const options = { origin_url: 'blah' } as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'origin_url must start with `http`');
+      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
     });
     it('throws error if link_limit is not a number', () => {
       const options = {

@@ -16,9 +16,8 @@ import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
 
-import puppeteer, { Page, Browser, HTTPResponse } from 'puppeteer';
+import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import sinon from 'sinon';
-const path = require('path');
 import {
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
@@ -26,6 +25,7 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import { LinkIntermediate } from '../../src/link_utils';
 import { BrokenLinkCheckerOptions } from '../../src/broken_links';
+const path = require('path');
 import {
   checkLink,
   navigate,
@@ -166,7 +166,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const json_link: LinkIntermediate = {
         target_url: `file:${path.join(
           __dirname,
-          '../example_test_files/jokes.json'
+          '../example_html_files/jokes.json'
         )}`,
         anchor_text: '',
         html_element: '',
@@ -179,7 +179,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         origin_url: 'http://origin.com',
         target_url: `file:${path.join(
           __dirname,
-          '../example_test_files/jokes.json'
+          '../example_html_files/jokes.json'
         )}`,
         html_element: '',
         anchor_text: '',
@@ -305,7 +305,7 @@ describe('retrieveLinksFromPage', async () => {
     await page.goto(
       `file:${path.join(
         __dirname,
-        '../example_test_files/retrieve_links_test.html'
+        '../example_html_files/retrieve_links_test.html'
       )}`
     );
     // Mock page.url() to return a custom URL
@@ -331,7 +331,7 @@ describe('retrieveLinksFromPage', async () => {
     const expectations: LinkIntermediate[] = [
       {
         // Fully qualified external link
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
@@ -354,14 +354,13 @@ describe('retrieveLinksFromPage', async () => {
         html_element: 'a',
       },
       {
-        // Image with src attribute
-        target_url: 'https://www.example.com/image.jpg',
+        target_url: 'https://mocked.com/jokes.json',
         anchor_text: '',
         html_element: 'img',
       },
       {
-        // Image with href attribute
-        target_url: 'https://mocked.com/relative-link-img-href',
+        // Image with src attribute
+        target_url: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },
@@ -383,12 +382,12 @@ describe('retrieveLinksFromPage', async () => {
 
     const expectations: LinkIntermediate[] = [
       {
-        target_url: 'https://www.example.com/',
+        target_url: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
       {
-        target_url: 'https://mocked.com/relative-link-img-href',
+        target_url: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },

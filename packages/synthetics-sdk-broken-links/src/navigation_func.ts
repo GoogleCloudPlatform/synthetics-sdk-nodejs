@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPResponse, Page } from 'puppeteer';
+import { Browser, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -21,11 +21,11 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   checkStatusPassing,
+  CommonResponseProps,
   isHTTPResponse,
   LinkIntermediate,
-  shouldGoToBlankPage,
   NavigateResponse,
-  CommonResponseProps,
+  shouldGoToBlankPage,
 } from './link_utils';
 
 /**
@@ -58,13 +58,19 @@ export async function retrieveLinksFromPage(
         return get_attributes
           .map((attr) => (link_element.getAttribute(attr) || '').toString())
           .filter((value) => {
-            const qualifed_url = new URL(value, origin_url);
-            return value && qualifed_url.href.startsWith('http');
+            const qualifed_url = new URL(value, origin_url).href;
+            return (
+              value &&
+              (qualifed_url.startsWith('http') ||
+                qualifed_url.startsWith('file:'))
+            );
           })
           .map((value) => {
-            const qualifed_url = new URL(value, origin_url);
+            const qualifed_url = value.startsWith('file:')
+              ? value
+              : new URL(value, origin_url).href;
             return {
-              target_url: qualifed_url.href,
+              target_url: qualifed_url,
               anchor_text: anchor_text,
               html_element: link_element.tagName.toLocaleLowerCase(),
             };
@@ -75,6 +81,38 @@ export async function retrieveLinksFromPage(
     get_attributes,
     origin_url
   );
+}
+
+/**
+ * Concurrently checks a list of links on multiple Puppeteer pages, records the results,
+ * and throws a detailed error if necessary.
+ *
+ * @param browser - The Puppeteer browser instance used to create pages.
+ * @param links - An array of links to check.
+ * @param options - global options object with all broken link checker options.
+ * @returns A Promise that resolves with an array of successfully checked link
+ *          results
+ * @throws {Error} If an error occurs while checking the links, it throws an
+ *          error with an appropriate message, including which link errored.
+ */
+export async function checkLinks(
+  browser: Browser,
+  links: LinkIntermediate[],
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
+  const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+  for (const link of links) {
+    try {
+      const page = await openNewPage(browser);
+      followed_links.push(await checkLink(page, link, options));
+    } catch (err) {
+      if (err instanceof Error) process.stderr.write(err.message);
+      throw new Error(
+        `An error occurred while checking ${link}. Please reference server logs for further information.`
+      );
+    }
+  }
+  return followed_links;
 }
 
 /**
@@ -160,7 +198,7 @@ export async function checkLink(
  * @param page - The Puppeteer Page instance.
  * @param link - The LinkIntermediate containing the target URL.
  * @param expected_status_code - The expected HTTP status code.
- * @param options - The options for navigation and retries.
+ * @param options - global options object with all broken link checker options.
  * @returns Information about navigation attempt:
  *   - `responseOrError`: HTTP response or error if navigation fails, or null.
  *   - `passed`: Boolean indicating if navigation passed per status code.
@@ -248,4 +286,55 @@ async function fetchLink(
 
   const linkEndTime = new Date().toISOString();
   return { responseOrError, linkStartTime, linkEndTime };
+}
+
+/**
+ * Closes the provided Puppeteer pages handles any errors
+ * gracefully. No error is thrown as even if this errors we do not need to fail
+ * the entire execution as Cloud Functions will handle the cleanup.
+ *
+ * @param browser - The Puppeteer browser instance to close.
+ */
+export async function closePagePool(pagePool: Page[]) {
+  try {
+    // Close all pages in the pool
+    await Promise.all(pagePool.map(async (page) => await page.close()));
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+  }
+}
+
+/**
+ * Opens a new Puppeteer page within the provided browser instance, disables caching, and returns the created page.
+ *
+ * @param browser - The Puppeteer browser instance in which to open a new page.
+ * @returns A Promise that resolves with the newly created Puppeteer page or
+ *          rejects if an error occurs during page creation.
+ * @throws {Error} If an error occurs while opening a new page, it throws an
+ *                 error with an appropriate message.
+ */
+export async function openNewPage(browser: Browser) {
+  try {
+    const page = await browser.newPage();
+    page.setCacheEnabled(false);
+    return page;
+  } catch (pageError) {
+    if (pageError instanceof Error) process.stderr.write(pageError.message);
+    throw new Error('An error occurred while opening a new puppeteer.Page.');
+  }
+}
+
+/**
+ * Closes the provided Puppeteer browser instance and handles any errors
+ * gracefully. No error is thrown as even if this errors we do not need to fail
+ * the entire execution as Cloud Functions will handle the cleanup.
+ *
+ * @param browser - The Puppeteer browser instance to close.
+ */
+export async function closeBrowser(browser: Browser) {
+  try {
+    await browser.close();
+  } catch (err) {
+    if (err instanceof Error) process.stderr.write(err.message);
+  }
 }

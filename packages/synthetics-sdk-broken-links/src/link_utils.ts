@@ -14,13 +14,17 @@
 
 import { HTTPResponse } from 'puppeteer';
 import {
-  ResponseStatusCode,
-  ResponseStatusCode_StatusClass,
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_SyntheticLinkResult,
+  GenericResultV1,
+  getRuntimeMetadata,
+  ResponseStatusCode,
+  ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
+
 /**
  * Represents an intermediate link with its properties.
  */
@@ -254,3 +258,51 @@ export function createSyntheticResult(
 
   return synthetic_result;
 }
+
+/**
+ * If the `link_order` is set to `RANDOM`, the links will be shuffled randomly.
+ * Otherwise, the links will be copied without shuffling. Truncate to
+ * `link_limit` regardless
+ *
+ * @param links - The array of links to process.
+ * @param link_limit - The maximum number of links to retain.
+ * @param link_order - Whether or not to shuffle links (enum value).
+ * @returns A new array of links that have been truncated based on the `link_limit`.
+ */
+export function shuffleAndTruncate(
+  links: LinkIntermediate[],
+  link_limit: number,
+  link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder
+): LinkIntermediate[] {
+  // shuffle links if link_order is `RANDOM` and truncate to link_limit
+
+  // Shuffle the links if link_order is RANDOM, or copy the original array
+  const linksToFollow =
+    link_order === BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM
+      ? [...links].sort(() => Math.random() - 0.5)
+      : [...links];
+
+  // Truncate the processed array to match the link_limit
+  return linksToFollow.slice(0, link_limit! - 1);
+}
+
+const getGenericError = (genericErrorMessage: string): GenericResultV1 => ({
+  ok: false,
+  generic_error: {
+    error_type: 'Error',
+    error_message: genericErrorMessage,
+    function_name: '',
+    file_path: '',
+    line: 0,
+  },
+});
+
+export const getGenericSyntheticResult = (
+  startTime: string,
+  genericErrorMessage: string
+): SyntheticResult => ({
+  synthetic_generic_result_v1: getGenericError(genericErrorMessage),
+  runtime_metadata: getRuntimeMetadata(),
+  start_time: startTime,
+  end_time: new Date().toISOString(),
+});
