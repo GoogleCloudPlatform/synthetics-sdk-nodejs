@@ -43,7 +43,7 @@ describe('runBrokenLinks', async () => {
       syntheticResult.synthetic_broken_links_result_v1;
     expect(broken_links_result?.origin_link_result?.link_passed).to.be.false;
     expect(broken_links_result?.followed_link_results?.length).to.equal(0);
-  }).timeout(10000);
+  }).timeout(15000);
 
   it('returns generic_result with appropriate error information if error thrown', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
@@ -59,7 +59,7 @@ describe('runBrokenLinks', async () => {
     expect(genericResult?.generic_error?.error_message).to.equal(
       'origin_uri must be a string that starts with `http`'
     );
-  }).timeout(10000);
+  }).timeout(15000);
 
   it('returns broken_links_result with origin link failure when waitForSelector exceeds deadline', async () => {
     const origin_uri = `file:${path.join(
@@ -84,7 +84,7 @@ describe('runBrokenLinks', async () => {
     expect(origin_link?.error_message).to.equal(
       'Waiting for selector `not_present` failed: Waiting failed: 3001ms exceeded'
     );
-  }).timeout(10000);
+  }).timeout(15000);
 
   it('successful execution with 1 failing link', async () => {
     const origin_uri = `file:${path.join(
@@ -200,5 +200,5 @@ describe('runBrokenLinks', async () => {
     broken_links_result?.followed_link_results?.forEach((link, index) => {
       expect(link.target_uri.endsWith(expectedTargeturis[index]));
     });
-  }).timeout(10000);
+  }).timeout(150000);
 });

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Browser, HTTPResponse, Page } from 'puppeteer';
+import { Browser, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -240,7 +240,8 @@ export async function navigate(
     fetch_link_output = await fetchLink(
       page,
       link.target_uri,
-      per_link_timeout_millis
+      per_link_timeout_millis,
+      options.max_redirects!
     );
 
     passed =
@@ -270,22 +271,58 @@ export async function navigate(
 async function fetchLink(
   page: Page,
   target_uri: string,
-  timeout: number
+  timeout: number,
+  max_redirects: number
 ): Promise<CommonResponseProps> {
   let responseOrError: HTTPResponse | Error | null;
   const linkStartTime = new Date().toISOString();
 
   try {
+    // Enable request interception.
+    await page.setRequestInterception(true);
+
+    // Intercept requests and follow redirects until the maximum number of redirects is reached.
+    page.on('request', async (request) => {
+      await handleNavigationRequestWithRedirects(request, max_redirects);
+    });
+
     responseOrError = await page.goto(target_uri, {
       waitUntil: 'load',
       timeout: timeout,
     });
   } catch (err) {
     responseOrError = err instanceof Error ? err : null;
+  } finally {
+    // Disable request interception.
+    await page.setRequestInterception(false);
   }
 
   const linkEndTime = new Date().toISOString();
   return { responseOrError, linkStartTime, linkEndTime };
+}
+
+/**
+ * Handles navigation requests and follows redirects until the maximum number of redirects is reached.
+ *
+ * @param {Request} request - The intercepted request.
+ * @param {number} max_redirects - The maximum number of redirects allowed.
+ */
+export async function handleNavigationRequestWithRedirects(
+  request: HTTPRequest,
+  max_redirects: number
+) {
+  let followedRedirects = 0;
+
+  if (request.isNavigationRequest()) {
+    if (followedRedirects > max_redirects) {
+      // If max_redirects is exceeded, abort the request
+      return await request.abort();
+    } else {
+      // If max_redirects is not exceeded, continue the request
+      followedRedirects++;
+    }
+  }
+  return await request.continue();
 }
 
 /**

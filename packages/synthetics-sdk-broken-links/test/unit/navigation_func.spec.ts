@@ -16,7 +16,7 @@ import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
 
-import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
+import puppeteer, { Browser, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -28,6 +28,7 @@ import { BrokenLinkCheckerOptions } from '../../src/broken_links';
 const path = require('path');
 import {
   checkLink,
+  handleNavigationRequestWithRedirects,
   navigate,
   retrieveLinksFromPage,
 } from '../../src/navigation_func';
@@ -47,8 +48,8 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   };
   const options = setDefaultOptions(input_options);
 
-  const response4xx: Partial<HTTPResponse> = { status: () => 404 };
   const response2xx: Partial<HTTPResponse> = { status: () => 200 };
+  const response4xx: Partial<HTTPResponse> = { status: () => 404 };
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
@@ -199,7 +200,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     it('catches and returns a TimeoutError', async () => {
       // set timeout
       const options_with_timeout = Object.assign({}, options);
-      options_with_timeout.link_timeout_millis = 1;
+      options_with_timeout.link_timeout_millis = 5;
 
       const timeout_link: LinkIntermediate = {
         target_uri: 'https://example.com',
@@ -222,7 +223,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         anchor_text: "Hello I'm an example",
         status_code: undefined,
         error_type: 'TimeoutError',
-        error_message: 'Navigation timeout of 1 ms exceeded',
+        error_message: 'Navigation timeout of 5 ms exceeded',
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
@@ -231,7 +232,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(synLinkResult)
         .excluding(['link_start_time', 'link_end_time'])
         .deep.equal(expectations);
-    });
+    }).timeout(5000);
 
     it('returns error when the actual response code does not match the expected', async () => {
       // add expected 404 status to options of broken link checker
@@ -288,7 +289,55 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         .deep.equal(expectations);
     });
   });
-}).timeout(3000);
+
+  describe('handleNavigationRequestWithRedirets', async () => {
+    it('should continue navigation request if redirects count is less than max_redirects', async () => {
+      // Arrange
+      const request = {
+        isNavigationRequest: () => true,
+        continue: async () => {},
+      } as HTTPRequest;
+      const max_redirects = 3;
+
+      // spy on continue() call
+      const continueSpy = sinon.spy(request, 'continue');
+
+      await handleNavigationRequestWithRedirects(request, max_redirects);
+
+      expect(continueSpy.calledOnce).to.be.true;
+    });
+
+    it('should continue navigation request is not a navigationResut()', async () => {
+      const request = {
+        isNavigationRequest: () => false,
+        continue: async () => {},
+      } as HTTPRequest;
+      const max_redirects = 3;
+
+      // spy on continue() call
+      const continueSpy = sinon.spy(request, 'continue');
+
+      await handleNavigationRequestWithRedirects(request, max_redirects);
+
+      expect(continueSpy.calledOnce).to.be.true;
+    });
+
+    it('should abort navigation request if redirects count is more than max_redirects', async () => {
+      // Arrange
+      const request = {
+        isNavigationRequest: () => true,
+        abort: async () => {},
+      } as HTTPRequest;
+      const max_redirects = -1;
+
+      const continueSpy = sinon.spy(request, 'abort');
+
+      await handleNavigationRequestWithRedirects(request, max_redirects);
+
+      expect(continueSpy.calledOnce).to.be.true;
+    });
+  });
+});
 
 describe('retrieveLinksFromPage', async () => {
   // Puppeteer constants

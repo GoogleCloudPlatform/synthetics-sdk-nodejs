@@ -87,10 +87,10 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
   if (
     inputOptions.link_timeout_millis !== undefined &&
     (typeof inputOptions.link_timeout_millis !== 'number' ||
-      inputOptions.link_timeout_millis < 1)
+      inputOptions.link_timeout_millis < 9)
   ) {
     throw new Error(
-      'Invalid link_timeout_millis value, must be a number greater than 0'
+      'Invalid link_timeout_millis value, must be a number greater than 9'
     );
   }
 
@@ -142,10 +142,10 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
     if (
       value.link_timeout_millis !== undefined &&
       (typeof inputOptions.link_timeout_millis !== 'number' ||
-        inputOptions.link_timeout_millis < 1)
+        inputOptions.link_timeout_millis < 9)
     ) {
       throw new Error(
-        `Invalid link_timeout_millis value in per_link_options set for ${key}, must be a number greater than 0`
+        `Invalid link_timeout_millis value in per_link_options set for ${key}, must be a number greater than 9`
       );
     }
 
