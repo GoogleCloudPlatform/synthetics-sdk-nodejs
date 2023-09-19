@@ -33,14 +33,14 @@ import {
  * @throws {Error} If any of the input options fail validation.
  */
 export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
-  if (!inputOptions.origin_url) {
-    throw new Error('Missing origin_url in options');
+  if (!inputOptions.origin_uri) {
+    throw new Error('Missing origin_uri in options');
   } else if (
-    typeof inputOptions.origin_url !== 'string' ||
-    (!inputOptions.origin_url.startsWith('http') &&
-      !inputOptions.origin_url.endsWith('.html'))
+    typeof inputOptions.origin_uri !== 'string' ||
+    (!inputOptions.origin_uri.startsWith('http') &&
+      !inputOptions.origin_uri.endsWith('.html'))
   ) {
-    throw new Error('origin_url must be a string that starts with `http`');
+    throw new Error('origin_uri must be a string that starts with `http`');
   }
 
   // check link_limit
@@ -131,10 +131,10 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
   for (const [key, value] of Object.entries(
     inputOptions.per_link_options || {}
   )) {
-    // Check URL in per_link_options
+    // Check URI in per_link_options
     if (!key.startsWith('http')) {
       throw new Error(
-        'Invalid url in per_link_options, urls must start with `http`'
+        'Invalid uri in per_link_options, uris must start with `http`'
       );
     }
 
@@ -167,7 +167,7 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
 
   // do this to remove out any extra fields
   return {
-    origin_url: inputOptions.origin_url,
+    origin_uri: inputOptions.origin_uri,
     link_limit: inputOptions.link_limit,
     query_selector_all: inputOptions.query_selector_all,
     get_attributes: inputOptions.get_attributes,
@@ -190,7 +190,7 @@ export function setDefaultOptions(
   inputOptions: BrokenLinkCheckerOptions
 ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
   const defaulOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
-    origin_url: '',
+    origin_uri: '',
     link_limit: 50,
     query_selector_all: 'a',
     get_attributes: ['href'],
@@ -242,7 +242,7 @@ export function setDefaultOptions(
   const perLinkOptions: {
     [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption;
   } = {};
-  for (const [url, perLinkOption] of Object.entries(
+  for (const [uri, perLinkOption] of Object.entries(
     inputOptions.per_link_options || {}
   )) {
     const expected_status_code = inputExpectedStatusToResponseStatusCode(
@@ -256,7 +256,7 @@ export function setDefaultOptions(
           perLinkOption.link_timeout_millis ||
           outputOptions.link_timeout_millis,
       };
-    perLinkOptions[url] = convertedPerLinkOption;
+    perLinkOptions[uri] = convertedPerLinkOption;
   }
   outputOptions.per_link_options = perLinkOptions;
   return outputOptions;

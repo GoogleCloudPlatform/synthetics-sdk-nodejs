@@ -37,7 +37,7 @@ import {
 import { setDefaultOptions, validateInputOptions } from './options_func';
 
 export interface BrokenLinkCheckerOptions {
-  origin_url: string;
+  origin_uri: string;
   link_limit?: number;
   query_selector_all?: string;
   get_attributes?: string[];
@@ -83,7 +83,7 @@ export async function runBrokenLinks(
   try {
     const options = processOptions(inputOptions);
 
-    // create Browser & origin page then navigate to origin_url, w/ origin
+    // create Browser & origin page then navigate to origin_uri, w/ origin
     // specific settings
     browser = await puppeteer.launch({ headless: 'new' });
     const originPage = await openNewPage(browser);
@@ -120,7 +120,7 @@ export async function runBrokenLinks(
     const errorMessage =
       err instanceof Error
         ? err.message
-        : `An error occurred while starting or running the broken link checker on ${inputOptions.origin_url}. Please reference server logs for further information.`;
+        : `An error occurred while starting or running the broken link checker on ${inputOptions.origin_uri}. Please reference server logs for further information.`;
     return getGenericSyntheticResult(startTime, errorMessage);
   } finally {
     if (browser! !== undefined) {
@@ -144,7 +144,7 @@ async function checkOriginLink(
   // check origin_link
   const originLinkResult = await checkLink(
     originPage,
-    { target_url: options.origin_url, anchor_text: '', html_element: '' },
+    { target_uri: options.origin_uri, anchor_text: '', html_element: '' },
     options,
     true
   );
@@ -181,7 +181,7 @@ async function scrapeLinks(
   originPage: Page,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<LinkIntermediate[]> {
-  // scrape links on originUrl
+  // scrape links on originUri
   const retrievedLinks: LinkIntermediate[] = await retrieveLinksFromPage(
     originPage,
     options.query_selector_all,

@@ -42,12 +42,12 @@ export async function retrieveLinksFromPage(
   query_selector_all: string,
   get_attributes: string[]
 ): Promise<LinkIntermediate[]> {
-  const origin_url = await page.url();
+  const origin_uri = await page.url();
   return await page.evaluate(
     (
       query_selector_all: string,
       get_attributes: string[],
-      origin_url: string
+      origin_uri: string
     ) => {
       const link_elements: HTMLElement[] = Array.from(
         document.querySelectorAll(query_selector_all)
@@ -58,7 +58,7 @@ export async function retrieveLinksFromPage(
         return get_attributes
           .map((attr) => (link_element.getAttribute(attr) || '').toString())
           .filter((value) => {
-            const qualifed_url = new URL(value, origin_url).href;
+            const qualifed_url = new URL(value, origin_uri).href;
             return (
               value &&
               (qualifed_url.startsWith('http') ||
@@ -68,9 +68,9 @@ export async function retrieveLinksFromPage(
           .map((value) => {
             const qualifed_url = value.startsWith('file:')
               ? value
-              : new URL(value, origin_url).href;
+              : new URL(value, origin_uri).href;
             return {
-              target_url: qualifed_url,
+              target_uri: qualifed_url,
               anchor_text: anchor_text,
               html_element: link_element.tagName.toLocaleLowerCase(),
             };
@@ -79,7 +79,7 @@ export async function retrieveLinksFromPage(
     },
     query_selector_all,
     get_attributes,
-    origin_url
+    origin_uri
   );
 }
 
@@ -119,7 +119,7 @@ export async function checkLinks(
  * Checks the status of a link and returns a synthetic link result.
  *
  * @param page - The Puppeteer Page instance to use for navigation.
- * @param link - The link.target_url to check
+ * @param link - The link.target_uri to check
  * @param options - global options object with all broken link checker options.
  * @param isOrigin=false - Indicates if the link is the origin URL.
  *
@@ -135,7 +135,7 @@ export async function checkLink(
   // Determine the expected status code for the link, using per-link setting if
   // available, else use default 2xx class
   const expectedStatusCode: ResponseStatusCode = options.per_link_options[
-    link.target_url
+    link.target_uri
   ]?.expected_status_code ?? {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
@@ -167,7 +167,7 @@ export async function checkLink(
       expectedStatusCode.status_class ?? expectedStatusCode.status_value;
 
     errorMessage =
-      `${link?.target_url} returned status code ` +
+      `${link?.target_uri} returned status code ` +
       `${responseOrError?.status()} when a ${expectedStatus} status ` +
       `${classOrCode} was expected.`;
   }
@@ -179,8 +179,8 @@ export async function checkLink(
   return {
     link_passed: passed,
     expected_status_code: expectedStatusCode,
-    origin_url: options.origin_url,
-    target_url: link.target_url,
+    source_uri: options.origin_uri,
+    target_uri: link.target_uri,
     html_element: link.html_element,
     anchor_text: link.anchor_text,
     status_code: response?.status(),
@@ -218,11 +218,11 @@ export async function navigate(
   let retriesRemaining = options.max_retries! + 1;
   // use link_specific timeout if set, else use options.link_timeout_millis
   const per_link_timeout_millis =
-    options.per_link_options[link.target_url]?.link_timeout_millis ??
+    options.per_link_options[link.target_uri]?.link_timeout_millis ??
     options.link_timeout_millis!;
 
   // see function description for why this is necessary
-  if (shouldGoToBlankPage(await page.url(), link.target_url)) {
+  if (shouldGoToBlankPage(await page.url(), link.target_uri)) {
     await page.goto('about:blank');
   }
 
@@ -239,7 +239,7 @@ export async function navigate(
     retriesRemaining--;
     fetch_link_output = await fetchLink(
       page,
-      link.target_url,
+      link.target_uri,
       per_link_timeout_millis
     );
 
@@ -263,20 +263,20 @@ export async function navigate(
  * Fetches the target URL using Puppeteer's page.goto method.
  *
  * @param page - The Puppeteer Page instance.
- * @param target_url - The URL to navigate to.
+ * @param target_uri - The URL to navigate to.
  * @param timeout - The timeout for the navigation.
  * @returns The HTTP response, an error if navigation fails, or null if no response.
  */
 async function fetchLink(
   page: Page,
-  target_url: string,
+  target_uri: string,
   timeout: number
 ): Promise<CommonResponseProps> {
   let responseOrError: HTTPResponse | Error | null;
   const linkStartTime = new Date().toISOString();
 
   try {
-    responseOrError = await page.goto(target_url, {
+    responseOrError = await page.goto(target_uri, {
       waitUntil: 'load',
       timeout: timeout,
     });

@@ -36,12 +36,12 @@ import { setDefaultOptions } from '../../src/options_func';
 describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   // constants
   const link: LinkIntermediate = {
-    target_url: 'https://example.com',
+    target_uri: 'https://example.com',
     anchor_text: '',
     html_element: '',
   };
   const input_options: BrokenLinkCheckerOptions = {
-    origin_url: 'http://origin.com',
+    origin_uri: 'http://origin.com',
     max_retries: 2,
     link_timeout_millis: 5000,
   };
@@ -79,7 +79,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   describe('navigate', async () => {
     it('should pass after retries', async () => {
       const pageStub = sinon.createStubInstance(Page);
-      pageStub.url.returns('fake-current-url');
+      pageStub.url.returns('fake-current-uri');
 
       // Configure the stub to simulate a failed navigation on the first call
       // and a successful one on the second
@@ -98,7 +98,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
     it('should fail after maximum retries', async () => {
       const pageStub = sinon.createStubInstance(Page);
-      pageStub.url.returns('fake-current-url');
+      pageStub.url.returns('fake-current-uri');
 
       // Configure the stub to simulate a failed navigation on three
       // consecutive calls
@@ -120,7 +120,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     it('with `shouldGoToBlankPage` navigation works on first try', async () => {
       await page.goto('https://pptr.dev/');
       const puppeteer_link: LinkIntermediate = {
-        target_url: 'https://pptr.dev/#',
+        target_uri: 'https://pptr.dev/#',
         anchor_text: '',
         html_element: '',
       };
@@ -134,14 +134,14 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   });
 
   describe('checkLink', async () => {
-    it('passes when navigating to real url', async () => {
+    it('passes when navigating to real uri', async () => {
       const synLinkResult = await checkLink(page, link, options);
 
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: true,
         expected_status_code: status_class_2xx,
-        origin_url: 'http://origin.com',
-        target_url: 'https://example.com',
+        source_uri: 'http://origin.com',
+        target_uri: 'https://example.com',
         html_element: '',
         anchor_text: '',
         status_code: 200,
@@ -164,7 +164,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
     it('passes when navigating to .json', async () => {
       const json_link: LinkIntermediate = {
-        target_url: `file:${path.join(
+        target_uri: `file:${path.join(
           __dirname,
           '../example_html_files/jokes.json'
         )}`,
@@ -176,8 +176,8 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: true,
         expected_status_code: status_class_2xx,
-        origin_url: 'http://origin.com',
-        target_url: `file:${path.join(
+        source_uri: 'http://origin.com',
+        target_uri: `file:${path.join(
           __dirname,
           '../example_html_files/jokes.json'
         )}`,
@@ -202,7 +202,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       options_with_timeout.link_timeout_millis = 1;
 
       const timeout_link: LinkIntermediate = {
-        target_url: 'https://example.com',
+        target_uri: 'https://example.com',
         anchor_text: "Hello I'm an example",
         html_element: 'img',
       };
@@ -216,8 +216,8 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: false,
         expected_status_code: status_class_2xx,
-        origin_url: 'http://origin.com',
-        target_url: 'https://example.com',
+        source_uri: 'http://origin.com',
+        target_uri: 'https://example.com',
         html_element: 'img',
         anchor_text: "Hello I'm an example",
         status_code: undefined,
@@ -247,7 +247,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
       // LinkIntermediate that will be navigated to
       const timeoutLink: LinkIntermediate = {
-        target_url: 'https://expecting404.com',
+        target_uri: 'https://expecting404.com',
         anchor_text: 'return 404',
         html_element: 'a',
       };
@@ -270,8 +270,8 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: false,
         expected_status_code: status_class_4xx,
-        origin_url: 'http://origin.com',
-        target_url: 'https://expecting404.com',
+        source_uri: 'http://origin.com',
+        target_uri: 'https://expecting404.com',
         html_element: 'a',
         anchor_text: 'return 404',
         status_code: 200,
@@ -294,7 +294,7 @@ describe('retrieveLinksFromPage', async () => {
   // Puppeteer constants
   let browser: Browser;
   let page: Page;
-  let pageUrlStub: sinon.SinonStub<[], string>;
+  let pageuriStub: sinon.SinonStub<[], string>;
   before(async () => {
     browser = await puppeteer.launch({ headless: 'new' });
   });
@@ -308,13 +308,13 @@ describe('retrieveLinksFromPage', async () => {
         '../example_html_files/retrieve_links_test.html'
       )}`
     );
-    // Mock page.url() to return a custom URL
-    pageUrlStub = sinon.stub(page, 'url').returns('https://mocked.com');
+    // Mock page.uri() to return a custom uri
+    pageuriStub = sinon.stub(page, 'url').returns('https://mocked.com');
   });
 
   after(async () => {
     // Close the browser after all tests
-    pageUrlStub.restore();
+    pageuriStub.restore();
     await browser.close();
   });
 
@@ -331,36 +331,36 @@ describe('retrieveLinksFromPage', async () => {
     const expectations: LinkIntermediate[] = [
       {
         // Fully qualified external link
-        target_url: 'https://mocked.com/200.html',
+        target_uri: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
       {
         // Internal Relative Link
-        target_url: 'https://mocked.com/about',
+        target_uri: 'https://mocked.com/about',
         anchor_text: 'Internal Relative Link',
         html_element: 'a',
       },
       {
         // Protocol-Relative Link
-        target_url: 'https://example.com/protocol-relative',
+        target_uri: 'https://example.com/protocol-relative',
         anchor_text: 'Protocol-Relative Link',
         html_element: 'a',
       },
       {
         // Anchor Link (Just #)
-        target_url: 'https://mocked.com/#',
+        target_uri: 'https://mocked.com/#',
         anchor_text: 'Anchor Link (Just #)',
         html_element: 'a',
       },
       {
-        target_url: 'https://mocked.com/jokes.json',
+        target_uri: 'https://mocked.com/jokes.json',
         anchor_text: '',
         html_element: 'img',
       },
       {
         // Image with src attribute
-        target_url: 'https://mocked.com/file_doesnt_exist.html',
+        target_uri: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },
@@ -382,12 +382,12 @@ describe('retrieveLinksFromPage', async () => {
 
     const expectations: LinkIntermediate[] = [
       {
-        target_url: 'https://mocked.com/200.html',
+        target_uri: 'https://mocked.com/200.html',
         anchor_text: 'External Link',
         html_element: 'a',
       },
       {
-        target_url: 'https://mocked.com/file_doesnt_exist.html',
+        target_uri: 'https://mocked.com/file_doesnt_exist.html',
         anchor_text: '',
         html_element: 'img',
       },
