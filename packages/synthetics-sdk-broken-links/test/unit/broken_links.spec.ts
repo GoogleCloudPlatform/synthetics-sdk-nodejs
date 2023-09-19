@@ -131,7 +131,9 @@ describe('runBrokenLinks', async () => {
     const file_doesnt_exist_path = `file://${path.join(
       __dirname,
       '../example_html_files/file_doesnt_exist.html'
-    )}`.split(' ').join('%20');
+    )}`
+      .split(' ')
+      .join('%20');
     const expectedFollowedLinksResults: BrokenLinksResultV1_SyntheticLinkResult[] =
       [
         {
@@ -161,7 +163,7 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-        }
+        },
       ];
 
     const broken_links_result = result.synthetic_broken_links_result_v1;

@@ -16,6 +16,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
+  instantiateMetadata,
   getRuntimeMetadata,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
@@ -67,6 +68,9 @@ export enum StatusClass {
   STATUS_CLASS_5XX = 'STATUS_CLASS_5XX',
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
+
+const synthetics_sdk_broken_links_package = require('../package.json');
+instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
   inputOptions: BrokenLinkCheckerOptions
