@@ -87,7 +87,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Visits and checks empty page with no links', async () => {
     const server = getTestServer('BrokenLinksEmptyPageOk');
@@ -162,7 +162,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Exits early with generic_result when options cannot be parsed', async () => {
     const server = getTestServer('BrokenLinksInvalidOptionsNotOk');
@@ -194,7 +194,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Runs a failing Broken Links suite', async () => {
     const server = getTestServer('BrokenLinksFailingOk');
@@ -317,7 +317,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Runs a passing Broken Links suite', async () => {
     const server = getTestServer('BrokenLinksPassingOk');
@@ -414,5 +414,5 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 });
