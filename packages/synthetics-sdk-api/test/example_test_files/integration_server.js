@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+const { runSyntheticHandler, instantiateAutoInstrumentation } = require('../../src/index');
+instantiateAutoInstrumentation();
 const functions = require('@google-cloud/functions-framework');
-const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
 import { AssertionError } from 'chai';
 
-functions.http('SyntheticOk', runSyntheticHandler(async () => {
+functions.http('SyntheticOk', runSyntheticHandler(async ({logger}) => {
+  logger.info('This is a log');
   return await true;
 }));
 
-functions.http('SyntheticNotOk', runSyntheticHandler(async () => {
+functions.http('SyntheticNotOk', runSyntheticHandler(async ({logger}) => {
     const e = new AssertionError('Did not assert');
     const splitStack = e.stack?.split('\n', 2) ?? '';
+    logger.error('This is an error log');
     e.stack = [
       splitStack?.[0],
       '    at internalFn (node:internal)',

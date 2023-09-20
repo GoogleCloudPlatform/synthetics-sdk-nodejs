@@ -12,22 +12,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { SyntheticResult } from '../../src'
+require('../../test/example_test_files/integration_server.js');
+import { SyntheticResult, TestFrameworkResultV1 } from '../../src';
 import { expect } from 'chai';
 import supertest from 'supertest';
 
-require('../../test/example_test_files/integration_server.js');
+import { Writable } from 'stream';
+import * as sinon from 'sinon';
+import winston, { Logger } from 'winston';
+
 const { getTestServer } = require('@google-cloud/functions-framework/testing');
+const { getInstrumentedLogger } = require('../../src/auto_instrumentation');
+
+let logger: Logger;
+let writeSpy: sinon.SinonSpy;
+
+const traceVersion = '00';
+const traceId = '12345678901234567890123456789012';
+const traceParentId = '1234567890123456';
+const traceFlags = '01';
+const traceParentHeader = [traceVersion, traceId, traceParentId, traceFlags].join('-');
 
 describe('CloudFunctionV2 Running Synthetics', async () => {
+  beforeEach(async () => {
+    const stream = new Writable();
+    stream._write = () => {};
+    writeSpy = sinon.spy(stream, '_write');
+
+    sinon.replace(process, 'env', {GCLOUD_PROJECT: 'project-id'});
+
+    logger = await getInstrumentedLogger();
+
+    const streamTransport = new winston.transports.Stream({ stream });
+    logger.add(streamTransport);
+  });
+
+  afterEach(async () => {
+    sinon.restore();
+  });
+
   it('runs a passing synthetic function', async () => {
     const server = getTestServer('SyntheticOk');
-
     const response = await supertest(server)
       .get('/')
       .send()
       .set('Content-Type', 'application/json')
+      .set('traceparent', traceParentHeader)
       .expect(200);
+
+    sinon.assert.calledOnce(writeSpy);
+
+    const record = JSON.parse(writeSpy.firstCall.args[0].toString());
+    expect(record['severity']).to.equal('INFO');
+    expect(record['message']).to.equal('This is a log');
+    expect(record['logging.googleapis.com/spanId']).to.equal('1234567890123456');
+    expect(record['logging.googleapis.com/trace']).to.equal('projects/project-id/traces/12345678901234567890123456789012');
+    expect(record['logging.googleapis.com/trace_sampled']).to.equal(true);
 
     const output: SyntheticResult = response.body as SyntheticResult;
     const start_time = output.start_time;
@@ -51,7 +91,17 @@ describe('CloudFunctionV2 Running Synthetics', async () => {
       .get('/')
       .send()
       .set('Content-Type', 'application/json')
+      .set('traceparent', traceParentHeader)
       .expect(200);
+
+    sinon.assert.calledOnce(writeSpy);
+
+    const record = JSON.parse(writeSpy.firstCall.args[0].toString());
+    expect(record['message']).to.equal('This is an error log');
+    expect(record['severity']).to.equal('ERROR');
+    expect(record['logging.googleapis.com/spanId']).to.equal('1234567890123456');
+    expect(record['logging.googleapis.com/trace']).to.equal('projects/project-id/traces/12345678901234567890123456789012');
+    expect(record['logging.googleapis.com/trace_sampled']).to.equal(true);
 
     const output: SyntheticResult = response.body as SyntheticResult;
     const start_time = output.start_time;
