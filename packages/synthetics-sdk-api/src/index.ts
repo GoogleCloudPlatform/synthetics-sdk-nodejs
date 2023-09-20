@@ -15,9 +15,14 @@
 /**
  * @public
  */
+
 export * from './generated/proto/synthetic_response';
 export { runSyntheticHandler } from './handlers';
 export {
   getRuntimeMetadata,
   instantiateMetadata,
 } from './runtime_metadata_extractor';
+export {
+  instantiateAutoInstrumentation,
+  getInstrumentedLogger,
+} from './auto_instrumentation';

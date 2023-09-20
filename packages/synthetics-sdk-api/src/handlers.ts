@@ -23,20 +23,24 @@ import {
   getRuntimeMetadata,
   instantiateMetadata,
 } from './runtime_metadata_extractor';
+import { Logger } from 'winston';
 
+import { getInstrumentedLogger } from './auto_instrumentation';
 instantiateMetadata();
 
 const asyncFilenamePrefix = 'async ';
-
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-const runSynthetic = async (syntheticCode: () => any) => {
+const runSynthetic = async (
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  syntheticCode: (args: { logger: Logger }) => any
+) => {
+  const logger = await getInstrumentedLogger();
   const startTime = new Date().toISOString();
 
   const syntheticResult = SyntheticResult.create();
   const synthetic_generic_result = GenericResultV1.create();
 
   try {
-    await syntheticCode();
+    await syntheticCode({ logger });
     synthetic_generic_result.ok = true;
   } catch (err: unknown) {
     synthetic_generic_result.ok = false;
@@ -88,8 +92,10 @@ const runSynthetic = async (syntheticCode: () => any) => {
  * @returns ExpressJS compatible middleware that invokes SyntheticsSDK mocha, and
  * returns the results via res.send
  */
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-export function runSyntheticHandler(syntheticCode: () => any) {
+export function runSyntheticHandler(
+  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+  syntheticCode: (args: { logger: Logger }) => any
+) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
     res.send(await runSynthetic(syntheticCode));
