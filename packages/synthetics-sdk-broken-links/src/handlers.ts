@@ -23,7 +23,7 @@ import { Request, Response } from 'express';
  * @returns ExpressJS compatible middleware that invokes SyntheticsSDK broken links, and
  * returns the results via res.send
  */
-export function runBrokenLinkHandler(options: BrokenLinkCheckerOptions) {
+export function runBrokenLinksHandler(options: BrokenLinkCheckerOptions) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
     res.send(await runBrokenLinks(options));

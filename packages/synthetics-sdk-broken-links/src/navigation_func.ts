@@ -174,7 +174,7 @@ export async function checkLink(
 
   const response = isHTTPResponse(responseOrError)
     ? (responseOrError as HTTPResponse)
-    : null;
+    : undefined;
 
   return {
     link_passed: passed,

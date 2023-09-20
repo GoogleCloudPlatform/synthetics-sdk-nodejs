@@ -1,5 +1,5 @@
 {
-  "name": "synthetics-sdk-broken-links",
+  "name": "@google-cloud/synthetics-sdk-broken-links",
   "version": "0.1.0",
   "description": "",
   "main": "./build/src/index.js",
@@ -33,7 +33,8 @@
     "chai-exclude": "^2.1.0",
     "express": "^4.18.2",
     "sinon": "^15.2.0",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "synthetics-sdk-broken-links": "file:./"
   },
   "engines": {
     "node": ">=18"
