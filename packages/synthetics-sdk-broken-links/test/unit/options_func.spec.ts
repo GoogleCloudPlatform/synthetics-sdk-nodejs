@@ -204,7 +204,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid link_timeout_millis value, must be a number greater than 0'
+        'Invalid link_timeout_millis value, must be a number greater than 9'
       );
     });
     it('throws error if link_timeout_millis is less than 1', () => {
@@ -216,7 +216,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid link_timeout_millis value, must be a number greater than 0'
+        'Invalid link_timeout_millis value, must be a number greater than 9'
       );
     });
     it('throws error if max_retries is not a number', () => {
@@ -317,7 +317,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid link_timeout_millis value in per_link_options set for http://example.com, must be a number greater than 0'
+        'Invalid link_timeout_millis value in per_link_options set for http://example.com, must be a number greater than 9'
       );
     });
     it('throws error if per_link_options contains an invalid expected_status_code number', () => {
