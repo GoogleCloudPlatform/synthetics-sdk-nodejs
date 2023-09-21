@@ -138,21 +138,21 @@ message BrokenLinksResultV1 {
   // the total number of links that count not be reached
   optional int64 unreachable_count = 4;
   // the total number of links that returned 2xx status codes
-  optional int64 status_2xx_count = 5;
+  optional int64 status2xx_count = 5;
   // the total number of links that returned 3xx status codes
-  optional int64 status_3xx_count = 6;
+  optional int64 status3xx_count = 6;
   // the total number of links that returned 4xx status codes
-  optional int64 status_4xx_count = 7;
+  optional int64 status4xx_count = 7;
   // the total number of links that returned 5xx status codes
-  optional int64 status_5xx_count = 8;
+  optional int64 status5xx_count = 8;
 
   message BrokenLinkCheckerOptions {
-    // Origin url from which to scrape all other links, this is the only
+    // Origin uri from which to scrape all other links, this is the only
     // required field.
-    string origin_url = 1;
+    string origin_uri = 1;
     // Number of links to follow, default 50.
     optional int64 link_limit = 2;
-    // HTML elements to scrape from origin_url, default 'a'.
+    // HTML elements to scrape from origin_uri, default 'a'.
     string query_selector_all = 3;
     // Attributes to scrape from queried HTML elements, default ['href'].
     repeated string get_attributes = 4;
@@ -177,7 +177,7 @@ message BrokenLinksResultV1 {
     optional int64 max_retries = 7;
     // Maximum number of times to follow redirects for a link, defaults to following all redirects.
     optional int64 max_redirects = 8;
-    // HTML element to wait for before scraping links on origin_url.
+    // HTML element to wait for before scraping links on origin_uri.
     // Method documentation:
     // https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
@@ -205,15 +205,15 @@ message BrokenLinksResultV1 {
     optional bool link_passed = 1;
     // The expected status code or status class.
     ResponseStatusCode expected_status_code = 2;
-    // Source_url from which the target_url is navigated from.
-    string origin_url = 3;
-    // Target_url navigated to from the source_url.
-    string target_url = 4;
-    // Anchor text on the source URL.
+    // Source_uri from which the target_uri is navigated from.
+    string source_uri = 3;
+    // target_uri navigated to from the source_uri.
+    string target_uri = 4;
+    // Anchor text on the source URI.
     string anchor_text = 5;
-    // HTML element from which target_url was scraped.
+    // HTML element from which target_uri was scraped.
     string html_element = 6;
-    // Status code returned by the target_url.
+    // Status code returned by the target_uri.
     optional int64 status_code = 7;
     // 'BrokenLinksSynthetic_IncorrectStatusCode' if the expected and actual
     // status codes differ. Otherwise, the class of the error thrown, eg
@@ -230,7 +230,7 @@ message BrokenLinksResultV1 {
     optional bool is_origin = 12;
   }
 
-  // link result for origin_url
+  // link result for origin_uri
   SyntheticLinkResult origin_link_result = 10;
   // link results for all scraped and followed links
   repeated SyntheticLinkResult followed_link_results = 11;

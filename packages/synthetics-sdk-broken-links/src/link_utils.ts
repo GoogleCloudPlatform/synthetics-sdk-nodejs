@@ -30,9 +30,9 @@ import {
  */
 export interface LinkIntermediate {
   /**
-   * The target URL of the link.
+   * The target URI of the link.
    */
-  target_url: string;
+  target_uri: string;
 
   /**
    * The anchor text of the link.
@@ -130,28 +130,28 @@ export function isHTTPResponse(
 }
 
 /**
- * Determines whether navigating from the current URL to the target URL
+ * Determines whether navigating from the current URI to the target URI
  * requires navigating to a blank page. This prevents Puppeteer errors caused by
- * navigating from one URL to the same URL with a different anchor part (will
+ * navigating from one URI to the same URI with a different anchor part (will
  * normally return `null`).
  *
- * @param current_url - The current URL in the browser.
- * @param target_url - The target URL
+ * @param current_uri - The current URI in the browser.
+ * @param target_uri - The target URI
  * @returns True if navigating requires a blank page, false otherwise.
  * @example
- * const currentUrl = 'http://example.com/page1#section1';
- * const targetUrl = 'http://example.com/page1#section2';
- * const needsBlankPage = shouldGoToBlankPage(currentUrl, targetUrl); // true
+ * const currentUri = 'http://example.com/page1#section1';
+ * const targetUri = 'http://example.com/page1#section2';
+ * const needsBlankPage = shouldGoToBlankPage(currentUri, targetUri); // true
  */
 export function shouldGoToBlankPage(
-  current_url: string,
-  target_url: string
+  current_uri: string,
+  target_uri: string
 ): boolean {
-  // Check if the target URL contains an anchor (#) and if the current URL
-  // includes the same base URL (excluding the anchor part)
+  // Check if the target URI contains an anchor (#) and if the current URI
+  // includes the same base URI (excluding the anchor part)
   return (
-    target_url.includes('#') &&
-    current_url.includes(target_url.substring(0, target_url.indexOf('#')))
+    target_uri.includes('#') &&
+    current_uri.includes(target_uri.substring(0, target_uri.indexOf('#')))
   );
 }
 
@@ -172,10 +172,10 @@ function parseFollowedLinks(
     passing_link_count: 0,
     failing_link_count: 0,
     unreachable_count: 0,
-    status_2xx_count: 0,
-    status_3xx_count: 0,
-    status_4xx_count: 0,
-    status_5xx_count: 0,
+    status2xx_count: 0,
+    status3xx_count: 0,
+    status4xx_count: 0,
+    status5xx_count: 0,
     options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
     origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
     followed_link_results: [],
@@ -198,23 +198,23 @@ function parseFollowedLinks(
 
     switch (Math.floor(link.status_code! / 100)) {
       case 2:
-        broken_links_result.status_2xx_count =
-          (broken_links_result.status_2xx_count ?? 0) + 1;
+        broken_links_result.status2xx_count =
+          (broken_links_result.status2xx_count ?? 0) + 1;
         break;
 
       case 3:
-        broken_links_result.status_3xx_count =
-          (broken_links_result.status_3xx_count ?? 0) + 1;
+        broken_links_result.status3xx_count =
+          (broken_links_result.status3xx_count ?? 0) + 1;
         break;
 
       case 4:
-        broken_links_result.status_4xx_count =
-          (broken_links_result.status_4xx_count ?? 0) + 1;
+        broken_links_result.status4xx_count =
+          (broken_links_result.status4xx_count ?? 0) + 1;
         break;
 
       case 5:
-        broken_links_result.status_5xx_count =
-          (broken_links_result.status_5xx_count ?? 0) + 1;
+        broken_links_result.status5xx_count =
+          (broken_links_result.status5xx_count ?? 0) + 1;
         break;
 
       default:

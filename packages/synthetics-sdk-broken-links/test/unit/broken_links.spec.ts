@@ -32,9 +32,9 @@ describe('runBrokenLinks', async () => {
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
-  it('exits early if origin_url is in an incorrect format', async () => {
+  it('exits early if origin_uri is in an incorrect format', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
-      origin_url: 'fake-url.html',
+      origin_uri: 'fake-uri.html',
     };
 
     const syntheticResult = await runBrokenLinks(inputOptions);
@@ -47,7 +47,7 @@ describe('runBrokenLinks', async () => {
 
   it('returns generic_result with appropriate error information if error thrown', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
-      origin_url: 'url-does-not-start-with-http',
+      origin_uri: 'uri-does-not-start-with-http',
     };
 
     const syntheticResult = await runBrokenLinks(inputOptions);
@@ -57,17 +57,17 @@ describe('runBrokenLinks', async () => {
     expect(genericResult?.ok).to.be.false;
     expect(genericResult?.generic_error?.error_type).to.equal('Error');
     expect(genericResult?.generic_error?.error_message).to.equal(
-      'origin_url must be a string that starts with `http`'
+      'origin_uri must be a string that starts with `http`'
     );
   }).timeout(10000);
 
   it('returns broken_links_result with origin link failure when waitForSelector exceeds deadline', async () => {
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
     )}`;
     const inputOptions = {
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       wait_for_selector: 'not_present',
       link_timeout_millis: 3001,
     };
@@ -87,12 +87,12 @@ describe('runBrokenLinks', async () => {
   }).timeout(10000);
 
   it('successful execution with 1 failing link', async () => {
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
     )}`;
     const inputOptions = {
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
     };
@@ -100,7 +100,7 @@ describe('runBrokenLinks', async () => {
     const result = await runBrokenLinks(inputOptions);
 
     const expectedOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       link_limit: 50,
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
@@ -116,8 +116,8 @@ describe('runBrokenLinks', async () => {
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
       link_passed: true,
       expected_status_code: status_class_2xx,
-      origin_url: origin_url,
-      target_url: origin_url,
+      source_uri: origin_uri,
+      target_uri: origin_uri,
       html_element: '',
       anchor_text: '',
       status_code: 200,
@@ -139,8 +139,8 @@ describe('runBrokenLinks', async () => {
         {
           link_passed: true,
           expected_status_code: status_class_2xx,
-          origin_url: origin_url,
-          target_url: 'CHECKED_BELOW',
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
           html_element: 'a',
           anchor_text: 'External Link',
           status_code: 200,
@@ -153,8 +153,8 @@ describe('runBrokenLinks', async () => {
         {
           link_passed: false,
           expected_status_code: status_class_2xx,
-          origin_url: origin_url,
-          target_url: 'CHECKED_BELOW',
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
           html_element: 'img',
           anchor_text: '',
           status_code: undefined,
@@ -175,10 +175,10 @@ describe('runBrokenLinks', async () => {
     expect(broken_links_result?.passing_link_count).to.equal(2);
     expect(broken_links_result?.failing_link_count).to.equal(1);
     expect(broken_links_result?.unreachable_count).to.equal(1);
-    expect(broken_links_result?.status_2xx_count).to.equal(2);
-    expect(broken_links_result?.status_3xx_count).to.equal(0);
-    expect(broken_links_result?.status_4xx_count).to.equal(0);
-    expect(broken_links_result?.status_5xx_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(2);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
 
     expect(broken_links_result?.origin_link_result)
       .excluding(['link_start_time', 'link_end_time'])
@@ -186,19 +186,19 @@ describe('runBrokenLinks', async () => {
 
     const sorted_followed_links_result =
       broken_links_result?.followed_link_results.sort((a, b) =>
-        a.target_url.localeCompare(b.target_url)
+        a.target_uri.localeCompare(b.target_uri)
       );
     expect(sorted_followed_links_result)
-      .excluding(['target_url', 'link_start_time', 'link_end_time'])
+      .excluding(['target_uri', 'link_start_time', 'link_end_time'])
       .to.deep.equal(expectedFollowedLinksResults);
 
     // these are checked separately because path and puppeteer format space differently which cause the equality assertion to fail
-    const expectedTargetUrls = [
+    const expectedTargeturis = [
       '/example_html_files/200.html',
       '/example_html_files/file_doesnt_exist.html',
     ];
     broken_links_result?.followed_link_results?.forEach((link, index) => {
-      expect(link.target_url.endsWith(expectedTargetUrls[index]));
+      expect(link.target_uri.endsWith(expectedTargeturis[index]));
     });
   }).timeout(10000);
 });

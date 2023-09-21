@@ -140,7 +140,7 @@ describe('gcm_synthetic_reporter', () => {
         expect(syntheticResult?.synthetic_test_framework_result_v1?.pending_test_count).to.equal(1);
         expect(syntheticResult?.synthetic_test_framework_result_v1?.failing_test_count).to.equal(0);
 
-        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.have.length(0);
+        expect(syntheticResult?.synthetic_test_framework_result_v1?.test_results).to.be.undefined;
         done();
       } catch (e) {
         done(e);

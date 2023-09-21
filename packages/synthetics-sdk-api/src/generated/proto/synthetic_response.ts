@@ -211,26 +211,26 @@ export interface BrokenLinksResultV1 {
     | number
     | undefined;
   /** the total number of links that returned 2xx status codes */
-  status_2xx_count?:
+  status2xx_count?:
     | number
     | undefined;
   /** the total number of links that returned 3xx status codes */
-  status_3xx_count?:
+  status3xx_count?:
     | number
     | undefined;
   /** the total number of links that returned 4xx status codes */
-  status_4xx_count?:
+  status4xx_count?:
     | number
     | undefined;
   /** the total number of links that returned 5xx status codes */
-  status_5xx_count?:
+  status5xx_count?:
     | number
     | undefined;
   /** Options set for broken link synthetic. */
   options:
     | BrokenLinksResultV1_BrokenLinkCheckerOptions
     | undefined;
-  /** link result for origin_url */
+  /** link result for origin_uri */
   origin_link_result:
     | BrokenLinksResultV1_SyntheticLinkResult
     | undefined;
@@ -240,15 +240,15 @@ export interface BrokenLinksResultV1 {
 
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
   /**
-   * Origin url from which to scrape all other links, this is the only
+   * Origin uri from which to scrape all other links, this is the only
    * required field.
    */
-  origin_url: string;
+  origin_uri: string;
   /** Number of links to follow, default 50. */
   link_limit?:
     | number
     | undefined;
-  /** HTML elements to scrape from origin_url, default 'a'. */
+  /** HTML elements to scrape from origin_uri, default 'a'. */
   query_selector_all: string;
   /** Attributes to scrape from queried HTML elements, default ['href']. */
   get_attributes: string[];
@@ -273,7 +273,7 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
     | number
     | undefined;
   /**
-   * HTML element to wait for before scraping links on origin_url.
+   * HTML element to wait for before scraping links on origin_uri.
    * Method documentation:
    * https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:
    * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
@@ -361,15 +361,15 @@ export interface BrokenLinksResultV1_SyntheticLinkResult {
   expected_status_code:
     | ResponseStatusCode
     | undefined;
-  /** Source_url from which the target_url is navigated from. */
-  origin_url: string;
-  /** Target_url navigated to from the source_url. */
-  target_url: string;
-  /** Anchor text on the source URL. */
+  /** Source_uri from which the target_uri is navigated from. */
+  source_uri: string;
+  /** target_uri navigated to from the source_uri. */
+  target_uri: string;
+  /** Anchor text on the source URI. */
   anchor_text: string;
-  /** HTML element from which target_url was scraped. */
+  /** HTML element from which target_uri was scraped. */
   html_element: string;
-  /** Status code returned by the target_url. */
+  /** Status code returned by the target_uri. */
   status_code?:
     | number
     | undefined;
@@ -1174,10 +1174,10 @@ function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
     passing_link_count: undefined,
     failing_link_count: undefined,
     unreachable_count: undefined,
-    status_2xx_count: undefined,
-    status_3xx_count: undefined,
-    status_4xx_count: undefined,
-    status_5xx_count: undefined,
+    status2xx_count: undefined,
+    status3xx_count: undefined,
+    status4xx_count: undefined,
+    status5xx_count: undefined,
     options: undefined,
     origin_link_result: undefined,
     followed_link_results: [],
@@ -1198,17 +1198,17 @@ export const BrokenLinksResultV1 = {
     if (message.unreachable_count !== undefined) {
       writer.uint32(32).int64(message.unreachable_count);
     }
-    if (message.status_2xx_count !== undefined) {
-      writer.uint32(40).int64(message.status_2xx_count);
+    if (message.status2xx_count !== undefined) {
+      writer.uint32(40).int64(message.status2xx_count);
     }
-    if (message.status_3xx_count !== undefined) {
-      writer.uint32(48).int64(message.status_3xx_count);
+    if (message.status3xx_count !== undefined) {
+      writer.uint32(48).int64(message.status3xx_count);
     }
-    if (message.status_4xx_count !== undefined) {
-      writer.uint32(56).int64(message.status_4xx_count);
+    if (message.status4xx_count !== undefined) {
+      writer.uint32(56).int64(message.status4xx_count);
     }
-    if (message.status_5xx_count !== undefined) {
-      writer.uint32(64).int64(message.status_5xx_count);
+    if (message.status5xx_count !== undefined) {
+      writer.uint32(64).int64(message.status5xx_count);
     }
     if (message.options !== undefined) {
       BrokenLinksResultV1_BrokenLinkCheckerOptions.encode(message.options, writer.uint32(74).fork()).ldelim();
@@ -1262,28 +1262,28 @@ export const BrokenLinksResultV1 = {
             break;
           }
 
-          message.status_2xx_count = longToNumber(reader.int64() as Long);
+          message.status2xx_count = longToNumber(reader.int64() as Long);
           continue;
         case 6:
           if (tag !== 48) {
             break;
           }
 
-          message.status_3xx_count = longToNumber(reader.int64() as Long);
+          message.status3xx_count = longToNumber(reader.int64() as Long);
           continue;
         case 7:
           if (tag !== 56) {
             break;
           }
 
-          message.status_4xx_count = longToNumber(reader.int64() as Long);
+          message.status4xx_count = longToNumber(reader.int64() as Long);
           continue;
         case 8:
           if (tag !== 64) {
             break;
           }
 
-          message.status_5xx_count = longToNumber(reader.int64() as Long);
+          message.status5xx_count = longToNumber(reader.int64() as Long);
           continue;
         case 9:
           if (tag !== 74) {
@@ -1321,10 +1321,10 @@ export const BrokenLinksResultV1 = {
       passing_link_count: isSet(object.passing_link_count) ? Number(object.passing_link_count) : undefined,
       failing_link_count: isSet(object.failing_link_count) ? Number(object.failing_link_count) : undefined,
       unreachable_count: isSet(object.unreachable_count) ? Number(object.unreachable_count) : undefined,
-      status_2xx_count: isSet(object.status_2xx_count) ? Number(object.status_2xx_count) : undefined,
-      status_3xx_count: isSet(object.status_3xx_count) ? Number(object.status_3xx_count) : undefined,
-      status_4xx_count: isSet(object.status_4xx_count) ? Number(object.status_4xx_count) : undefined,
-      status_5xx_count: isSet(object.status_5xx_count) ? Number(object.status_5xx_count) : undefined,
+      status2xx_count: isSet(object.status2xx_count) ? Number(object.status2xx_count) : undefined,
+      status3xx_count: isSet(object.status3xx_count) ? Number(object.status3xx_count) : undefined,
+      status4xx_count: isSet(object.status4xx_count) ? Number(object.status4xx_count) : undefined,
+      status5xx_count: isSet(object.status5xx_count) ? Number(object.status5xx_count) : undefined,
       options: isSet(object.options)
         ? BrokenLinksResultV1_BrokenLinkCheckerOptions.fromJSON(object.options)
         : undefined,
@@ -1351,17 +1351,17 @@ export const BrokenLinksResultV1 = {
     if (message.unreachable_count !== undefined) {
       obj.unreachable_count = Math.round(message.unreachable_count);
     }
-    if (message.status_2xx_count !== undefined) {
-      obj.status_2xx_count = Math.round(message.status_2xx_count);
+    if (message.status2xx_count !== undefined) {
+      obj.status2xx_count = Math.round(message.status2xx_count);
     }
-    if (message.status_3xx_count !== undefined) {
-      obj.status_3xx_count = Math.round(message.status_3xx_count);
+    if (message.status3xx_count !== undefined) {
+      obj.status3xx_count = Math.round(message.status3xx_count);
     }
-    if (message.status_4xx_count !== undefined) {
-      obj.status_4xx_count = Math.round(message.status_4xx_count);
+    if (message.status4xx_count !== undefined) {
+      obj.status4xx_count = Math.round(message.status4xx_count);
     }
-    if (message.status_5xx_count !== undefined) {
-      obj.status_5xx_count = Math.round(message.status_5xx_count);
+    if (message.status5xx_count !== undefined) {
+      obj.status5xx_count = Math.round(message.status5xx_count);
     }
     if (message.options !== undefined) {
       obj.options = BrokenLinksResultV1_BrokenLinkCheckerOptions.toJSON(message.options);
@@ -1386,10 +1386,10 @@ export const BrokenLinksResultV1 = {
     message.passing_link_count = object.passing_link_count ?? undefined;
     message.failing_link_count = object.failing_link_count ?? undefined;
     message.unreachable_count = object.unreachable_count ?? undefined;
-    message.status_2xx_count = object.status_2xx_count ?? undefined;
-    message.status_3xx_count = object.status_3xx_count ?? undefined;
-    message.status_4xx_count = object.status_4xx_count ?? undefined;
-    message.status_5xx_count = object.status_5xx_count ?? undefined;
+    message.status2xx_count = object.status2xx_count ?? undefined;
+    message.status3xx_count = object.status3xx_count ?? undefined;
+    message.status4xx_count = object.status4xx_count ?? undefined;
+    message.status5xx_count = object.status5xx_count ?? undefined;
     message.options = (object.options !== undefined && object.options !== null)
       ? BrokenLinksResultV1_BrokenLinkCheckerOptions.fromPartial(object.options)
       : undefined;
@@ -1404,7 +1404,7 @@ export const BrokenLinksResultV1 = {
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksResultV1_BrokenLinkCheckerOptions {
   return {
-    origin_url: "",
+    origin_uri: "",
     link_limit: undefined,
     query_selector_all: "",
     get_attributes: [],
@@ -1419,8 +1419,8 @@ function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksRe
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
   encode(message: BrokenLinksResultV1_BrokenLinkCheckerOptions, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.origin_url !== "") {
-      writer.uint32(10).string(message.origin_url);
+    if (message.origin_uri !== "") {
+      writer.uint32(10).string(message.origin_uri);
     }
     if (message.link_limit !== undefined) {
       writer.uint32(16).int64(message.link_limit);
@@ -1467,7 +1467,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
             break;
           }
 
-          message.origin_url = reader.string();
+          message.origin_uri = reader.string();
           continue;
         case 2:
           if (tag !== 16) {
@@ -1549,7 +1549,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
   fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions {
     return {
-      origin_url: isSet(object.origin_url) ? String(object.origin_url) : "",
+      origin_uri: isSet(object.origin_uri) ? String(object.origin_uri) : "",
       link_limit: isSet(object.link_limit) ? Number(object.link_limit) : undefined,
       query_selector_all: isSet(object.query_selector_all) ? String(object.query_selector_all) : "",
       get_attributes: Array.isArray(object?.get_attributes) ? object.get_attributes.map((e: any) => String(e)) : [],
@@ -1573,8 +1573,8 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
   toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions): unknown {
     const obj: any = {};
-    if (message.origin_url !== "") {
-      obj.origin_url = message.origin_url;
+    if (message.origin_uri !== "") {
+      obj.origin_uri = message.origin_uri;
     }
     if (message.link_limit !== undefined) {
       obj.link_limit = Math.round(message.link_limit);
@@ -1621,7 +1621,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     object: I,
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
     const message = createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions();
-    message.origin_url = object.origin_url ?? "";
+    message.origin_uri = object.origin_uri ?? "";
     message.link_limit = object.link_limit ?? undefined;
     message.query_selector_all = object.query_selector_all ?? "";
     message.get_attributes = object.get_attributes?.map((e) => e) || [];
@@ -1820,8 +1820,8 @@ function createBaseBrokenLinksResultV1_SyntheticLinkResult(): BrokenLinksResultV
   return {
     link_passed: undefined,
     expected_status_code: undefined,
-    origin_url: "",
-    target_url: "",
+    source_uri: "",
+    target_uri: "",
     anchor_text: "",
     html_element: "",
     status_code: undefined,
@@ -1841,11 +1841,11 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     if (message.expected_status_code !== undefined) {
       ResponseStatusCode.encode(message.expected_status_code, writer.uint32(18).fork()).ldelim();
     }
-    if (message.origin_url !== "") {
-      writer.uint32(26).string(message.origin_url);
+    if (message.source_uri !== "") {
+      writer.uint32(26).string(message.source_uri);
     }
-    if (message.target_url !== "") {
-      writer.uint32(34).string(message.target_url);
+    if (message.target_uri !== "") {
+      writer.uint32(34).string(message.target_uri);
     }
     if (message.anchor_text !== "") {
       writer.uint32(42).string(message.anchor_text);
@@ -1900,14 +1900,14 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
             break;
           }
 
-          message.origin_url = reader.string();
+          message.source_uri = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.target_url = reader.string();
+          message.target_uri = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
@@ -1980,8 +1980,8 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
       expected_status_code: isSet(object.expected_status_code)
         ? ResponseStatusCode.fromJSON(object.expected_status_code)
         : undefined,
-      origin_url: isSet(object.origin_url) ? String(object.origin_url) : "",
-      target_url: isSet(object.target_url) ? String(object.target_url) : "",
+      source_uri: isSet(object.source_uri) ? String(object.source_uri) : "",
+      target_uri: isSet(object.target_uri) ? String(object.target_uri) : "",
       anchor_text: isSet(object.anchor_text) ? String(object.anchor_text) : "",
       html_element: isSet(object.html_element) ? String(object.html_element) : "",
       status_code: isSet(object.status_code) ? Number(object.status_code) : undefined,
@@ -2001,11 +2001,11 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     if (message.expected_status_code !== undefined) {
       obj.expected_status_code = ResponseStatusCode.toJSON(message.expected_status_code);
     }
-    if (message.origin_url !== "") {
-      obj.origin_url = message.origin_url;
+    if (message.source_uri !== "") {
+      obj.source_uri = message.source_uri;
     }
-    if (message.target_url !== "") {
-      obj.target_url = message.target_url;
+    if (message.target_uri !== "") {
+      obj.target_uri = message.target_uri;
     }
     if (message.anchor_text !== "") {
       obj.anchor_text = message.anchor_text;
@@ -2047,8 +2047,8 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     message.expected_status_code = (object.expected_status_code !== undefined && object.expected_status_code !== null)
       ? ResponseStatusCode.fromPartial(object.expected_status_code)
       : undefined;
-    message.origin_url = object.origin_url ?? "";
-    message.target_url = object.target_url ?? "";
+    message.source_uri = object.source_uri ?? "";
+    message.target_uri = object.target_uri ?? "";
     message.anchor_text = object.anchor_text ?? "";
     message.html_element = object.html_element ?? "";
     message.status_code = object.status_code ?? undefined;

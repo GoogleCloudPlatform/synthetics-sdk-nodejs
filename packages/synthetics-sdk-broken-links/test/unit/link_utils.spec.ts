@@ -77,33 +77,33 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('shouldGoToBlankPage', () => {
     it('should return true for different anchor parts', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1#section2';
-      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
+      const current_uri = 'http://example.com/page1#section1';
+      const target_uri = 'http://example.com/page1#section2';
+      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
     });
 
-    it('should return false for same URLs', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1#section1';
-      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
+    it('should return false for same uris', () => {
+      const current_uri = 'http://example.com/page1#section1';
+      const target_uri = 'http://example.com/page1#section1';
+      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
     });
 
-    it('should return false for different URLs', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page2#section1';
-      expect(shouldGoToBlankPage(current_url, target_url)).to.be.false;
+    it('should return false for different uris', () => {
+      const current_uri = 'http://example.com/page1#section1';
+      const target_uri = 'http://example.com/page2#section1';
+      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.false;
     });
 
     it('should return true if target has # and current does not', () => {
-      const current_url = 'http://example.com/page1';
-      const target_url = 'http://example.com/page1#section1';
-      expect(shouldGoToBlankPage(current_url, target_url)).to.be.true;
+      const current_uri = 'http://example.com/page1';
+      const target_uri = 'http://example.com/page1#section1';
+      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
     });
 
     it('should return false if target has no #', () => {
-      const current_url = 'http://example.com/page1#section1';
-      const target_url = 'http://example.com/page1';
-      expect(shouldGoToBlankPage(current_url, target_url)).to.be.false;
+      const current_uri = 'http://example.com/page1#section1';
+      const target_uri = 'http://example.com/page1';
+      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.false;
     });
   });
 
@@ -132,7 +132,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     };
     const options: BrokenLinksResultV1_BrokenLinkCheckerOptions =
       setDefaultOptions({
-        origin_url: 'https://example.com',
+        origin_uri: 'https://example.com',
         get_attributes: ['src'],
         link_order: LinkOrder.RANDOM,
         link_timeout_millis: 5000,
@@ -163,10 +163,10 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       passing_link_count: 5,
       failing_link_count: 3,
       unreachable_count: 1,
-      status_2xx_count: 4,
-      status_3xx_count: 1,
-      status_4xx_count: 1,
-      status_5xx_count: 1,
+      status2xx_count: 4,
+      status3xx_count: 1,
+      status4xx_count: 1,
+      status5xx_count: 1,
       options: options,
       origin_link_result: origin_link,
       followed_link_results: followed_links,
@@ -180,11 +180,11 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('shuffleAndTruncate', () => {
     const links: LinkIntermediate[] = [
-      { target_url: 'link1', html_element: '', anchor_text: '' },
-      { target_url: 'link2', html_element: '', anchor_text: '' },
-      { target_url: 'link3', html_element: '', anchor_text: '' },
-      { target_url: 'link4', html_element: '', anchor_text: '' },
-      { target_url: 'link5', html_element: '', anchor_text: '' },
+      { target_uri: 'link1', html_element: '', anchor_text: '' },
+      { target_uri: 'link2', html_element: '', anchor_text: '' },
+      { target_uri: 'link3', html_element: '', anchor_text: '' },
+      { target_uri: 'link4', html_element: '', anchor_text: '' },
+      { target_uri: 'link5', html_element: '', anchor_text: '' },
     ];
     const random =
       BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM;
@@ -212,7 +212,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
       const truncatedLinks = shuffleAndTruncate(links, link_limit, firstN);
       // Expect that the truncatedLinks array has a length equal to link_limit-1
-      // (this is to account for the origin_url being included in link_limit)
+      // (this is to account for the origin_uri being included in link_limit)
       expect(truncatedLinks).to.have.lengthOf(link_limit - 1);
     });
   });

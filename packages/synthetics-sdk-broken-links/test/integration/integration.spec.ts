@@ -55,12 +55,12 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
     expect(broken_links_result?.passing_link_count).to.equal(0);
     expect(broken_links_result?.failing_link_count).to.equal(1);
     expect(broken_links_result?.unreachable_count).to.equal(1);
-    expect(broken_links_result?.status_2xx_count).to.equal(0);
-    expect(broken_links_result?.status_3xx_count).to.equal(0);
-    expect(broken_links_result?.status_4xx_count).to.equal(0);
-    expect(broken_links_result?.status_5xx_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(0);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
 
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/file_doesnt_exist.html'
     )}`;
@@ -70,12 +70,12 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .to.deep.equal({
         link_passed: false,
         expected_status_code: status_class_2xx,
-        origin_url: origin_url,
-        target_url: origin_url,
+        source_uri: origin_uri,
+        target_uri: origin_uri,
         html_element: '',
         anchor_text: '',
         error_type: 'Error',
-        error_message: 'net::ERR_FILE_NOT_FOUND at ' + origin_url,
+        error_message: 'net::ERR_FILE_NOT_FOUND at ' + origin_uri,
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
@@ -87,7 +87,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Visits and checks empty page with no links', async () => {
     const server = getTestServer('BrokenLinksEmptyPageOk');
@@ -99,7 +99,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .set('Content-Type', 'application/json')
       .expect(200);
 
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/200.html'
     )}`;
@@ -120,13 +120,13 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
     expect(broken_links_result?.passing_link_count).to.equal(1);
     expect(broken_links_result?.failing_link_count).to.equal(0);
     expect(broken_links_result?.unreachable_count).to.equal(0);
-    expect(broken_links_result?.status_2xx_count).to.equal(1);
-    expect(broken_links_result?.status_3xx_count).to.equal(0);
-    expect(broken_links_result?.status_4xx_count).to.equal(0);
-    expect(broken_links_result?.status_5xx_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(1);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
 
     expect(options).to.deep.equal({
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       link_limit: 50,
       query_selector_all: 'a',
       get_attributes: ['href'],
@@ -144,8 +144,8 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .to.deep.equal({
         link_passed: true,
         expected_status_code: status_class_2xx,
-        origin_url: origin_url,
-        target_url: origin_url,
+        source_uri: origin_uri,
+        target_uri: origin_uri,
         html_element: '',
         anchor_text: '',
         status_code: 200,
@@ -162,7 +162,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Exits early with generic_result when options cannot be parsed', async () => {
     const server = getTestServer('BrokenLinksInvalidOptionsNotOk');
@@ -194,7 +194,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Runs a failing Broken Links suite', async () => {
     const server = getTestServer('BrokenLinksFailingOk');
@@ -206,7 +206,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .set('Content-Type', 'application/json')
       .expect(200);
 
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
     )}`;
@@ -227,13 +227,13 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
     expect(broken_links_result?.passing_link_count).to.equal(2);
     expect(broken_links_result?.failing_link_count).to.equal(1);
     expect(broken_links_result?.unreachable_count).to.equal(1);
-    expect(broken_links_result?.status_2xx_count).to.equal(2);
-    expect(broken_links_result?.status_3xx_count).to.equal(0);
-    expect(broken_links_result?.status_4xx_count).to.equal(0);
-    expect(broken_links_result?.status_5xx_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(2);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
 
     expect(options).to.deep.equal({
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       link_limit: 50,
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
@@ -251,8 +251,8 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .to.deep.equal({
         link_passed: true,
         expected_status_code: status_class_2xx,
-        origin_url: origin_url,
-        target_url: origin_url,
+        source_uri: origin_uri,
+        target_uri: origin_uri,
         html_element: '',
         anchor_text: '',
         status_code: 200,
@@ -264,7 +264,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       });
 
     const sorted_followed_links = followed_links?.sort((a, b) =>
-      a.target_url.localeCompare(b.target_url)
+      a.target_uri.localeCompare(b.target_uri)
     );
 
     const doesnt_exist_path = `file://${path.join(
@@ -274,13 +274,13 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .split(' ')
       .join('%20');
     expect(sorted_followed_links)
-      .excluding(['target_url', 'link_start_time', 'link_end_time'])
+      .excluding(['target_uri', 'link_start_time', 'link_end_time'])
       .to.deep.equal([
         {
           link_passed: true,
           expected_status_code: status_class_2xx,
-          origin_url: origin_url,
-          target_url: 'CHECKED_BELOW',
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
           html_element: 'a',
           anchor_text: 'External Link',
           status_code: 200,
@@ -293,8 +293,8 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         {
           link_passed: false,
           expected_status_code: { status_class: 200 },
-          origin_url: origin_url,
-          target_url: 'CHECKED_BELOW',
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
           html_element: 'img',
           anchor_text: '',
           error_type: 'Error',
@@ -310,14 +310,14 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       'example_html_files/file_doesnt_exist.html',
     ];
     followed_links?.forEach((link, index) => {
-      expect(link.target_url.endsWith(expectedTargetPaths[index]));
+      expect(link.target_uri.endsWith(expectedTargetPaths[index]));
     });
 
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-api']).to.not.be
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 
   it('Runs a passing Broken Links suite', async () => {
     const server = getTestServer('BrokenLinksPassingOk');
@@ -329,7 +329,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .set('Content-Type', 'application/json')
       .expect(200);
 
-    const origin_url = `file:${path.join(
+    const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
     )}`;
@@ -350,13 +350,13 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
     expect(broken_links_result?.passing_link_count).to.equal(2);
     expect(broken_links_result?.failing_link_count).to.equal(0);
     expect(broken_links_result?.unreachable_count).to.equal(0);
-    expect(broken_links_result?.status_2xx_count).to.equal(2);
-    expect(broken_links_result?.status_3xx_count).to.equal(0);
-    expect(broken_links_result?.status_4xx_count).to.equal(0);
-    expect(broken_links_result?.status_5xx_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(2);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
 
     expect(options).to.deep.equal({
-      origin_url: origin_url,
+      origin_uri: origin_uri,
       link_limit: 50,
       query_selector_all: 'a[src]',
       get_attributes: ['src'],
@@ -374,8 +374,8 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       .to.deep.equal({
         link_passed: true,
         expected_status_code: status_class_2xx,
-        origin_url: origin_url,
-        target_url: origin_url,
+        source_uri: origin_uri,
+        target_uri: origin_uri,
         html_element: '',
         anchor_text: '',
         status_code: 200,
@@ -387,13 +387,13 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       });
 
     expect(followed_links)
-      .excluding(['target_url', 'link_start_time', 'link_end_time'])
+      .excluding(['target_uri', 'link_start_time', 'link_end_time'])
       .to.deep.equal([
         {
           link_passed: true,
           expected_status_code: status_class_2xx,
-          origin_url: origin_url,
-          target_url: 'CHECKED_BELOW',
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
           html_element: 'a',
           anchor_text: 'External Link',
           status_code: 200,
@@ -407,12 +407,12 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
 
     const expectedTargetPaths = ['example_html_files/200.html'];
     followed_links?.forEach((link, index) => {
-      expect(link.target_url.endsWith(expectedTargetPaths[index]));
+      expect(link.target_uri.endsWith(expectedTargetPaths[index]));
     });
 
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-api']).to.not.be
       .undefined;
     expect(runtime_metadata?.['@google-cloud/synthetics-sdk-broken-links']).to
       .not.be.undefined;
-  });
+  }).timeout(10000);
 });

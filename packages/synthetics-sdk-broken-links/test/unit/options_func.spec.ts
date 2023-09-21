@@ -41,7 +41,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
   };
   it('setDefaultOptions only sets non-present values', () => {
     const input_options: BrokenLinkCheckerOptions = {
-      origin_url: 'https://example.com',
+      origin_uri: 'https://example.com',
       get_attributes: ['src'],
       link_order: LinkOrder.RANDOM,
       link_timeout_millis: 5000,
@@ -65,7 +65,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     expect(options.max_redirects).to.equal(Number.MAX_SAFE_INTEGER);
 
     // Verify that existing values are not overridden
-    expect(options.origin_url).to.equal('https://example.com');
+    expect(options.origin_uri).to.equal('https://example.com');
     expect(options.get_attributes).to.deep.equal(['src']);
     expect(options.link_order).to.equal(
       BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.RANDOM
@@ -96,27 +96,27 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
 
   describe('validateInputOptions', () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
-    it('throws error if origin_url is missing', () => {
+    it('throws error if origin_uri is missing', () => {
       const options = {} as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'Missing origin_url in options');
+      }).to.throw(Error, 'Missing origin_uri in options');
     });
-    it('throws error if origin_url is not a string', () => {
-      const options = { origin_url: 4 } as any as BrokenLinkCheckerOptions;
+    it('throws error if origin_uri is not a string', () => {
+      const options = { origin_uri: 4 } as any as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
+      }).to.throw(Error, 'origin_uri must be a string that starts with `http`');
     });
-    it('throws error if origin_url does not start with http', () => {
-      const options = { origin_url: 'blah' } as BrokenLinkCheckerOptions;
+    it('throws error if origin_uri does not start with http', () => {
+      const options = { origin_uri: 'blah' } as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(Error, 'origin_url must be a string that starts with `http`');
+      }).to.throw(Error, 'origin_uri must be a string that starts with `http`');
     });
     it('throws error if link_limit is not a number', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_limit: 'invalid',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -128,7 +128,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if link_limit is less than 1', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_limit: 0,
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -140,7 +140,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if query_selector_all is not a string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         query_selector_all: 123,
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -152,7 +152,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if query_selector_all is an empty string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         query_selector_all: '',
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -164,7 +164,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if get_attributes is not an array of strings', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         get_attributes: ['href', 123],
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -176,7 +176,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if link_order is not a valid LinkOrder value', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_order: 'invalid',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -188,7 +188,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('link_order accepts string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_order: 'RANDOM',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -197,7 +197,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if link_timeout_millis is not a number', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_timeout_millis: 'invalid',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -209,7 +209,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if link_timeout_millis is less than 1', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_timeout_millis: 0,
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -221,7 +221,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if max_retries is not a number', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         max_retries: 'invalid',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -233,7 +233,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if max_retries is less than -1', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         max_retries: -2,
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -245,7 +245,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if max_redirects is not a number', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         max_redirects: 'invalid',
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -254,7 +254,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if max_redirects is less than -1', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         max_redirects: -2,
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -266,7 +266,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if wait_for_selector is not a string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         wait_for_selector: 123,
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
@@ -278,7 +278,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if wait_for_selector is an empty string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         wait_for_selector: '',
       } as BrokenLinkCheckerOptions;
       expect(() => {
@@ -288,11 +288,11 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         'Invalid wait_for_selector value, must be a non-empty string'
       );
     });
-    it('throws error if per_link_options contains an invalid URL', () => {
+    it('throws error if per_link_options contains an invalid uri', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         per_link_options: {
-          'invalid-url': {
+          'invalid-uri': {
             link_timeout_millis: 5000,
           },
         },
@@ -301,12 +301,12 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid url in per_link_options, urls must start with `http`'
+        'Invalid uri in per_link_options, uris must start with `http`'
       );
     });
     it('throws error if per_link_options contains an invalid link_timeout_millis value', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         per_link_options: {
           'http://example.com': {
             link_timeout_millis: -1,
@@ -322,7 +322,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if per_link_options contains an invalid expected_status_code number', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         per_link_options: {
           'http://example.com': {
             expected_status_code: 50,
@@ -338,7 +338,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('throws error if per_link_options contains an invalid expected_status_code string', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         per_link_options: {
           'http://example.com': {
             expected_status_code: 'STATUS_CLASS_WOOHOO',
@@ -354,7 +354,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('per_link_options accepts valid string as StatusClass', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         per_link_options: {
           'http://example.com': {
             expected_status_code: 'STATUS_CLASS_4XX',
@@ -367,7 +367,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('validates input options when all values are valid', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_limit: 10,
         query_selector_all: 'a',
         get_attributes: ['href'],
@@ -390,12 +390,12 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     });
     it('validates input options and gets rid of extra fields', () => {
       const options = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         fake_field: 'hello',
       } as any as BrokenLinkCheckerOptions;
 
       const expectations = {
-        origin_url: 'http://example.com',
+        origin_uri: 'http://example.com',
         link_limit: undefined,
         query_selector_all: undefined,
         get_attributes: undefined,
