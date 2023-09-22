@@ -298,13 +298,16 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
+      let followedRedirects = 0;
 
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(1);
+
     });
 
     it('should continue navigation request is not a navigationResut()', async () => {
@@ -313,13 +316,15 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
+      let followedRedirects = 0;
 
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(1);
     });
 
     it('should abort navigation request if redirects count is more than max_redirects', async () => {
@@ -329,12 +334,14 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         abort: async () => {},
       } as HTTPRequest;
       const max_redirects = -1;
+      let followedRedirects = 0;
 
       const continueSpy = sinon.spy(request, 'abort');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(0);
     });
   });
 });

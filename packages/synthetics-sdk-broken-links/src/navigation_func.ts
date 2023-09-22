@@ -281,9 +281,10 @@ async function fetchLink(
     // Enable request interception.
     await page.setRequestInterception(true);
 
+    let followedRedirects = 0;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
     page.on('request', async (request) => {
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+     followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
     });
 
     responseOrError = await page.goto(target_uri, {
@@ -309,20 +310,21 @@ async function fetchLink(
  */
 export async function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
-  max_redirects: number
+  max_redirects: number,
+  followedRedirects: number,
 ) {
-  let followedRedirects = 0;
-
   if (request.isNavigationRequest()) {
     if (followedRedirects > max_redirects) {
       // If max_redirects is exceeded, abort the request
-      return await request.abort();
+      await request.abort();
+      return followedRedirects;
     } else {
       // If max_redirects is not exceeded, continue the request
       followedRedirects++;
     }
   }
-  return await request.continue();
+  await request.continue();
+  return followedRedirects;
 }
 
 /**
