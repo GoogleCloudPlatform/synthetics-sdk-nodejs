@@ -303,14 +303,17 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
       expect(followedRedirects).to.equal(1);
-
     });
 
-    it('should continue navigation request is not a navigationResut()', async () => {
+    it('should continue navigation request if is not a navigationResut()', async () => {
       const request = {
         isNavigationRequest: () => false,
         continue: async () => {},
@@ -321,10 +324,14 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
-      expect(followedRedirects).to.equal(1);
+      expect(followedRedirects).to.equal(0);
     });
 
     it('should abort navigation request if redirects count is more than max_redirects', async () => {
@@ -338,7 +345,11 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
       const continueSpy = sinon.spy(request, 'abort');
 
-      followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
       expect(followedRedirects).to.equal(0);

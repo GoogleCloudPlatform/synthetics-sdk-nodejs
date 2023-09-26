@@ -284,7 +284,11 @@ async function fetchLink(
     let followedRedirects = 0;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
     page.on('request', async (request) => {
-     followedRedirects = await handleNavigationRequestWithRedirects(request, max_redirects, followedRedirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
     });
 
     responseOrError = await page.goto(target_uri, {
@@ -311,7 +315,7 @@ async function fetchLink(
 export async function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
   max_redirects: number,
-  followedRedirects: number,
+  followedRedirects: number
 ) {
   if (request.isNavigationRequest()) {
     if (followedRedirects > max_redirects) {
