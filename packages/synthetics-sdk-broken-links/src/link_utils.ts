@@ -182,6 +182,7 @@ function parseFollowedLinks(
   };
 
   for (const link of followed_links) {
+    if (link.link_passed === undefined) continue;
     link.is_origin
       ? (broken_links_result.origin_link_result = link)
       : broken_links_result.followed_link_results.push(link);

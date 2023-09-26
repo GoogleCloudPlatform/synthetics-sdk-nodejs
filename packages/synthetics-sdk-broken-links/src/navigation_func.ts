@@ -98,20 +98,46 @@ export async function retrieveLinksFromPage(
 export async function checkLinks(
   browser: Browser,
   links: LinkIntermediate[],
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  startTime: string,
+  total_timeout_millis: number
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
   const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
-  for (const link of links) {
-    try {
-      const page = await openNewPage(browser);
-      followed_links.push(await checkLink(page, link, options));
-    } catch (err) {
-      if (err instanceof Error) process.stderr.write(err.message);
-      throw new Error(
-        `An error occurred while checking ${link}. Please reference server logs for further information.`
-      );
+
+  // Create all Promise and variables used to set and resolve the time limit
+  // imposed by `total_timeout_millis`
+  let timeLimitTimeout;
+  let timeLimitresolver = () => {};
+  const timeLimitPromise = new Promise<void>((resolve) => {
+    timeLimitresolver = () => {
+      resolve();
+    };
+    const time_used = Date.now() - new Date(startTime).getTime();
+    timeLimitTimeout = setTimeout(
+      timeLimitresolver,
+      total_timeout_millis - time_used - 500
+    );
+  });
+
+  const sequentialPromises = async () => {
+    const page = await openNewPage(browser);
+    for (const link of links) {
+      try {
+        followed_links.push(await checkLink(page, link, options));
+      } catch (err) {
+        if (err instanceof Error) process.stderr.write(err.message);
+        throw new Error(
+          `An error occurred while checking ${link}. Please reference server logs for further information.`
+        );
+      }
     }
-  }
+  };
+
+  await Promise.race([timeLimitPromise, sequentialPromises()]);
+
+  // clear timer and resolve (safe regardless of which promise finishes first)
+  if (timeLimitTimeout !== undefined) clearTimeout(timeLimitTimeout);
+  timeLimitresolver();
   return followed_links;
 }
 
@@ -283,9 +309,8 @@ async function fetchLink(
     // Enable request interception.
     await page.setRequestInterception(true);
 
-    let followedRedirects = 0;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
-    page.on('request', (request) => {
+    page.on('request', (request: HTTPRequest) => {
       followedRedirects = handleNavigationRequestWithRedirects(
         request,
         max_redirects,
@@ -293,7 +318,7 @@ async function fetchLink(
       );
     });
 
-    page.on('response', (response) => {
+    page.on('response', (response: HTTPResponse) => {
       if (response.request().isNavigationRequest()) lastResponse = response;
     });
 

@@ -74,7 +74,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
   after(async () => {
     // Close the browser after all tests
-    await browser.close();
+    if (browser) await browser.close();
   });
 
   describe('navigate', async () => {

@@ -86,6 +86,42 @@ describe('runBrokenLinks', async () => {
     );
   }).timeout(15000);
 
+  it('Global timeout occurs during checkOriginLink waiting for `wait_for_selector', async () => {
+    const origin_uri = `file:${path.join(
+      __dirname,
+      '../example_html_files/retrieve_links_test.html'
+    )}`;
+    const inputOptions = {
+      origin_uri: origin_uri,
+      query_selector_all: 'a[src], img[href]',
+      get_attributes: ['href', 'src'],
+      wait_for_selector: 'none existent',
+    };
+    const result = await runBrokenLinks(inputOptions, 3000);
+    const broken_links_result = result.synthetic_broken_links_result_v1;
+
+    const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
+      link_passed: false,
+      expected_status_code: status_class_2xx,
+      source_uri: origin_uri,
+      target_uri: origin_uri,
+      html_element: '',
+      anchor_text: '',
+      status_code: 200,
+      error_type: 'TimeoutError',
+      error_message:
+        "Global Timeout of 300 secs hit while waiting for selector 'none existent'",
+      link_start_time: 'NA',
+      link_end_time: 'NA',
+      is_origin: true,
+    };
+
+    expect(broken_links_result?.origin_link_result)
+      .excluding(['link_start_time', 'link_end_time'])
+      .to.deep.equal(expectedOriginLinkResult);
+    expect(broken_links_result?.followed_link_results.length).to.equal(0);
+  }).timeout(5000);
+
   it('successful execution with 1 failing link', async () => {
     const origin_uri = `file:${path.join(
       __dirname,
