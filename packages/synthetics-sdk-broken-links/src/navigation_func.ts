@@ -310,7 +310,6 @@ async function fetchLink(
     // Enable request interception.
     await page.setRequestInterception(true);
 
-    let followedRedirects = 0;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
     page.on('request', (request: HTTPRequest) => {
       followedRedirects = handleNavigationRequestWithRedirects(
