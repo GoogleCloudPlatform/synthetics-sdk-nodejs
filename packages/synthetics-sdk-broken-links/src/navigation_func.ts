@@ -283,8 +283,8 @@ async function fetchLink(
 
     let followedRedirects = 0;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
-    page.on('request', async (request) => {
-      followedRedirects = await handleNavigationRequestWithRedirects(
+    page.on('request', (request) => {
+      followedRedirects = handleNavigationRequestWithRedirects(
         request,
         max_redirects,
         followedRedirects
@@ -307,27 +307,41 @@ async function fetchLink(
 }
 
 /**
- * Handles navigation requests and follows redirects until the maximum number of redirects is reached.
+ * Handles navigation requests and follows redirects until the maximum number of
+ * redirects is reached.
+ * Note:  before any request.continue()/abort() call is made we need to check if
+ *        it is has already been handled or Puppeteer will throw an error:
+ *        https://github.com/puppeteer/puppeteer/blob/59578d9cd5709bebe3117f8e060ad7cab220b3df/docs/api.md#pagesetrequestinterceptionvalue
  *
  * @param {Request} request - The intercepted request.
  * @param {number} max_redirects - The maximum number of redirects allowed.
  */
-export async function handleNavigationRequestWithRedirects(
+export function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
   max_redirects: number,
   followedRedirects: number
 ) {
   if (request.isNavigationRequest()) {
     if (followedRedirects > max_redirects) {
-      // If max_redirects is exceeded, abort the request
-      await request.abort();
+      // If max_redirects is exceeded, respond with last response
+      if (!request.isInterceptResolutionHandled()) {
+        const redirected = request
+          .redirectChain()
+          [followedRedirects].response();
+        request.respond({
+          status: redirected?.status(),
+          contentType: 'text/plain',
+          body: 'Too Many Redirects!',
+        });
+      }
       return followedRedirects;
     } else {
       // If max_redirects is not exceeded, continue the request
       followedRedirects++;
     }
   }
-  await request.continue();
+
+  if (!request.isInterceptResolutionHandled()) request.continue();
   return followedRedirects;
 }
 

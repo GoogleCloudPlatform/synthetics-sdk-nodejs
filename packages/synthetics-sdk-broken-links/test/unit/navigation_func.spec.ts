@@ -295,6 +295,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       // Arrange
       const request = {
         isNavigationRequest: () => true,
+        isInterceptResolutionHandled: () => false,
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
@@ -316,6 +317,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     it('should continue navigation request if is not a navigationResut()', async () => {
       const request = {
         isNavigationRequest: () => false,
+        isInterceptResolutionHandled: () => false,
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
@@ -334,16 +336,19 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(followedRedirects).to.equal(0);
     });
 
-    it('should abort navigation request if redirects count is more than max_redirects', async () => {
+    it('should respond appropriately if redirects count is more than max_redirects', async () => {
       // Arrange
       const request = {
         isNavigationRequest: () => true,
-        abort: async () => {},
+        isInterceptResolutionHandled: () => false,
+        redirectChain: () => [{ response: () => ({ status: () => 302 }) }], // Simulate a redirect chain
+        // eslint-disable-next-line  @typescript-eslint/no-unused-vars
+        respond: ({ status, contentType, body }) => {},
       } as HTTPRequest;
       const max_redirects = -1;
       let followedRedirects = 0;
 
-      const continueSpy = sinon.spy(request, 'abort');
+      const continueSpy = sinon.spy(request, 'respond');
 
       followedRedirects = await handleNavigationRequestWithRedirects(
         request,
@@ -352,6 +357,28 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       );
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(0);
+    });
+
+    it('does not call request.continue() if already handled', async () => {
+      // Arrange
+      const request = {
+        isNavigationRequest: () => true,
+        isInterceptResolutionHandled: () => true,
+        continue: () => {},
+      } as HTTPRequest;
+      const max_redirects = -1;
+      let followedRedirects = 0;
+
+      const continueSpy = sinon.spy(request, 'continue');
+
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
+
+      expect(continueSpy.called).to.be.false;
       expect(followedRedirects).to.equal(0);
     });
   });
