@@ -13,26 +13,22 @@
 // limitations under the License.
 
 // [START monitoring_synthetic_monitoring_custom_script]
-
+const { instantiateAutoInstrumentation, runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
+// Run instantiateAutoInstrumentation before any other code runs, to get automatic logs and traces
+instantiateAutoInstrumentation();
 const functions = require('@google-cloud/functions-framework');
-const fetch = require('node-fetch');
-const { runSyntheticHandler } = require('@google-cloud/synthetics-sdk-api');
+const axios = require('axios');
 const assert = require('node:assert');
 
-/*
- * This is the server template that is required to run a synthetic monitor in
- * Google Cloud Functions. It is unlikely that you should need to change the
- * contents of this function.
- */
-functions.http('SyntheticFunction', runSyntheticHandler(async () => {
+functions.http('SyntheticFunction', runSyntheticHandler(async ({logger}) => {
   /*
-   * This is the function that should run your code synthetic code. This should
-   * either exit without issue, in which case the synthetic is considered a
-   * success, or it should throw an Error, in which case the synthetic is
-   * considered a failure.
+   * This function executes the synthetic code for testing purposes.
+   * If the code runs without errors, the synthetic test is considered successful.
+   * If an error is thrown during execution, the synthetic test is considered failed.
    */
-  const url = 'https://www.google.com/'; // URL to send the request to
-  return await assert.doesNotReject(fetch(url));
+  logger.info('Making an http request using synthetics');
+  const url = 'https://www.googfasdffsdfle.com/'; // URL to send the request to
+  return await assert.doesNotReject(axios.get(url));
 }));
 
 // [END monitoring_synthetic_monitoring_custom_script]
