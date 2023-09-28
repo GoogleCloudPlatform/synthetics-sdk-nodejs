@@ -204,12 +204,12 @@ describe('runBrokenLinks', async () => {
 
   it.only('Wikipedia', async () => {
     const inputOptions = {
-      // origin_uri: 'http://gooogle.com',
-      origin_uri: 'http://crappyschool.com',
+      origin_uri: 'http://gooogle.com',
+      // origin_uri: 'http://crappyschool.com',
       query_selector_all: 'a',
       get_attributes: ['href'],
       link_limit: 1,
-      max_redirects: 1,
+      max_redirects: 0,
     };
 
     const result = await runBrokenLinks(inputOptions);

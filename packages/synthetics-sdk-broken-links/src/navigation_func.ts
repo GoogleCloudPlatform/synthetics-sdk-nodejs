@@ -277,22 +277,21 @@ async function fetchLink(
   let responseOrError: HTTPResponse | Error | null;
   const linkStartTime = new Date().toISOString();
 
+  let followedRedirects = 0;
+  let lastResponse: HTTPResponse | null;
   try {
     // Enable request interception.
     await page.setRequestInterception(true);
 
-    let followedRedirects = 0;
-    let aborted = false;
     let lastResponse: HTTPResponse | null;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
     page.on('request', (request) => {
       // console.log("requested");
-      [followedRedirects, aborted, lastResponse] =
-        handleNavigationRequestWithRedirects(
-          request,
-          max_redirects,
-          followedRedirects
-        );
+      [followedRedirects, lastResponse] = handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
       // if (request.isNavigationRequest() && request.redirectChain.length >= max_redirects) {
       //   if (!request.isInterceptResolutionHandled()) request.abort();
       // } else {
@@ -305,19 +304,29 @@ async function fetchLink(
       // console.log('response', response.status());
     });
 
-    page.on('requestfinished', (requestFinished) => {
-      requestFinished.isNavigationRequest()
-        ? console.log('requestFinished')
-        : null;
-    });
+    // page.on('requestfinished', (requestFinished) => {
+    //   requestFinished.isNavigationRequest()
+    //     ? console.log('requestFinished')
+    //     : null;
+    // });
 
     responseOrError = await page.goto(target_uri, {
       waitUntil: 'load',
       timeout: timeout,
     });
-    if (aborted) responseOrError = lastResponse!;
   } catch (err) {
-    responseOrError = err instanceof Error ? err : null;
+    // responseOrError = err instanceof Error ? err : null;
+    // console.log('HIIIII');
+    // if (aborted) responseOrError = lastResponse!;
+    if (err instanceof Error) {
+      if (err.message.includes('net::ERR_ABORTED')) {
+        responseOrError = lastResponse!;
+      } else {
+        responseOrError = err;
+      }
+    } else {
+      responseOrError = null;
+    }
   } finally {
     // Disable request interception.
     await page.setRequestInterception(false);
@@ -341,7 +350,7 @@ export function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
   max_redirects: number,
   followedRedirects: number
-): [number, boolean, HTTPResponse | null] {
+): [number, HTTPResponse | null] {
   if (request.isNavigationRequest()) {
     console.log('1', request.url());
     console.log('chain length: ', request.redirectChain().length);
@@ -362,8 +371,7 @@ export function handleNavigationRequestWithRedirects(
       }
       return [
         followedRedirects,
-        true,
-        request.redirectChain()[followedRedirects].response(),
+        request.redirectChain()[request.redirectChain().length-1].response(),
       ];
     } else {
       // If max_redirects is not exceeded, continue the request
@@ -375,7 +383,7 @@ export function handleNavigationRequestWithRedirects(
   if (!request.isInterceptResolutionHandled()) {
     request.continue();
   }
-  return [followedRedirects, false, null];
+  return [followedRedirects, null];
 }
 
 /**
