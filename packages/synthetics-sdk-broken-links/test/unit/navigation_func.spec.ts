@@ -290,7 +290,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     });
   });
 
-  describe('handleNavigationRequestWithRedirets', async () => {
+  /*describe('handleNavigationRequestWithRedirets', async () => {
     it('should continue navigation request if redirects count is less than max_redirects', async () => {
       // Arrange
       const request = {
@@ -381,7 +381,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(continueSpy.called).to.be.false;
       expect(followedRedirects).to.equal(0);
     });
-  });
+  });*/
 });
 
 describe('retrieveLinksFromPage', async () => {

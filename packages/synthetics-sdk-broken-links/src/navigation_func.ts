@@ -282,19 +282,40 @@ async function fetchLink(
     await page.setRequestInterception(true);
 
     let followedRedirects = 0;
+    let aborted = false;
+    let lastResponse: HTTPResponse | null;
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
     page.on('request', (request) => {
-      followedRedirects = handleNavigationRequestWithRedirects(
-        request,
-        max_redirects,
-        followedRedirects
-      );
+      // console.log("requested");
+      [followedRedirects, aborted, lastResponse] =
+        handleNavigationRequestWithRedirects(
+          request,
+          max_redirects,
+          followedRedirects
+        );
+      // if (request.isNavigationRequest() && request.redirectChain.length >= max_redirects) {
+      //   if (!request.isInterceptResolutionHandled()) request.abort();
+      // } else {
+      //   console.log('continue');
+      //   if (!request.isInterceptResolutionHandled()) request.continue();
+      // }
+    });
+
+    page.on('response', (response) => {
+      // console.log('response', response.status());
+    });
+
+    page.on('requestfinished', (requestFinished) => {
+      requestFinished.isNavigationRequest()
+        ? console.log('requestFinished')
+        : null;
     });
 
     responseOrError = await page.goto(target_uri, {
       waitUntil: 'load',
       timeout: timeout,
     });
+    if (aborted) responseOrError = lastResponse!;
   } catch (err) {
     responseOrError = err instanceof Error ? err : null;
   } finally {
@@ -320,29 +341,41 @@ export function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
   max_redirects: number,
   followedRedirects: number
-) {
+): [number, boolean, HTTPResponse | null] {
   if (request.isNavigationRequest()) {
+    console.log('1', request.url());
+    console.log('chain length: ', request.redirectChain().length);
     if (followedRedirects > max_redirects) {
+      console.log('2');
       // If max_redirects is exceeded, respond with last response
       if (!request.isInterceptResolutionHandled()) {
-        const redirected = request
-          .redirectChain()
-          [followedRedirects].response();
-        request.respond({
-          status: redirected?.status(),
-          contentType: 'text/plain',
-          body: 'Too Many Redirects!',
-        });
+        // const redirected = request
+        //   .redirectChain()
+        //   [followedRedirects].response();
+        // request.respond({
+        //   status: redirected?.status(),
+        //   contentType: 'text/plain',
+        //   body: 'Too Many Redirects!',
+        // });
+        // console.log('abort');
+        request.abort('aborted');
       }
-      return followedRedirects;
+      return [
+        followedRedirects,
+        true,
+        request.redirectChain()[followedRedirects].response(),
+      ];
     } else {
       // If max_redirects is not exceeded, continue the request
       followedRedirects++;
+      console.log('3');
     }
   }
 
-  if (!request.isInterceptResolutionHandled()) request.continue();
-  return followedRedirects;
+  if (!request.isInterceptResolutionHandled()) {
+    request.continue();
+  }
+  return [followedRedirects, false, null];
 }
 
 /**

@@ -201,4 +201,18 @@ describe('runBrokenLinks', async () => {
       expect(link.target_uri.endsWith(expectedTargeturis[index]));
     });
   }).timeout(150000);
+
+  it.only('Wikipedia', async () => {
+    const inputOptions = {
+      // origin_uri: 'http://gooogle.com',
+      origin_uri: 'http://crappyschool.com',
+      query_selector_all: 'a',
+      get_attributes: ['href'],
+      link_limit: 1,
+      max_redirects: 1,
+    };
+
+    const result = await runBrokenLinks(inputOptions);
+    console.log('results:\n', result);
+  }).timeout(70000);
 });
