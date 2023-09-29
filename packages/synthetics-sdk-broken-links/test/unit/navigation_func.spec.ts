@@ -202,8 +202,13 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const options_with_timeout = Object.assign({}, options);
       options_with_timeout.link_timeout_millis = 5;
 
+      const target_uri = `file:${path.join(
+        __dirname,
+        '../example_html_files/jokes.json'
+      )}`
+
       const timeout_link: LinkIntermediate = {
-        target_uri: 'https://example.com',
+        target_uri: target_uri,
         anchor_text: "Hello I'm an example",
         html_element: 'img',
       };
@@ -218,7 +223,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_passed: false,
         expected_status_code: status_class_2xx,
         source_uri: 'http://origin.com',
-        target_uri: 'https://example.com',
+        target_uri: target_uri,
         html_element: 'img',
         anchor_text: "Hello I'm an example",
         status_code: undefined,
@@ -290,7 +295,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     });
   });
 
-  /*describe('handleNavigationRequestWithRedirets', async () => {
+  describe('handleNavigationRequestWithRedirets', async () => {
     it('should continue navigation request if redirects count is less than max_redirects', async () => {
       // Arrange
       const request = {
@@ -314,7 +319,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(followedRedirects).to.equal(1);
     });
 
-    it('should continue navigation request if is not a navigationResut()', async () => {
+    it('should continue navigation request if is not a navigationResult()', async () => {
       const request = {
         isNavigationRequest: () => false,
         isInterceptResolutionHandled: () => false,
@@ -336,19 +341,17 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(followedRedirects).to.equal(0);
     });
 
-    it('should respond appropriately if redirects count is more than max_redirects', async () => {
+    it('should abort if redirects count is more than max_redirects', async () => {
       // Arrange
       const request = {
         isNavigationRequest: () => true,
         isInterceptResolutionHandled: () => false,
-        redirectChain: () => [{ response: () => ({ status: () => 302 }) }], // Simulate a redirect chain
-        // eslint-disable-next-line  @typescript-eslint/no-unused-vars
-        respond: ({ status, contentType, body }) => {},
+        abort: () => {},
       } as HTTPRequest;
       const max_redirects = -1;
       let followedRedirects = 0;
 
-      const continueSpy = sinon.spy(request, 'respond');
+      const continueSpy = sinon.spy(request, 'abort');
 
       followedRedirects = await handleNavigationRequestWithRedirects(
         request,
@@ -381,7 +384,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(continueSpy.called).to.be.false;
       expect(followedRedirects).to.equal(0);
     });
-  });*/
+  });
 });
 
 describe('retrieveLinksFromPage', async () => {
