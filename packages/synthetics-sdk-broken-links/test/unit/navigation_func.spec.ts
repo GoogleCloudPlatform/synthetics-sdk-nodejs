@@ -202,8 +202,13 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const options_with_timeout = Object.assign({}, options);
       options_with_timeout.link_timeout_millis = 5;
 
+      const target_uri = `file:${path.join(
+        __dirname,
+        '../example_html_files/jokes.json'
+      )}`
+
       const timeout_link: LinkIntermediate = {
-        target_uri: 'https://example.com',
+        target_uri: target_uri,
         anchor_text: "Hello I'm an example",
         html_element: 'img',
       };
@@ -218,7 +223,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_passed: false,
         expected_status_code: status_class_2xx,
         source_uri: 'http://origin.com',
-        target_uri: 'https://example.com',
+        target_uri: target_uri,
         html_element: 'img',
         anchor_text: "Hello I'm an example",
         status_code: undefined,
@@ -295,46 +300,89 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       // Arrange
       const request = {
         isNavigationRequest: () => true,
+        isInterceptResolutionHandled: () => false,
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
+      let followedRedirects = 0;
 
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(1);
     });
 
-    it('should continue navigation request is not a navigationResut()', async () => {
+    it('should continue navigation request if is not a navigationResult()', async () => {
       const request = {
         isNavigationRequest: () => false,
+        isInterceptResolutionHandled: () => false,
         continue: async () => {},
       } as HTTPRequest;
       const max_redirects = 3;
+      let followedRedirects = 0;
 
       // spy on continue() call
       const continueSpy = sinon.spy(request, 'continue');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(0);
     });
 
-    it('should abort navigation request if redirects count is more than max_redirects', async () => {
+    it('should abort if redirects count is more than max_redirects', async () => {
       // Arrange
       const request = {
         isNavigationRequest: () => true,
-        abort: async () => {},
+        isInterceptResolutionHandled: () => false,
+        abort: () => {},
       } as HTTPRequest;
       const max_redirects = -1;
+      let followedRedirects = 0;
 
       const continueSpy = sinon.spy(request, 'abort');
 
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
 
       expect(continueSpy.calledOnce).to.be.true;
+      expect(followedRedirects).to.equal(0);
+    });
+
+    it('does not call request.continue() if already handled', async () => {
+      // Arrange
+      const request = {
+        isNavigationRequest: () => true,
+        isInterceptResolutionHandled: () => true,
+        continue: () => {},
+      } as HTTPRequest;
+      const max_redirects = -1;
+      let followedRedirects = 0;
+
+      const continueSpy = sinon.spy(request, 'continue');
+
+      followedRedirects = await handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
+
+      expect(continueSpy.called).to.be.false;
+      expect(followedRedirects).to.equal(0);
     });
   });
 });

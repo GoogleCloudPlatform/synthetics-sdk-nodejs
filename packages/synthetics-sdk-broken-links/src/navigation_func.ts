@@ -277,13 +277,23 @@ async function fetchLink(
   let responseOrError: HTTPResponse | Error | null;
   const linkStartTime = new Date().toISOString();
 
+  let followedRedirects = 0;
+  let lastResponse: HTTPResponse | null;
   try {
     // Enable request interception.
     await page.setRequestInterception(true);
 
     // Intercept requests and follow redirects until the maximum number of redirects is reached.
-    page.on('request', async (request) => {
-      await handleNavigationRequestWithRedirects(request, max_redirects);
+    page.on('request', (request) => {
+      followedRedirects = handleNavigationRequestWithRedirects(
+        request,
+        max_redirects,
+        followedRedirects
+      );
+    });
+
+    page.on('response', (response) => {
+      if (response.request().isNavigationRequest()) lastResponse = response;
     });
 
     responseOrError = await page.goto(target_uri, {
@@ -291,7 +301,15 @@ async function fetchLink(
       timeout: timeout,
     });
   } catch (err) {
-    responseOrError = err instanceof Error ? err : null;
+    if (err instanceof Error) {
+      if (err.message.includes('net::ERR_ABORTED')) {
+        responseOrError = lastResponse!;
+      } else {
+        responseOrError = err;
+      }
+    } else {
+      responseOrError = null;
+    }
   } finally {
     // Disable request interception.
     await page.setRequestInterception(false);
@@ -302,27 +320,37 @@ async function fetchLink(
 }
 
 /**
- * Handles navigation requests and follows redirects until the maximum number of redirects is reached.
+ * Handles navigation requests and follows redirects until the maximum number of
+ * redirects is reached.
+ * Note:  before any request.continue()/abort() call is made we need to check if
+ *        it is has already been handled or Puppeteer will throw an error:
+ *        https://github.com/puppeteer/puppeteer/blob/59578d9cd5709bebe3117f8e060ad7cab220b3df/docs/api.md#pagesetrequestinterceptionvalue
  *
  * @param {Request} request - The intercepted request.
  * @param {number} max_redirects - The maximum number of redirects allowed.
  */
-export async function handleNavigationRequestWithRedirects(
+export function handleNavigationRequestWithRedirects(
   request: HTTPRequest,
-  max_redirects: number
-) {
-  let followedRedirects = 0;
-
+  max_redirects: number,
+  followedRedirects: number
+): number {
   if (request.isNavigationRequest()) {
     if (followedRedirects > max_redirects) {
       // If max_redirects is exceeded, abort the request
-      return await request.abort();
+      if (!request.isInterceptResolutionHandled()) {
+        request.abort('aborted');
+      }
+      return followedRedirects;
     } else {
       // If max_redirects is not exceeded, continue the request
       followedRedirects++;
     }
   }
-  return await request.continue();
+
+  if (!request.isInterceptResolutionHandled()) {
+    request.continue();
+  }
+  return followedRedirects;
 }
 
 /**
@@ -353,7 +381,7 @@ export async function closePagePool(pagePool: Page[]) {
 export async function openNewPage(browser: Browser) {
   try {
     const page = await browser.newPage();
-    page.setCacheEnabled(false);
+    await page.setCacheEnabled(false);
     return page;
   } catch (pageError) {
     if (pageError instanceof Error) process.stderr.write(pageError.message);
