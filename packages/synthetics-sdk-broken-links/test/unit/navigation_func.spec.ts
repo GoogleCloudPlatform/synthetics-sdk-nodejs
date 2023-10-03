@@ -205,7 +205,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const target_uri = `file:${path.join(
         __dirname,
         '../example_html_files/jokes.json'
-      )}`
+      )}`;
 
       const timeout_link: LinkIntermediate = {
         target_uri: target_uri,

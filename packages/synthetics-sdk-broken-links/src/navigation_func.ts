@@ -311,8 +311,14 @@ async function fetchLink(
       responseOrError = null;
     }
   } finally {
-    // Disable request interception.
-    await page.setRequestInterception(false);
+    // Disable event listeners and request interception.
+    page.off('request');
+    page.off('response');
+    try {
+      await page.setRequestInterception(false);
+    } catch (err) {
+      if (err instanceof Error) process.stderr.write(err.message);
+    }
   }
 
   const linkEndTime = new Date().toISOString();
