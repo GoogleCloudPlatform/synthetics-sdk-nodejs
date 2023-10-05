@@ -70,7 +70,12 @@ export enum StatusClass {
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
 
-const synthetics_sdk_broken_links_package = require('../package.json');
+let synthetics_sdk_broken_links_package;
+try {
+  synthetics_sdk_broken_links_package = require('../package.json');
+} catch (err) {
+  synthetics_sdk_broken_links_package = require('../../package.json');
+}
 instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(

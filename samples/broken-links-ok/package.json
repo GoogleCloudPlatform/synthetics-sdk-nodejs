@@ -1,0 +1,16 @@
+{
+  "name": "broken-links-ok",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "reinstall": "rm package-lock.json && rm -rf ./node_modules && npm install"
+  },
+  "dependencies": {
+    "@google-cloud/synthetics-sdk-broken-links": "google-cloud-synthetics-sdk-broken-links-0.1.0.tgz",
+    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
+    "@google-cloud/functions-framework": "^3.1.2"
+  },
+  "author": "Google Inc.",
+  "license": "Apache-2.0"
+}
