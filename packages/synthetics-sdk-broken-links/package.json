@@ -13,11 +13,13 @@
     "pretest": "npm run compile",
     "lint": "eslint **/*.ts",
     "posttest": "npm run lint",
+    "postinstall": "node ./puppeteer-postinstall.js",
     "all": "rm -rf ./node_modules && npm install && npm run build"
   },
   "files": [
     "build/src/**/*.js",
-    "build/src/**/*.d.ts"
+    "build/src/**/*.d.ts",
+    "puppeteer-postinstall.js"
   ],
   "author": "Google Inc.",
   "license": "Apache-2.0",

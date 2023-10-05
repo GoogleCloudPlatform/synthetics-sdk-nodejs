@@ -1,3 +1,6 @@
 node_modules/
 build/
 dist/
+samples/broken-links-ok/.cache
+samples/broken-links-ok/google-cloud-synthetics-sdk-broken-links-0.1.0.tgz
+samples/broken-links-ok/google-cloud-synthetics-sdk-api-0.1.0.tgz

@@ -15,8 +15,8 @@
 import { expect } from 'chai';
 const SyntheticsSdkMocha = require('synthetics-sdk-mocha');
 
-describe('GCM Synthetics Mocha', async () => {
-  it('returns a GenericResult, when no test spec is provided', async () => {
+describe.only('GCM Synthetics Mocha', async () => {
+  it.only('returns a GenericResult, when no test spec is provided', async () => {
     const { synthetic_generic_result_v1, runtime_metadata } = await SyntheticsSdkMocha.runMocha({
       spec: '',
     });
