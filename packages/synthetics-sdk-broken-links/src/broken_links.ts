@@ -23,6 +23,7 @@ import {
 import {
   createSyntheticResult,
   getGenericSyntheticResult,
+  getTimeLimitPromise,
   LinkIntermediate,
   shuffleAndTruncate,
 } from './link_utils';
@@ -83,18 +84,11 @@ export async function runBrokenLinks(
   let browser: Browser;
   try {
     const options = processOptions(inputOptions);
-    let timeLimitTimeout;
-    let timeLimitresolver = () => {};
-    const timeLimitPromise = new Promise<void>((resolve) => {
-      timeLimitresolver = () => {
-        resolve();
-      };
-      const time_used = Date.now() - new Date(startTime).getTime();
-      timeLimitTimeout = setTimeout(
-        timeLimitresolver,
-        total_timeout_millis - time_used
-      );
-    });
+
+    // Create Promise and variables used to set and resolve the time limit
+    // imposed by `total_timeout_millis`
+    const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+      getTimeLimitPromise(startTime, total_timeout_millis);
 
     const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
@@ -116,7 +110,7 @@ export async function runBrokenLinks(
       // if orgin link is not present or if it did not pass: exit and return the
       // singular link result
       if (!followed_links[0].link_passed || !followed_links[0].link_passed) {
-        return;
+        return true;
       }
 
       // scrape and organize links to check
@@ -134,7 +128,7 @@ export async function runBrokenLinks(
           total_timeout_millis
         ))
       );
-      return;
+      return true;
     };
 
     await Promise.race([timeLimitPromise, checkLinksPromise()]);
@@ -180,20 +174,13 @@ async function checkOriginLink(
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
   let originLinkResult: BrokenLinksResultV1_SyntheticLinkResult;
 
-  // Create all Promise and variables used to set and resolve the time limit
-  // imposed by `total_timeout_millis`
-  let timeLimitTimeout: NodeJS.Timeout;
-  let timeLimitresolver = () => {};
-  const timeLimitPromise = new Promise<boolean>((resolve) => {
-    timeLimitresolver = () => {
-      resolve(false);
-    };
-    const time_used = Date.now() - new Date(startTime).getTime();
-    timeLimitTimeout = setTimeout(
-      timeLimitresolver,
-      total_timeout_millis - time_used - 500
+  // Create Promise and variables used to set and resolve the time limit
+  const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+    getTimeLimitPromise(
+      startTime,
+      total_timeout_millis,
+      /*extraOffsetMillis=*/ 500
     );
-  });
 
   const originLinkResultPromise = async () => {
     originLinkResult = await checkLink(
@@ -223,7 +210,7 @@ async function checkOriginLink(
   return Promise.race([timeLimitPromise, originLinkResultPromise()]).then(
     (finished) => {
       // clear timer and resolve (safe regardless of which promise finishes first)
-      if (timeLimitTimeout !== undefined) clearTimeout(timeLimitTimeout);
+      clearTimeout(timeLimitTimeout);
       timeLimitresolver();
 
       // if the time limit occured during the wait_for_selector operation

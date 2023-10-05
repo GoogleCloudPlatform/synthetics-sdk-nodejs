@@ -26,6 +26,7 @@ import {
   LinkIntermediate,
   NavigateResponse,
   shouldGoToBlankPage,
+  getTimeLimitPromise,
 } from './link_utils';
 
 /**
@@ -102,26 +103,19 @@ export async function checkLinks(
   startTime: string,
   total_timeout_millis: number
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
+  let timeLimitReached = false;
   const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
-  // Create all Promise and variables used to set and resolve the time limit
-  // imposed by `total_timeout_millis`
-  let timeLimitTimeout;
-  let timeLimitresolver = () => {};
-  const timeLimitPromise = new Promise<void>((resolve) => {
-    timeLimitresolver = () => {
-      resolve();
-    };
-    const time_used = Date.now() - new Date(startTime).getTime();
-    timeLimitTimeout = setTimeout(
-      timeLimitresolver,
-      total_timeout_millis - time_used - 500
-    );
-  });
+  // Create Promise and variables used to set and resolve the time limit
+  const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+    getTimeLimitPromise(startTime, total_timeout_millis, 500);
 
   const sequentialPromises = async () => {
     const page = await openNewPage(browser);
     for (const link of links) {
+      // prevents links from being checked after timeout is hit
+      if (timeLimitReached) return false;
+
       try {
         followed_links.push(await checkLink(page, link, options));
       } catch (err) {
@@ -131,14 +125,21 @@ export async function checkLinks(
         );
       }
     }
+    return true;
   };
 
-  await Promise.race([timeLimitPromise, sequentialPromises()]);
+  return Promise.race([timeLimitPromise, sequentialPromises()]).then(
+    (sequentialPromisesfinished) => {
+      // set timeLimitReached so that `sequentialPromises()` stops executing
+      timeLimitReached = !sequentialPromisesfinished;
 
-  // clear timer and resolve (safe regardless of which promise finishes first)
-  if (timeLimitTimeout !== undefined) clearTimeout(timeLimitTimeout);
-  timeLimitresolver();
-  return followed_links;
+      // clear timer and resolve (safe regardless of which promise finishes first)
+      clearTimeout(timeLimitTimeout);
+      timeLimitresolver();
+
+      return followed_links;
+    }
+  );
 }
 
 /**

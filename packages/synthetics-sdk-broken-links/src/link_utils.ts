@@ -287,6 +287,26 @@ export function shuffleAndTruncate(
   return linksToFollow.slice(0, link_limit! - 1);
 }
 
+export function getTimeLimitPromise(
+  startTime: string,
+  totalTimeoutMillis: number,
+  extraOffsetMillis = 0
+): [Promise<boolean>, NodeJS.Timeout, () => void] {
+  let timeLimitTimeout: NodeJS.Timeout;
+  let timeLimitresolver = () => {};
+  const timeLimitPromise = new Promise<boolean>((resolve) => {
+    timeLimitresolver = () => {
+      resolve(false);
+    };
+    const timeUsed = Date.now() - new Date(startTime).getTime();
+    timeLimitTimeout = setTimeout(
+      timeLimitresolver,
+      totalTimeoutMillis - timeUsed - extraOffsetMillis
+    );
+  });
+  return [timeLimitPromise, timeLimitTimeout!, timeLimitresolver!];
+}
+
 const getGenericError = (genericErrorMessage: string): GenericResultV1 => ({
   ok: false,
   generic_error: {

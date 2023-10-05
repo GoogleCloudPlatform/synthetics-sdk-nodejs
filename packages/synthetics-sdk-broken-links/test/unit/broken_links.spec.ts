@@ -96,6 +96,7 @@ describe('runBrokenLinks', async () => {
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
       wait_for_selector: 'none existent',
+      link_timeout_millis: 5000,
     };
     const result = await runBrokenLinks(inputOptions, 3000);
     const broken_links_result = result.synthetic_broken_links_result_v1;
