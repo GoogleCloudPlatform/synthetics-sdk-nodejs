@@ -31,7 +31,7 @@ instantiateMetadata();
 const asyncFilenamePrefix = 'async ';
 const runSynthetic = async (
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  syntheticCode: (args: { logger: Logger }) => any
+  syntheticCode: (args: { logger: Logger, syntheticExecutionId: string  }) => any
 ) => {
   const logger = await getInstrumentedLogger();
   const startTime = new Date().toISOString();
@@ -94,7 +94,7 @@ const runSynthetic = async (
  */
 export function runSyntheticHandler(
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  syntheticCode: (args: { logger: Logger }) => any
+  syntheticCode: (args: { logger: Logger, syntheticExecutionId: string }) => any
 ) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
