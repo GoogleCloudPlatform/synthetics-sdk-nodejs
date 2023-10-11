@@ -155,29 +155,26 @@ describe('GCM Synthetics Handler', async () => {
   });
 
   it('has execution id available', async () => {
-    const start = new Date();
-    const handler = runSyntheticHandler(() => true);
+    const expectedExecutionId = 'deadbeefdeadbeefdeadbeefdeadbeef'
+    const handler = runSyntheticHandler((args: {executionId: string|undefined}) => {
+      return args.executionId === expectedExecutionId;
+    });
 
     const runHandler = new Promise((resolve) => {
+      let request = {} as Request;
+      request.headers = {'Synthetic-Execution-Id': expectedExecutionId};
+
       let mockResponse = {
         send: (body: any) => {
           resolve(body);
         }
       } as Response;
 
-      handler({} as Request, mockResponse);
+      handler(request, mockResponse);
     });
 
     const syntheticResult = await runHandler as SyntheticResult;
-    const end = new Date();
-
-    const syntheticStart = new Date(syntheticResult?.start_time ?? '');
-    const syntheticEnd = new Date(syntheticResult?.end_time ?? '');
-
-    expect(syntheticStart >= start).to.be.true;
-    expect(syntheticEnd <= end).to.be.true;
     expect(syntheticResult?.synthetic_generic_result_v1?.ok).to.be.true;
     expect(syntheticResult?.synthetic_generic_result_v1?.generic_error).to.be.undefined;
-    expect(syntheticResult?.runtime_metadata).to.not.be.undefined;
   });
 });
