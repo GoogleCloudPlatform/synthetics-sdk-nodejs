@@ -20,14 +20,14 @@ const functions = require('@google-cloud/functions-framework');
 const axios = require('axios');
 const assert = require('node:assert');
 
-functions.http('SyntheticFunction', runSyntheticHandler(async ({logger}) => {
+functions.http('SyntheticFunction', runSyntheticHandler(async ({logger, executionId}) => {
   /*
    * This function executes the synthetic code for testing purposes.
    * If the code runs without errors, the synthetic test is considered successful.
    * If an error is thrown during execution, the synthetic test is considered failed.
    */
-  logger.info('Making an http request using synthetics');
-  const url = 'https://www.googfasdffsdfle.com/'; // URL to send the request to
+  logger.info('Making an http request using synthetics, with execution id: ' + executionId);
+  const url = 'https://www.google.com/'; // URL to send the request to
   return await assert.doesNotReject(axios.get(url));
 }));
 

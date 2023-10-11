@@ -29,9 +29,14 @@ import { getInstrumentedLogger } from './auto_instrumentation';
 instantiateMetadata();
 
 const asyncFilenamePrefix = 'async ';
+const syntheticExecutionIdHeader = 'Synthetic-Execution-Id';
 const runSynthetic = async (
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  syntheticCode: (args: { logger: Logger, syntheticExecutionId: string  }) => any
+  syntheticCode: (args: {
+    logger: Logger;
+    executionId: string | undefined;
+  }) => any,
+  executionId: string | undefined
 ) => {
   const logger = await getInstrumentedLogger();
   const startTime = new Date().toISOString();
@@ -40,7 +45,7 @@ const runSynthetic = async (
   const synthetic_generic_result = GenericResultV1.create();
 
   try {
-    await syntheticCode({ logger });
+    await syntheticCode({ logger, executionId });
     synthetic_generic_result.ok = true;
   } catch (err: unknown) {
     synthetic_generic_result.ok = false;
@@ -94,11 +99,16 @@ const runSynthetic = async (
  */
 export function runSyntheticHandler(
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-  syntheticCode: (args: { logger: Logger, syntheticExecutionId: string }) => any
+  syntheticCode: (args: {
+    logger: Logger;
+    executionId: string | undefined;
+  }) => any
 ) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
-    res.send(await runSynthetic(syntheticCode));
+    res.send(
+      await runSynthetic(syntheticCode, req.get(syntheticExecutionIdHeader))
+    );
 }
 
 export function firstUserErrorStackFrame(
