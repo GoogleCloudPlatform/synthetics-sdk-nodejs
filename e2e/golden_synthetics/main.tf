@@ -14,7 +14,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "synthetics-golden-tf"
+    bucket = "synthetics-os-build-pipeline-golden-tf"
   }
 }
 

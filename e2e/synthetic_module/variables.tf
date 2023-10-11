@@ -42,3 +42,8 @@ variable "passing" {
   description = "Whether or not the synthetic should be passing or failing, with an alerting policy that alerts on the incorrect behavior from being observed"
   type        = bool
 }
+variable "service_account_email" {
+  description = "If provided, the self-provided service account to run the function with"
+  type        = string
+  default     = "synthetic-monitoring@synthetic-os-build-pipeline.iam.gserviceaccount.com"
+}

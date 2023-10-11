@@ -19,17 +19,32 @@ steps:
       set -x
       apk add zip jq coreutils findutils
       npm run generate_test_servers
-
+ 
   - id: 'terraform setup'
     name: 'hashicorp/terraform:1.0.0'
     env:
       - 'PROJECT_ID=$PROJECT_ID'
-      - 'NOTIFICATION_CHANNEL=$_NOTIFICATION_CHANNEL' 
-    automapSubstitutions: true
+      - 'BUILD_ID=$BUILD_ID'
     script: |
-      cd e2e/golden_synthetics
-      echo "here is a log"
+      cd e2e/test_synthetics
+      WORKSPACE_ID=${BUILD_ID:0:7}
       terraform init -reconfigure
-      terraform workspace select golden-prod || terraform workspace new golden-prod
-      terraform plan -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL
-      #terraform apply -auto-approve -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL
+      terraform workspace new $WORKSPACE_ID
+      terraform plan -var project_id=$PROJECT_ID
+      terraform apply -auto-approve -var project_id=$PROJECT_ID
+  
+  - name: node:16-alpine
+    id: 'run tests'
+    script: |
+      # This step waits for alerts to fire / not fire.
+      sleep 600
+  - name: 'hashicorp/terraform:1.0.0'
+    id: 'terraform teardown'
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'BUILD_ID=$BUILD_ID'
+    script: |
+      cd e2e/test_synthetics
+      WORKSPACE_ID=${BUILD_ID:0:7}
+      terraform workspace select $WORKSPACE_ID
+      terraform destroy -auto-approve -var project_id=$PROJECT_ID

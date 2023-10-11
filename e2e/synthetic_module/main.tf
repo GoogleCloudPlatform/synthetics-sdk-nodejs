@@ -54,7 +54,6 @@ resource "google_cloudfunctions2_function" "default" {
     name        = "${var.name}-${terraform.workspace}"
     location    = "us-central1"
     description = "created using terraform config"
-
     build_config {
         runtime     = var.runtime
 	entry_point = var.entry_point
@@ -70,6 +69,7 @@ resource "google_cloudfunctions2_function" "default" {
         max_instance_count = 1
 	available_memory   = "256M"
 	timeout_seconds    = 60
+        service_account_email = var.service_account_email
     }
 }
 

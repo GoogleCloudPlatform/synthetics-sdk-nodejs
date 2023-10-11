@@ -25,11 +25,11 @@ steps:
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'NOTIFICATION_CHANNEL=$_NOTIFICATION_CHANNEL' 
+      - 'SERVICE_ACCOUNT=$_SERVICE_ACCOUNT'
     automapSubstitutions: true
     script: |
       cd e2e/golden_synthetics
-      echo "here is a log"
       terraform init -reconfigure
       terraform workspace select golden-prod || terraform workspace new golden-prod
-      terraform plan -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL
-      #terraform apply -auto-approve -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL
+      terraform plan -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL -var service_account=$SERVICE_ACCOUNT
+      terraform apply -auto-approve -var project_id=$PROJECT_ID -var notification_channel=$NOTIFICATION_CHANNEL -var service_account=$SERVICE_ACCOUNT

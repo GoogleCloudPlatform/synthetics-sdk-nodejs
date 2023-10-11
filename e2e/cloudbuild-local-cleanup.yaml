@@ -25,7 +25,7 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'WORKSPACE_ID=$_WORKSPACE_ID'
     script: |
-      cd e2e/test_synthetics
+      cd e2e/golden_synthetics
       terraform init -reconfigure
       terraform workspace select $WORKSPACE_ID
       terraform destroy -auto-approve -var project_id=$PROJECT_ID

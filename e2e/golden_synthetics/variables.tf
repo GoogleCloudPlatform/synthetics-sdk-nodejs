@@ -21,3 +21,9 @@ variable "notification_channel" {
   description = "The notification channel used for created alert policies"
   type        = string
 }
+
+# variable "service_account_email" {
+#   description = "If provided, the self-provided service account to run the function with."
+#  type        = string
+#  default     = ""
+#}

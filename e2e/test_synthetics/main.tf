@@ -14,7 +14,7 @@
 
 terraform {
   backend "gcs" {
-    bucket = "synthetics-sdk-testing-tf"
+    bucket = "synthetics-os-build-pipeline-testing-tf"
     prefix = "dev"
   }
 }
