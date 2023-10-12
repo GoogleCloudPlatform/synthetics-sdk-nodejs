@@ -12,6 +12,7 @@
     "@types/express": "^4.17.17",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.15.10",
+    "@types/sinon": "^10.0.16",
     "@types/supertest": "^2.0.12",
     "chai": "^4.3.7",
     "express": "^4.18.2",
@@ -31,18 +32,17 @@
     "posttest": "npm run lint"
   },
   "dependencies": {
-    "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.1.0",
-    "@opentelemetry/api": "^1.6.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.39.2",
-    "@opentelemetry/instrumentation": "^0.43.0",
-    "@opentelemetry/sdk-node": "^0.43.0",
-    "@opentelemetry/sdk-trace-base": "^1.17.0",
-    "@opentelemetry/sdk-trace-node": "^1.17.0",
-    "@types/sinon": "^10.0.16",
-    "error-stack-parser": "^2.1.4",
-    "google-auth-library": "^9.0.0",
-    "ts-proto": "^1.148.1",
-    "winston": "^3.10.0"
+    "@google-cloud/opentelemetry-cloud-trace-exporter": "2.1.0",
+    "@opentelemetry/api": "1.6.0",
+    "@opentelemetry/auto-instrumentations-node": "0.39.2",
+    "@opentelemetry/instrumentation": "0.43.0",
+    "@opentelemetry/sdk-node": "0.43.0",
+    "@opentelemetry/sdk-trace-base": "1.17.0",
+    "@opentelemetry/sdk-trace-node": "1.17.0",
+    "error-stack-parser": "2.1.4",
+    "google-auth-library": "9.0.0",
+    "ts-proto": "1.148.1",
+    "winston": "3.10.0"
   },
   "author": "Google Inc.",
   "license": "Apache-2.0"
