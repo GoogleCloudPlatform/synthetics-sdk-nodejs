@@ -31,10 +31,10 @@ instantiateMetadata();
 const asyncFilenamePrefix = 'async ';
 const syntheticExecutionIdHeader = 'Synthetic-Execution-Id';
 const runSynthetic = async (
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   syntheticCode: (args: {
     logger: Logger;
     executionId: string | undefined;
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   }) => any,
   executionId: string | undefined
 ) => {
@@ -98,10 +98,10 @@ const runSynthetic = async (
  * returns the results via res.send
  */
 export function runSyntheticHandler(
-  // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   syntheticCode: (args: {
     logger: Logger;
     executionId: string | undefined;
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   }) => any
 ) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
