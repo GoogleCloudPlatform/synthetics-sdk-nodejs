@@ -44,8 +44,6 @@ const runSynthetic = async (
   const syntheticResult = SyntheticResult.create();
   const synthetic_generic_result = GenericResultV1.create();
 
-  console.log('did I make it here?');
-
   try {
     await syntheticCode({ logger, executionId });
     synthetic_generic_result.ok = true;
@@ -108,11 +106,8 @@ export function runSyntheticHandler(
 ) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> => {
-    console.log('checkpoint 1');
-    let temp = req.get(syntheticExecutionIdHeader);
-    console.log('checkpoint 2: ' + temp);
     res.send(
-      await runSynthetic(syntheticCode, temp)
+      await runSynthetic(syntheticCode, req.get(syntheticExecutionIdHeader))
     );}
 }
 

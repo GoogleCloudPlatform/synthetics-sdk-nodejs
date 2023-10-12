@@ -15,6 +15,7 @@
 import { SyntheticResult, runSyntheticHandler } from '../../src/index';
 import { AssertionError, expect } from 'chai';
 import { Request, Response } from 'express';
+import { createRequest } from 'node-mocks-http';
 import { firstUserErrorStackFrame } from '../../src/handlers';
 import ErrorStackParser = require('error-stack-parser');
 
@@ -24,13 +25,15 @@ describe('GCM Synthetics Handler', async () => {
     const handler = runSyntheticHandler(() => true);
 
     const runHandler = new Promise((resolve) => {
+      const mockRequest = createRequest({});
+
       let mockResponse = {
         send: (body: any) => {
           resolve(body);
         }
       } as Response;
 
-      handler({} as Request, mockResponse);
+      handler(mockRequest, mockResponse);
     });
 
     const syntheticResult = await runHandler as SyntheticResult;
@@ -53,13 +56,14 @@ describe('GCM Synthetics Handler', async () => {
     });
 
     const runHandler = new Promise((resolve) => {
+      const mockRequest = createRequest({});
       let mockResponse = {
         send: (body: any) => {
           resolve(body);
         }
       } as Response;
 
-      handler({} as Request, mockResponse);
+      handler(mockRequest, mockResponse);
     });
 
     const syntheticResult = await runHandler as SyntheticResult;
@@ -92,13 +96,14 @@ describe('GCM Synthetics Handler', async () => {
     const handler = runSyntheticHandler(handlerFunction);
 
     const runHandler = new Promise((resolve) => {
+      const mockRequest = createRequest({});
       let mockResponse = {
         send: (body: any) => {
           resolve(body);
         }
       } as Response;
 
-      handler({} as Request, mockResponse);
+      handler(mockRequest, mockResponse);
     });
 
     const syntheticResult = await runHandler as SyntheticResult;
@@ -155,14 +160,15 @@ describe('GCM Synthetics Handler', async () => {
   });
 
   it('has execution id available', async () => {
-    const expectedExecutionId = 'deadbeefdeadbeefdeadbeefdeadbeef'
+    const executionId = 'deadbeefdeadbeefdeadbeefdeadbeef'
     const handler = runSyntheticHandler((args: {executionId: string|undefined}) => {
-      return args.executionId === expectedExecutionId;
+      expect(args.executionId).to.equal(executionId);
     });
 
     const runHandler = new Promise((resolve) => {
-      let request = {} as Request;
-      request.headers = {'Synthetic-Execution-Id': expectedExecutionId};
+      const mockRequest = createRequest({
+        headers: {"Synthetic-Execution-Id": executionId}
+      });
 
       let mockResponse = {
         send: (body: any) => {
@@ -170,7 +176,7 @@ describe('GCM Synthetics Handler', async () => {
         }
       } as Response;
 
-      handler(request, mockResponse);
+      handler(mockRequest, mockResponse);
     });
 
     const syntheticResult = await runHandler as SyntheticResult;
