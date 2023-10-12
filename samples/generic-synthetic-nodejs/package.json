@@ -5,7 +5,7 @@
     "main": "index.js",
     "dependencies": {
         "@google-cloud/functions-framework": "^3.1.2",
-        "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.3.0.tgz",
+        "@google-cloud/synthetics-sdk-api": "^0.3.0",
         "axios": "^1.5.0"
     },
     "license": "Apache-2.0",
