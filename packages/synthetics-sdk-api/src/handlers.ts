@@ -108,7 +108,8 @@ export function runSyntheticHandler(
   return async (req: Request, res: Response): Promise<any> => {
     res.send(
       await runSynthetic(syntheticCode, req.get(syntheticExecutionIdHeader))
-    );}
+    );
+  };
 }
 
 export function firstUserErrorStackFrame(
