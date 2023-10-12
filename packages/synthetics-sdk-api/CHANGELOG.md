@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.3.0...synthetics-sdk-api-v0.3.1) (2023-10-12)
+
+
+### Bug Fixes
+
+* Fixes broken patch dependencies ([#59](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/59)) ([45834df](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/45834dfad0c494f1117465095e9c85929929915b))
+
 ## [0.3.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.2.0...synthetics-sdk-api-v0.3.0) (2023-09-20)
 
 
