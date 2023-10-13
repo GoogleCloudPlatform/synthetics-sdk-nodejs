@@ -27,7 +27,7 @@ functions.http('SyntheticFunction', runSyntheticHandler(async ({logger}) => {
    * If an error is thrown during execution, the synthetic test is considered failed.
    */
   logger.info('Making an http request using synthetics');
-  const url = 'https://www.googfasdffsdfle.com/'; // URL to send the request to
+  const url = 'https://www.google.com/'; // URL to send the request to
   return await assert.doesNotReject(axios.get(url));
 }));
 
