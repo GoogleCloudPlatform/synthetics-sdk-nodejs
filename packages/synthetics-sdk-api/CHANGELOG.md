@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.3.1...synthetics-sdk-api-v0.4.0) (2023-10-13)
+
+
+### Features
+
+* Makes execution id accessible in the user's code ([#58](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/58)) ([78b2162](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/78b216235b9671c47b4c943a2bec0f007f95faff))
+
 ## [0.3.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.3.0...synthetics-sdk-api-v0.3.1) (2023-10-12)
 
 
