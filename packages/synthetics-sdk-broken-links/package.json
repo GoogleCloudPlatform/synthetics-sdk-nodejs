@@ -13,7 +13,6 @@
     "pretest": "npm run compile",
     "lint": "eslint **/*.ts",
     "posttest": "npm run lint",
-    "postinstall": "node ../../node_modules/puppeteer/install.js",
     "all": "rm -rf ./node_modules && npm install && npm run build"
   },
   "files": [
@@ -41,6 +40,6 @@
   },
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.1.0.tgz",
-    "puppeteer": "^21.0.2"
+    "puppeteer": "21.3.6"
   }
 }

@@ -23,6 +23,7 @@ import {
 import {
   createSyntheticResult,
   getGenericSyntheticResult,
+  getTimeLimitPromise,
   LinkIntermediate,
   shuffleAndTruncate,
 } from './link_utils';
@@ -73,7 +74,8 @@ const synthetics_sdk_broken_links_package = require('../package.json');
 instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
-  inputOptions: BrokenLinkCheckerOptions
+  inputOptions: BrokenLinkCheckerOptions,
+  total_timeout_millis = 250000
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();
@@ -83,30 +85,57 @@ export async function runBrokenLinks(
   try {
     const options = processOptions(inputOptions);
 
-    // create Browser & origin page then navigate to origin_uri, w/ origin
-    // specific settings
-    browser = await puppeteer.launch({ headless: 'new' });
-    const originPage = await openNewPage(browser);
+    // Create Promise and variables used to set and resolve the time limit
+    // imposed by `total_timeout_millis`
+    const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+      getTimeLimitPromise(startTime, total_timeout_millis);
 
-    const followed_links = [await checkOriginLink(originPage, options)];
-    // if orgin link did not pass exit and return the singular link result
-    if (!followed_links[0].link_passed) {
-      return createSyntheticResult(
-        startTime,
-        runtime_metadata,
-        options,
-        followed_links
+    const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
+
+    const checkLinksPromise = async () => {
+      // create Browser & origin page then navigate to origin_uri, w/ origin
+      // specific settings
+      browser = await puppeteer.launch({ headless: 'new' });
+      const originPage = await openNewPage(browser);
+
+      followed_links.push(
+        await checkOriginLink(
+          originPage,
+          options,
+          startTime,
+          total_timeout_millis
+        )
       );
-    }
 
-    // scrape and organize links to check
-    const linksToFollow: LinkIntermediate[] = await scrapeLinks(
-      originPage,
-      options
-    );
+      // if orgin link is not present or if it did not pass: exit and return the
+      // singular link result
+      if (!followed_links[0].link_passed || !followed_links[0].link_passed) {
+        return true;
+      }
 
-    // check all links
-    followed_links.push(...(await checkLinks(browser, linksToFollow, options)));
+      // scrape and organize links to check
+      const linksToFollow: LinkIntermediate[] = await scrapeLinks(
+        originPage,
+        options
+      );
+      // check all links
+      followed_links.push(
+        ...(await checkLinks(
+          browser,
+          linksToFollow,
+          options,
+          startTime,
+          total_timeout_millis
+        ))
+      );
+      return true;
+    };
+
+    await Promise.race([timeLimitPromise, checkLinksPromise()]);
+
+    // clear timer and resolve (safe regardless of which promise finishes first)
+    clearTimeout(timeLimitTimeout);
+    timeLimitresolver();
 
     // returned a SyntheticResult with `options`, `followed_links` &
     // runtimeMetadata
@@ -139,32 +168,66 @@ export async function runBrokenLinks(
  */
 async function checkOriginLink(
   originPage: Page,
-  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  startTime: string,
+  total_timeout_millis: number
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
-  // check origin_link
-  const originLinkResult = await checkLink(
-    originPage,
-    { target_uri: options.origin_uri, anchor_text: '', html_element: '' },
-    options,
-    true
+  let originLinkResult: BrokenLinksResultV1_SyntheticLinkResult;
+
+  // Create Promise and variables used to set and resolve the time limit
+  const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+    getTimeLimitPromise(
+      startTime,
+      total_timeout_millis,
+      /*extraOffsetMillis=*/ 500
+    );
+
+  const originLinkResultPromise = async () => {
+    originLinkResult = await checkLink(
+      originPage,
+      { target_uri: options.origin_uri, anchor_text: '', html_element: '' },
+      options,
+      true
+    );
+
+    try {
+      if (options.wait_for_selector) {
+        await originPage.waitForSelector(options.wait_for_selector, {
+          timeout: options.link_timeout_millis,
+        });
+      }
+    } catch (err) {
+      originLinkResult.link_passed = false;
+      if (err instanceof Error) {
+        originLinkResult.error_type = err.name;
+        originLinkResult.error_message = err.message;
+        process.stderr.write(err.message);
+      }
+    }
+    return true;
+  };
+
+  return Promise.race([timeLimitPromise, originLinkResultPromise()]).then(
+    (finished) => {
+      // clear timer and resolve (safe regardless of which promise finishes first)
+      clearTimeout(timeLimitTimeout);
+      timeLimitresolver();
+
+      // if the time limit occured during the wait_for_selector operation
+      if (!finished && originLinkResult) {
+        originLinkResult.link_passed = false;
+        originLinkResult.error_type = 'TimeoutError';
+        originLinkResult.error_message = `Global Timeout of 300 secs hit while waiting for selector '${options.wait_for_selector}'`;
+        process.stderr.write(originLinkResult.error_message);
+      }
+
+      // If initialized returns a copy otherwise theres a possibility that
+      // originLinkResultPromise will finish executing before `runBrokenLinks`
+      // finishes, and since objects are pass by reference the
+      // SyntheticLinkResult could change values.
+      return Object.assign({}, originLinkResult);
+    }
   );
-
-  try {
-    if (options.wait_for_selector) {
-      await originPage.waitForSelector(options.wait_for_selector, {
-        timeout: options.link_timeout_millis,
-      });
-    }
-  } catch (err) {
-    originLinkResult.link_passed = false;
-    if (err instanceof Error) {
-      originLinkResult.error_type = err.name;
-      originLinkResult.error_message = err.message;
-      process.stderr.write(err.message);
-    }
-  }
-
-  return originLinkResult;
 }
 
 /**
