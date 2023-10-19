@@ -273,20 +273,17 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid wait_for_selector value, must be a non-empty string'
+        'Invalid wait_for_selector value, must be a string'
       );
     });
-    it('throws error if wait_for_selector is an empty string', () => {
+    it('wait_for_selector can be  an empty string', () => {
       const options = {
         origin_uri: 'http://example.com',
         wait_for_selector: '',
       } as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(
-        Error,
-        'Invalid wait_for_selector value, must be a non-empty string'
-      );
+      }).not.to.throw();
     });
     it('throws error if per_link_options contains an invalid uri', () => {
       const options = {

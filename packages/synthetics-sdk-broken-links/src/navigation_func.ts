@@ -121,7 +121,7 @@ export async function checkLinks(
       } catch (err) {
         if (err instanceof Error) process.stderr.write(err.message);
         throw new Error(
-          `An error occurred while checking ${link}. Please reference server logs for further information.`
+          `An error occurred while checking ${link.target_uri}. Please reference server logs for further information.`
         );
       }
     }

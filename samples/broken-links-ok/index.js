@@ -22,7 +22,7 @@ const GcmSynthetics = require('@google-cloud/synthetics-sdk-broken-links');
 
 
 const options = {
-  origin_uri: "https://www.wikipedia.org/",
+  origin_uri: "https://example.com",
   // link_limit: 50,
   // query_selector_all: "a", // https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll
   // get_attributes: ['href'], // https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute
