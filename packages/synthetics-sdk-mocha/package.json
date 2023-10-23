@@ -1,6 +1,6 @@
 {
   "name": "@google-cloud/synthetics-sdk-mocha",
-  "version": "0.1.1",
+  "version": "0.4.1",
   "description": "NodeJS SDK for integrating with the Google Cloud Monitoring Synthetics product.",
   "main": "./build/src/index.js",
   "repository": "GoogleCloudPlatform/synthetics-sdk-nodejs",
