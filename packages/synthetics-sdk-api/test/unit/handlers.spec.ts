@@ -159,7 +159,7 @@ describe('GCM Synthetics Handler', async () => {
     });
   });
 
-  it('has execution id available', async () => {
+  it('has an execution id', async () => {
     const executionId = 'deadbeefdeadbeefdeadbeefdeadbeef'
     const handler = runSyntheticHandler((args: {executionId: string|undefined}) => {
       expect(args.executionId).to.equal(executionId);
