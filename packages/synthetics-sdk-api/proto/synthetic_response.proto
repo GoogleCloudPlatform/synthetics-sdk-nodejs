@@ -183,7 +183,7 @@ message BrokenLinksResultV1 {
     // Method documentation:
     // https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:
     // https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors
-    string wait_for_selector = 8;
+    string wait_for_selector = 9;
 
     // Individual link options.
     message PerLinkOption {
@@ -195,7 +195,7 @@ message BrokenLinksResultV1 {
     }
     // individual link options, default None. string must be formatted as a
     // fully qualified url
-    map<string, PerLinkOption> per_link_options = 9;
+    map<string, PerLinkOption> per_link_options = 10;
   }
 
   // Options set for broken link synthetic.
