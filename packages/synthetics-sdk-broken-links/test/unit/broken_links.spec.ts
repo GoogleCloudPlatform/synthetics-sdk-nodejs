@@ -132,6 +132,7 @@ describe('runBrokenLinks', async () => {
       origin_uri: origin_uri,
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
+      wait_for_selector: '',
     };
 
     const result = await runBrokenLinks(inputOptions);

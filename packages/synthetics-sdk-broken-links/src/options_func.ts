@@ -119,12 +119,9 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
   // Check wait_for_selector
   if (
     inputOptions.wait_for_selector !== undefined &&
-    (typeof inputOptions.wait_for_selector !== 'string' ||
-      inputOptions.wait_for_selector.length === 0)
+    typeof inputOptions.wait_for_selector !== 'string'
   ) {
-    throw new Error(
-      'Invalid wait_for_selector value, must be a non-empty string'
-    );
+    throw new Error('Invalid wait_for_selector value, must be a string');
   }
 
   // per_link_options
