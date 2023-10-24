@@ -79,7 +79,7 @@ instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
   inputOptions: BrokenLinkCheckerOptions,
-  total_timeout_millis = 250000
+  total_timeout_millis = 50000
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();

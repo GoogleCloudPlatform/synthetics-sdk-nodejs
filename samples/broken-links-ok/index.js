@@ -28,8 +28,7 @@ const options = {
   // get_attributes: ['href'], // https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute
   // link_order: "FIRST_N", // "FIRST_N" or "RANDOM"
   // link_timeout_millis: 30000, // timeout per link
-  // max_redirects: undefined, // unlimited
-  // max_retries: 0, //
+  // max_retries: 0, // number of retries per link if it failed for any reason
   // wait_for_selector: '', // https://pptr.dev/api/puppeteer.page.waitforselector
   // per_link_options: {}
     /*

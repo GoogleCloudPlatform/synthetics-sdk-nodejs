@@ -130,32 +130,6 @@ export function isHTTPResponse(
 }
 
 /**
- * Determines whether navigating from the current URI to the target URI
- * requires navigating to a blank page. This prevents Puppeteer errors caused by
- * navigating from one URI to the same URI with a different anchor part (will
- * normally return `null`).
- *
- * @param current_uri - The current URI in the browser.
- * @param target_uri - The target URI
- * @returns True if navigating requires a blank page, false otherwise.
- * @example
- * const currentUri = 'http://example.com/page1#section1';
- * const targetUri = 'http://example.com/page1#section2';
- * const needsBlankPage = shouldGoToBlankPage(currentUri, targetUri); // true
- */
-export function shouldGoToBlankPage(
-  current_uri: string,
-  target_uri: string
-): boolean {
-  // Check if the target URI contains an anchor (#) and if the current URI
-  // includes the same base URI (excluding the anchor part)
-  return (
-    target_uri.includes('#') &&
-    current_uri.includes(target_uri.substring(0, target_uri.indexOf('#')))
-  );
-}
-
-/**
  * Parses an array of followed BrokenLinksResultV1_SyntheticLinkResult's and
  * aggregates statistics into a single BrokenLinksResultV1 object.
  *

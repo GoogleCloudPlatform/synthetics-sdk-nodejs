@@ -25,7 +25,6 @@ import {
   checkStatusPassing,
   createSyntheticResult,
   LinkIntermediate,
-  shouldGoToBlankPage,
   shuffleAndTruncate,
 } from '../../src/link_utils';
 import { setDefaultOptions } from '../../src/options_func';
@@ -73,38 +72,6 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     expect(checkStatusPassing(status_class_3xx, 200)).to.be.false;
     expect(checkStatusPassing(status_class_4xx, 200)).to.be.false;
     expect(checkStatusPassing(status_class_5xx, 200)).to.be.false;
-  });
-
-  describe('shouldGoToBlankPage', () => {
-    it('should return true for different anchor parts', () => {
-      const current_uri = 'http://example.com/page1#section1';
-      const target_uri = 'http://example.com/page1#section2';
-      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
-    });
-
-    it('should return false for same uris', () => {
-      const current_uri = 'http://example.com/page1#section1';
-      const target_uri = 'http://example.com/page1#section1';
-      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
-    });
-
-    it('should return false for different uris', () => {
-      const current_uri = 'http://example.com/page1#section1';
-      const target_uri = 'http://example.com/page2#section1';
-      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.false;
-    });
-
-    it('should return true if target has # and current does not', () => {
-      const current_uri = 'http://example.com/page1';
-      const target_uri = 'http://example.com/page1#section1';
-      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.true;
-    });
-
-    it('should return false if target has no #', () => {
-      const current_uri = 'http://example.com/page1#section1';
-      const target_uri = 'http://example.com/page1';
-      expect(shouldGoToBlankPage(current_uri, target_uri)).to.be.false;
-    });
   });
 
   it('createSyntheticResult correctly sets all aggregate fields in BrokenLinksResultV1', () => {
