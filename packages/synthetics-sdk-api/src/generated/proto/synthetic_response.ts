@@ -1438,12 +1438,12 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       writer.uint32(56).int64(message.max_retries);
     }
     if (message.wait_for_selector !== "") {
-      writer.uint32(74).string(message.wait_for_selector);
+      writer.uint32(66).string(message.wait_for_selector);
     }
     Object.entries(message.per_link_options).forEach(([key, value]) => {
       BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.encode(
         { key: key as any, value },
-        writer.uint32(82).fork(),
+        writer.uint32(74).fork(),
       ).ldelim();
     });
     return writer;
@@ -1510,19 +1510,12 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
             break;
           }
 
-          message.wait_for_selector = reader.string();
-          continue;
-        case 10:
-          if (tag !== 82) {
-            break;
-          }
-
-          const entry10 = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.decode(
+          const entry9 = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry.decode(
             reader,
             reader.uint32(),
           );
-          if (entry10.value !== undefined) {
-            message.per_link_options[entry10.key] = entry10.value;
+          if (entry9.value !== undefined) {
+            message.per_link_options[entry9.key] = entry9.value;
           }
           continue;
       }
