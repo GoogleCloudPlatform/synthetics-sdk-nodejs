@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.4.0...synthetics-sdk-api-v0.4.1) (2023-10-24)
+
+
+### Bug Fixes
+
+* Trivial change to trigger release please ([#69](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/69)) ([f795d59](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/f795d59cd649409ea71bd6a304408da4f67aacd2))
+
 ## [0.4.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.3.1...synthetics-sdk-api-v0.4.0) (2023-10-13)
 
 
