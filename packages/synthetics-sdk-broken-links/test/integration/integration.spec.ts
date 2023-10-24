@@ -134,7 +134,6 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
       link_timeout_millis: 30000,
       max_retries: 0,
-      max_redirects: Number.MAX_SAFE_INTEGER,
       wait_for_selector: '',
       per_link_options: {},
     });
@@ -241,7 +240,6 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
       link_timeout_millis: 30000,
       max_retries: 0,
-      max_redirects: Number.MAX_SAFE_INTEGER,
       wait_for_selector: '',
       per_link_options: {},
     });
@@ -364,7 +362,6 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
       link_timeout_millis: 30000,
       max_retries: 0,
-      max_redirects: Number.MAX_SAFE_INTEGER,
       wait_for_selector: '',
       per_link_options: {},
     });

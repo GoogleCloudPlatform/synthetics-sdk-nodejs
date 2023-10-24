@@ -62,7 +62,6 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
     expect(options.link_limit).to.equal(50);
     expect(options.query_selector_all).to.equal('a');
     expect(options.max_retries).to.equal(0);
-    expect(options.max_redirects).to.equal(Number.MAX_SAFE_INTEGER);
 
     // Verify that existing values are not overridden
     expect(options.origin_uri).to.equal('https://example.com');
@@ -243,27 +242,6 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         'Invalid max_retries value, must be a number greater than -1'
       );
     });
-    it('throws error if max_redirects is not a number', () => {
-      const options = {
-        origin_uri: 'http://example.com',
-        max_redirects: 'invalid',
-      } as any as BrokenLinkCheckerOptions;
-      expect(() => {
-        validateInputOptions(options);
-      }).to.throw(Error, 'Invalid max_redirects');
-    });
-    it('throws error if max_redirects is less than -1', () => {
-      const options = {
-        origin_uri: 'http://example.com',
-        max_redirects: -2,
-      } as BrokenLinkCheckerOptions;
-      expect(() => {
-        validateInputOptions(options);
-      }).to.throw(
-        Error,
-        'Invalid max_redirects value, must be a number greater than -1'
-      );
-    });
     it('throws error if wait_for_selector is not a string', () => {
       const options = {
         origin_uri: 'http://example.com',
@@ -271,10 +249,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
-      }).to.throw(
-        Error,
-        'Invalid wait_for_selector value, must be a string'
-      );
+      }).to.throw(Error, 'Invalid wait_for_selector value, must be a string');
     });
     it('wait_for_selector can be  an empty string', () => {
       const options = {
@@ -371,7 +346,6 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         link_order: LinkOrder.FIRST_N,
         link_timeout_millis: 5000,
         max_retries: 3,
-        max_redirects: 5,
         wait_for_selector: 'a.link',
         per_link_options: {
           'http://example.com': {
@@ -399,7 +373,6 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         link_order: undefined,
         link_timeout_millis: undefined,
         max_retries: undefined,
-        max_redirects: undefined,
         wait_for_selector: undefined,
         per_link_options: undefined,
       } as BrokenLinkCheckerOptions;
