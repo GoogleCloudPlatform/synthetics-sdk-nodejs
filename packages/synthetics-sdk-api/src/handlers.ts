@@ -36,6 +36,7 @@ const runSynthetic = async (syntheticCode: () => any) => {
   const synthetic_generic_result = GenericResultV1.create();
 
   try {
+    console.log('testing');
     await syntheticCode();
     synthetic_generic_result.ok = true;
   } catch (err: unknown) {
