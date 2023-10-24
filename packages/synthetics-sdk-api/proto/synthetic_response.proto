@@ -175,8 +175,10 @@ message BrokenLinksResultV1 {
     // Maximum number of times to retry a link that does not return the
     // “expected_status_code”.
     optional int64 max_retries = 7;
-    // Maximum number of times to follow redirects for a link, defaults to following all redirects.
-    optional int64 max_redirects = 8;
+
+    reserved 8;
+    reserved "max_redirects";
+
     // HTML element to wait for before scraping links on origin_uri.
     // Method documentation:
     // https://pptr.dev/api/puppeteer.page.waitforselector. Type documentation:

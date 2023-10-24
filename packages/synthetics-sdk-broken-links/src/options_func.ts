@@ -105,17 +105,6 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
     );
   }
 
-  // check max_redirects
-  if (
-    inputOptions.max_redirects !== undefined &&
-    (typeof inputOptions.max_redirects !== 'number' ||
-      inputOptions.max_redirects < 0)
-  ) {
-    throw new Error(
-      'Invalid max_redirects value, must be a number greater than -1'
-    );
-  }
-
   // Check wait_for_selector
   if (
     inputOptions.wait_for_selector !== undefined &&
@@ -171,7 +160,6 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
     link_order: inputOptions.link_order,
     link_timeout_millis: inputOptions.link_timeout_millis,
     max_retries: inputOptions.max_retries,
-    max_redirects: inputOptions.max_redirects,
     wait_for_selector: inputOptions.wait_for_selector,
     per_link_options: inputOptions.per_link_options,
   };
@@ -194,7 +182,6 @@ export function setDefaultOptions(
     link_order: BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
     link_timeout_millis: 30000,
     max_retries: 0,
-    max_redirects: Number.MAX_SAFE_INTEGER, // allows infinite number of redirects
     wait_for_selector: '',
     per_link_options: {},
   };

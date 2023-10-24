@@ -45,7 +45,6 @@ export interface BrokenLinkCheckerOptions {
   link_order?: LinkOrder;
   link_timeout_millis?: number | undefined;
   max_retries?: number | undefined;
-  max_redirects?: number | undefined;
   wait_for_selector?: string;
   per_link_options?: { [key: string]: PerLinkOption };
 }

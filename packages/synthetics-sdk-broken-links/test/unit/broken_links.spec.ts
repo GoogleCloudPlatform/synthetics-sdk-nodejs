@@ -146,7 +146,6 @@ describe('runBrokenLinks', async () => {
         BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
       link_timeout_millis: 30000,
       max_retries: 0,
-      max_redirects: Number.MAX_SAFE_INTEGER,
       wait_for_selector: '',
       per_link_options: {},
     };

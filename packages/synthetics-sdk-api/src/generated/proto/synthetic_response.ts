@@ -268,10 +268,6 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
   max_retries?:
     | number
     | undefined;
-  /** Maximum number of times to follow redirects for a link, defaults to following all redirects. */
-  max_redirects?:
-    | number
-    | undefined;
   /**
    * HTML element to wait for before scraping links on origin_uri.
    * Method documentation:
@@ -506,11 +502,13 @@ export const TestResult = {
 
   fromJSON(object: any): TestResult {
     return {
-      title: isSet(object.title) ? String(object.title) : "",
-      test_passed: isSet(object.test_passed) ? Boolean(object.test_passed) : undefined,
-      title_paths: Array.isArray(object?.title_paths) ? object.title_paths.map((e: any) => String(e)) : [],
-      test_start_time: isSet(object.test_start_time) ? String(object.test_start_time) : "",
-      test_end_time: isSet(object.test_end_time) ? String(object.test_end_time) : "",
+      title: isSet(object.title) ? globalThis.String(object.title) : "",
+      test_passed: isSet(object.test_passed) ? globalThis.Boolean(object.test_passed) : undefined,
+      title_paths: globalThis.Array.isArray(object?.title_paths)
+        ? object.title_paths.map((e: any) => globalThis.String(e))
+        : [],
+      test_start_time: isSet(object.test_start_time) ? globalThis.String(object.test_start_time) : "",
+      test_end_time: isSet(object.test_end_time) ? globalThis.String(object.test_end_time) : "",
       test_error: isSet(object.test_error) ? TestResult_TestError.fromJSON(object.test_error) : undefined,
     };
   },
@@ -612,9 +610,9 @@ export const TestResult_TestError = {
 
   fromJSON(object: any): TestResult_TestError {
     return {
-      error_type: isSet(object.error_type) ? String(object.error_type) : "",
-      error_message: isSet(object.error_message) ? String(object.error_message) : "",
-      stack_frames: Array.isArray(object?.stack_frames)
+      error_type: isSet(object.error_type) ? globalThis.String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? globalThis.String(object.error_message) : "",
+      stack_frames: globalThis.Array.isArray(object?.stack_frames)
         ? object.stack_frames.map((e: any) => TestResult_TestError_StackFrame.fromJSON(e))
         : [],
     };
@@ -713,10 +711,10 @@ export const TestResult_TestError_StackFrame = {
 
   fromJSON(object: any): TestResult_TestError_StackFrame {
     return {
-      function_name: isSet(object.function_name) ? String(object.function_name) : "",
-      file_path: isSet(object.file_path) ? String(object.file_path) : "",
-      line: isSet(object.line) ? Number(object.line) : undefined,
-      column: isSet(object.column) ? Number(object.column) : undefined,
+      function_name: isSet(object.function_name) ? globalThis.String(object.function_name) : "",
+      file_path: isSet(object.file_path) ? globalThis.String(object.file_path) : "",
+      line: isSet(object.line) ? globalThis.Number(object.line) : undefined,
+      column: isSet(object.column) ? globalThis.Number(object.column) : undefined,
     };
   },
 
@@ -846,12 +844,12 @@ export const TestFrameworkResultV1 = {
 
   fromJSON(object: any): TestFrameworkResultV1 {
     return {
-      suite_count: isSet(object.suite_count) ? Number(object.suite_count) : undefined,
-      test_count: isSet(object.test_count) ? Number(object.test_count) : undefined,
-      passing_test_count: isSet(object.passing_test_count) ? Number(object.passing_test_count) : undefined,
-      failing_test_count: isSet(object.failing_test_count) ? Number(object.failing_test_count) : undefined,
-      pending_test_count: isSet(object.pending_test_count) ? Number(object.pending_test_count) : undefined,
-      test_results: Array.isArray(object?.test_results)
+      suite_count: isSet(object.suite_count) ? globalThis.Number(object.suite_count) : undefined,
+      test_count: isSet(object.test_count) ? globalThis.Number(object.test_count) : undefined,
+      passing_test_count: isSet(object.passing_test_count) ? globalThis.Number(object.passing_test_count) : undefined,
+      failing_test_count: isSet(object.failing_test_count) ? globalThis.Number(object.failing_test_count) : undefined,
+      pending_test_count: isSet(object.pending_test_count) ? globalThis.Number(object.pending_test_count) : undefined,
+      test_results: globalThis.Array.isArray(object?.test_results)
         ? object.test_results.map((e: any) => TestResult.fromJSON(e))
         : [],
     };
@@ -942,7 +940,7 @@ export const GenericResultV1 = {
 
   fromJSON(object: any): GenericResultV1 {
     return {
-      ok: isSet(object.ok) ? Boolean(object.ok) : undefined,
+      ok: isSet(object.ok) ? globalThis.Boolean(object.ok) : undefined,
       generic_error: isSet(object.generic_error)
         ? GenericResultV1_GenericError.fromJSON(object.generic_error)
         : undefined,
@@ -1050,11 +1048,11 @@ export const GenericResultV1_GenericError = {
 
   fromJSON(object: any): GenericResultV1_GenericError {
     return {
-      error_type: isSet(object.error_type) ? String(object.error_type) : "",
-      error_message: isSet(object.error_message) ? String(object.error_message) : "",
-      function_name: isSet(object.function_name) ? String(object.function_name) : "",
-      file_path: isSet(object.file_path) ? String(object.file_path) : "",
-      line: isSet(object.line) ? Number(object.line) : undefined,
+      error_type: isSet(object.error_type) ? globalThis.String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? globalThis.String(object.error_message) : "",
+      function_name: isSet(object.function_name) ? globalThis.String(object.function_name) : "",
+      file_path: isSet(object.file_path) ? globalThis.String(object.file_path) : "",
+      line: isSet(object.line) ? globalThis.Number(object.line) : undefined,
     };
   },
 
@@ -1139,7 +1137,7 @@ export const ResponseStatusCode = {
 
   fromJSON(object: any): ResponseStatusCode {
     return {
-      status_value: isSet(object.status_value) ? Number(object.status_value) : undefined,
+      status_value: isSet(object.status_value) ? globalThis.Number(object.status_value) : undefined,
       status_class: isSet(object.status_class)
         ? responseStatusCode_StatusClassFromJSON(object.status_class)
         : undefined,
@@ -1317,21 +1315,21 @@ export const BrokenLinksResultV1 = {
 
   fromJSON(object: any): BrokenLinksResultV1 {
     return {
-      link_count: isSet(object.link_count) ? Number(object.link_count) : undefined,
-      passing_link_count: isSet(object.passing_link_count) ? Number(object.passing_link_count) : undefined,
-      failing_link_count: isSet(object.failing_link_count) ? Number(object.failing_link_count) : undefined,
-      unreachable_count: isSet(object.unreachable_count) ? Number(object.unreachable_count) : undefined,
-      status2xx_count: isSet(object.status2xx_count) ? Number(object.status2xx_count) : undefined,
-      status3xx_count: isSet(object.status3xx_count) ? Number(object.status3xx_count) : undefined,
-      status4xx_count: isSet(object.status4xx_count) ? Number(object.status4xx_count) : undefined,
-      status5xx_count: isSet(object.status5xx_count) ? Number(object.status5xx_count) : undefined,
+      link_count: isSet(object.link_count) ? globalThis.Number(object.link_count) : undefined,
+      passing_link_count: isSet(object.passing_link_count) ? globalThis.Number(object.passing_link_count) : undefined,
+      failing_link_count: isSet(object.failing_link_count) ? globalThis.Number(object.failing_link_count) : undefined,
+      unreachable_count: isSet(object.unreachable_count) ? globalThis.Number(object.unreachable_count) : undefined,
+      status2xx_count: isSet(object.status2xx_count) ? globalThis.Number(object.status2xx_count) : undefined,
+      status3xx_count: isSet(object.status3xx_count) ? globalThis.Number(object.status3xx_count) : undefined,
+      status4xx_count: isSet(object.status4xx_count) ? globalThis.Number(object.status4xx_count) : undefined,
+      status5xx_count: isSet(object.status5xx_count) ? globalThis.Number(object.status5xx_count) : undefined,
       options: isSet(object.options)
         ? BrokenLinksResultV1_BrokenLinkCheckerOptions.fromJSON(object.options)
         : undefined,
       origin_link_result: isSet(object.origin_link_result)
         ? BrokenLinksResultV1_SyntheticLinkResult.fromJSON(object.origin_link_result)
         : undefined,
-      followed_link_results: Array.isArray(object?.followed_link_results)
+      followed_link_results: globalThis.Array.isArray(object?.followed_link_results)
         ? object.followed_link_results.map((e: any) => BrokenLinksResultV1_SyntheticLinkResult.fromJSON(e))
         : [],
     };
@@ -1411,7 +1409,6 @@ function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksRe
     link_order: 0,
     link_timeout_millis: undefined,
     max_retries: undefined,
-    max_redirects: undefined,
     wait_for_selector: "",
     per_link_options: {},
   };
@@ -1439,9 +1436,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     }
     if (message.max_retries !== undefined) {
       writer.uint32(56).int64(message.max_retries);
-    }
-    if (message.max_redirects !== undefined) {
-      writer.uint32(64).int64(message.max_redirects);
     }
     if (message.wait_for_selector !== "") {
       writer.uint32(74).string(message.wait_for_selector);
@@ -1511,13 +1505,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
           message.max_retries = longToNumber(reader.int64() as Long);
           continue;
-        case 8:
-          if (tag !== 64) {
-            break;
-          }
-
-          message.max_redirects = longToNumber(reader.int64() as Long);
-          continue;
         case 9:
           if (tag !== 74) {
             break;
@@ -1549,17 +1536,20 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
   fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions {
     return {
-      origin_uri: isSet(object.origin_uri) ? String(object.origin_uri) : "",
-      link_limit: isSet(object.link_limit) ? Number(object.link_limit) : undefined,
-      query_selector_all: isSet(object.query_selector_all) ? String(object.query_selector_all) : "",
-      get_attributes: Array.isArray(object?.get_attributes) ? object.get_attributes.map((e: any) => String(e)) : [],
+      origin_uri: isSet(object.origin_uri) ? globalThis.String(object.origin_uri) : "",
+      link_limit: isSet(object.link_limit) ? globalThis.Number(object.link_limit) : undefined,
+      query_selector_all: isSet(object.query_selector_all) ? globalThis.String(object.query_selector_all) : "",
+      get_attributes: globalThis.Array.isArray(object?.get_attributes)
+        ? object.get_attributes.map((e: any) => globalThis.String(e))
+        : [],
       link_order: isSet(object.link_order)
         ? brokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrderFromJSON(object.link_order)
         : 0,
-      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : undefined,
-      max_retries: isSet(object.max_retries) ? Number(object.max_retries) : undefined,
-      max_redirects: isSet(object.max_redirects) ? Number(object.max_redirects) : undefined,
-      wait_for_selector: isSet(object.wait_for_selector) ? String(object.wait_for_selector) : "",
+      link_timeout_millis: isSet(object.link_timeout_millis)
+        ? globalThis.Number(object.link_timeout_millis)
+        : undefined,
+      max_retries: isSet(object.max_retries) ? globalThis.Number(object.max_retries) : undefined,
+      wait_for_selector: isSet(object.wait_for_selector) ? globalThis.String(object.wait_for_selector) : "",
       per_link_options: isObject(object.per_link_options)
         ? Object.entries(object.per_link_options).reduce<
           { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
@@ -1594,9 +1584,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     if (message.max_retries !== undefined) {
       obj.max_retries = Math.round(message.max_retries);
     }
-    if (message.max_redirects !== undefined) {
-      obj.max_redirects = Math.round(message.max_redirects);
-    }
     if (message.wait_for_selector !== "") {
       obj.wait_for_selector = message.wait_for_selector;
     }
@@ -1628,7 +1615,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     message.link_order = object.link_order ?? 0;
     message.link_timeout_millis = object.link_timeout_millis ?? undefined;
     message.max_retries = object.max_retries ?? undefined;
-    message.max_redirects = object.max_redirects ?? undefined;
     message.wait_for_selector = object.wait_for_selector ?? "";
     message.per_link_options = Object.entries(object.per_link_options ?? {}).reduce<
       { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption }
@@ -1695,7 +1681,9 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption = {
       expected_status_code: isSet(object.expected_status_code)
         ? ResponseStatusCode.fromJSON(object.expected_status_code)
         : undefined,
-      link_timeout_millis: isSet(object.link_timeout_millis) ? Number(object.link_timeout_millis) : undefined,
+      link_timeout_millis: isSet(object.link_timeout_millis)
+        ? globalThis.Number(object.link_timeout_millis)
+        : undefined,
     };
   },
 
@@ -1781,7 +1769,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = 
 
   fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry {
     return {
-      key: isSet(object.key) ? String(object.key) : "",
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
       value: isSet(object.value)
         ? BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.fromJSON(object.value)
         : undefined,
@@ -1976,20 +1964,20 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
 
   fromJSON(object: any): BrokenLinksResultV1_SyntheticLinkResult {
     return {
-      link_passed: isSet(object.link_passed) ? Boolean(object.link_passed) : undefined,
+      link_passed: isSet(object.link_passed) ? globalThis.Boolean(object.link_passed) : undefined,
       expected_status_code: isSet(object.expected_status_code)
         ? ResponseStatusCode.fromJSON(object.expected_status_code)
         : undefined,
-      source_uri: isSet(object.source_uri) ? String(object.source_uri) : "",
-      target_uri: isSet(object.target_uri) ? String(object.target_uri) : "",
-      anchor_text: isSet(object.anchor_text) ? String(object.anchor_text) : "",
-      html_element: isSet(object.html_element) ? String(object.html_element) : "",
-      status_code: isSet(object.status_code) ? Number(object.status_code) : undefined,
-      error_type: isSet(object.error_type) ? String(object.error_type) : "",
-      error_message: isSet(object.error_message) ? String(object.error_message) : "",
-      link_start_time: isSet(object.link_start_time) ? String(object.link_start_time) : "",
-      link_end_time: isSet(object.link_end_time) ? String(object.link_end_time) : "",
-      is_origin: isSet(object.is_origin) ? Boolean(object.is_origin) : undefined,
+      source_uri: isSet(object.source_uri) ? globalThis.String(object.source_uri) : "",
+      target_uri: isSet(object.target_uri) ? globalThis.String(object.target_uri) : "",
+      anchor_text: isSet(object.anchor_text) ? globalThis.String(object.anchor_text) : "",
+      html_element: isSet(object.html_element) ? globalThis.String(object.html_element) : "",
+      status_code: isSet(object.status_code) ? globalThis.Number(object.status_code) : undefined,
+      error_type: isSet(object.error_type) ? globalThis.String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? globalThis.String(object.error_message) : "",
+      link_start_time: isSet(object.link_start_time) ? globalThis.String(object.link_start_time) : "",
+      link_end_time: isSet(object.link_end_time) ? globalThis.String(object.link_end_time) : "",
+      is_origin: isSet(object.is_origin) ? globalThis.Boolean(object.is_origin) : undefined,
     };
   },
 
@@ -2173,8 +2161,8 @@ export const SyntheticResult = {
           return acc;
         }, {})
         : {},
-      start_time: isSet(object.start_time) ? String(object.start_time) : "",
-      end_time: isSet(object.end_time) ? String(object.end_time) : "",
+      start_time: isSet(object.start_time) ? globalThis.String(object.start_time) : "",
+      end_time: isSet(object.end_time) ? globalThis.String(object.end_time) : "",
     };
   },
 
@@ -2227,7 +2215,7 @@ export const SyntheticResult = {
     message.runtime_metadata = Object.entries(object.runtime_metadata ?? {}).reduce<{ [key: string]: string }>(
       (acc, [key, value]) => {
         if (value !== undefined) {
-          acc[key] = String(value);
+          acc[key] = globalThis.String(value);
         }
         return acc;
       },
@@ -2285,7 +2273,10 @@ export const SyntheticResult_RuntimeMetadataEntry = {
   },
 
   fromJSON(object: any): SyntheticResult_RuntimeMetadataEntry {
-    return { key: isSet(object.key) ? String(object.key) : "", value: isSet(object.value) ? String(object.value) : "" };
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : "",
+      value: isSet(object.value) ? globalThis.String(object.value) : "",
+    };
   },
 
   toJSON(message: SyntheticResult_RuntimeMetadataEntry): unknown {
@@ -2314,29 +2305,11 @@ export const SyntheticResult_RuntimeMetadataEntry = {
   },
 };
 
-declare const self: any | undefined;
-declare const window: any | undefined;
-declare const global: any | undefined;
-const tsProtoGlobalThis: any = (() => {
-  if (typeof globalThis !== "undefined") {
-    return globalThis;
-  }
-  if (typeof self !== "undefined") {
-    return self;
-  }
-  if (typeof window !== "undefined") {
-    return window;
-  }
-  if (typeof global !== "undefined") {
-    return global;
-  }
-  throw "Unable to locate global object";
-})();
-
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
 export type DeepPartial<T> = T extends Builtin ? T
-  : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
   : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
@@ -2345,8 +2318,8 @@ export type Exact<P, I extends P> = P extends Builtin ? P
   : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
 function longToNumber(long: Long): number {
-  if (long.gt(Number.MAX_SAFE_INTEGER)) {
-    throw new tsProtoGlobalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  if (long.gt(globalThis.Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
   }
   return long.toNumber();
 }

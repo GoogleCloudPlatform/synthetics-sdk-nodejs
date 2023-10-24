@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Browser, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
+import { Browser, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -267,8 +267,7 @@ export async function navigate(
     fetch_link_output = await fetchLink(
       page,
       link.target_uri,
-      per_link_timeout_millis,
-      options.max_redirects!
+      per_link_timeout_millis
     );
 
     passed =
@@ -298,92 +297,22 @@ export async function navigate(
 async function fetchLink(
   page: Page,
   target_uri: string,
-  timeout: number,
-  max_redirects: number
+  timeout: number
 ): Promise<CommonResponseProps> {
   let responseOrError: HTTPResponse | Error | null;
   const linkStartTime = new Date().toISOString();
 
-  let followedRedirects = 0;
-  let lastResponse: HTTPResponse | null;
   try {
-    // Enable request interception.
-    await page.setRequestInterception(true);
-
-    // Intercept requests and follow redirects until the maximum number of redirects is reached.
-    page.on('request', (request: HTTPRequest) => {
-      followedRedirects = handleNavigationRequestWithRedirects(
-        request,
-        max_redirects,
-        followedRedirects
-      );
-    });
-
-    page.on('response', (response: HTTPResponse) => {
-      if (response.request().isNavigationRequest()) lastResponse = response;
-    });
-
     responseOrError = await page.goto(target_uri, {
       waitUntil: 'load',
       timeout: timeout,
     });
   } catch (err) {
-    if (err instanceof Error) {
-      if (err.message.includes('net::ERR_ABORTED')) {
-        responseOrError = lastResponse!;
-      } else {
-        responseOrError = err;
-      }
-    } else {
-      responseOrError = null;
-    }
-  } finally {
-    // Disable event listeners and request interception.
-    page.off('request');
-    page.off('response');
-    try {
-      await page.setRequestInterception(false);
-    } catch (err) {
-      if (err instanceof Error) process.stderr.write(err.message);
-    }
+    responseOrError = err instanceof Error ? err : null;
   }
 
   const linkEndTime = new Date().toISOString();
   return { responseOrError, linkStartTime, linkEndTime };
-}
-
-/**
- * Handles navigation requests and follows redirects until the maximum number of
- * redirects is reached.
- * Note:  before any request.continue()/abort() call is made we need to check if
- *        it is has already been handled or Puppeteer will throw an error:
- *        https://github.com/puppeteer/puppeteer/blob/59578d9cd5709bebe3117f8e060ad7cab220b3df/docs/api.md#pagesetrequestinterceptionvalue
- *
- * @param {Request} request - The intercepted request.
- * @param {number} max_redirects - The maximum number of redirects allowed.
- */
-export function handleNavigationRequestWithRedirects(
-  request: HTTPRequest,
-  max_redirects: number,
-  followedRedirects: number
-): number {
-  if (request.isNavigationRequest()) {
-    if (followedRedirects > max_redirects) {
-      // If max_redirects is exceeded, abort the request
-      if (!request.isInterceptResolutionHandled()) {
-        request.abort('aborted');
-      }
-      return followedRedirects;
-    } else {
-      // If max_redirects is not exceeded, continue the request
-      followedRedirects++;
-    }
-  }
-
-  if (!request.isInterceptResolutionHandled()) {
-    request.continue();
-  }
-  return followedRedirects;
 }
 
 /**
