@@ -25,7 +25,6 @@ import {
   isHTTPResponse,
   LinkIntermediate,
   NavigateResponse,
-  shouldGoToBlankPage,
   getTimeLimitPromise,
 } from './link_utils';
 
@@ -118,6 +117,11 @@ export async function checkLinks(
 
       try {
         followed_links.push(await checkLink(page, link, options));
+        /** In the case of a single page app, network requests can hang and cause
+         * timeout issues in following links. To ensure this does not happen we
+         * need to reset the page in between every link checked
+         */
+        await gotoBlankPage(page);
       } catch (err) {
         if (err instanceof Error) process.stderr.write(err.message);
         throw new Error(
@@ -248,11 +252,6 @@ export async function navigate(
     options.per_link_options[link.target_uri]?.link_timeout_millis ??
     options.link_timeout_millis!;
 
-  // see function description for why this is necessary
-  if (shouldGoToBlankPage(await page.url(), link.target_uri)) {
-    await page.goto('about:blank');
-  }
-
   let passed = false;
   /**
    * Expected behavior: if the link fails for any reason, see
@@ -363,5 +362,19 @@ export async function closeBrowser(browser: Browser) {
     await browser.close();
   } catch (err) {
     if (err instanceof Error) process.stderr.write(err.message);
+  }
+}
+
+/**
+ * Navigates the provided Puppeteer page to about:blank.
+ *
+ * @param {Page} page - The Puppeteer page to navigate.
+ * @returns {Promise<void>} - A Promise that resolves when the navigation is complete.
+ */
+async function gotoBlankPage(page: Page) {
+  try {
+    await page.goto('about:blank', { timeout: 1000 });
+  } catch (err) {
+    // swallow error
   }
 }

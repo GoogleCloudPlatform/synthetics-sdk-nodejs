@@ -87,7 +87,7 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
   if (
     inputOptions.link_timeout_millis !== undefined &&
     (typeof inputOptions.link_timeout_millis !== 'number' ||
-      inputOptions.link_timeout_millis < 9)
+      inputOptions.link_timeout_millis < 10)
   ) {
     throw new Error(
       'Invalid link_timeout_millis value, must be a number greater than 9'

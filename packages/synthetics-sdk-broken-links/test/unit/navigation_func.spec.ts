@@ -16,7 +16,7 @@ import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
 
-import puppeteer, { Browser, HTTPRequest, HTTPResponse, Page } from 'puppeteer';
+import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -116,21 +116,6 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect((result.responseOrError as HTTPResponse).status()).to.equal(404);
       expect(result.retriesRemaining).to.equal(0);
     });
-
-    it('with `shouldGoToBlankPage` navigation works on first try', async () => {
-      await page.goto('https://pptr.dev/');
-      const puppeteer_link: LinkIntermediate = {
-        target_uri: 'https://pptr.dev/#',
-        anchor_text: '',
-        html_element: '',
-      };
-      const result = await navigate(page, puppeteer_link, options);
-
-      expect(result.passed).to.be.true;
-      expect(result.responseOrError).to.be.an.instanceOf(HTTPResponse);
-      expect((result.responseOrError as HTTPResponse).status()).to.equal(200);
-      expect(result.retriesRemaining).to.equal(2);
-    }).timeout(2500);
   });
 
   describe('checkLink', async () => {
