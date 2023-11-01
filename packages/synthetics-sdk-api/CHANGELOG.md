@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.4.1...synthetics-sdk-api-v0.5.0) (2023-11-01)
+
+
+### Features
+
+* Add broken link api support ([#76](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/76)) ([9d4d75c](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/9d4d75c235a95cba528adfb89c553d5e50a9d256))
+
 ## [0.4.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.4.0...synthetics-sdk-api-v0.4.1) (2023-10-24)
 
 
