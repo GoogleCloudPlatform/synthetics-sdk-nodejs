@@ -1,0 +1,16 @@
+{
+  "extends": "../../node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "build",
+    "allowJs": true,
+    "target": "es2020",
+    "lib": ["dom", "es2020"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "module": "commonjs"
+  },
+  "include": ["src/**/*", "test/**/*", "package.json"],
+  "exclude": ["test/example_html_files/*"],
+  "references": [{ "path": "../synthetics-sdk-api" }]
+}

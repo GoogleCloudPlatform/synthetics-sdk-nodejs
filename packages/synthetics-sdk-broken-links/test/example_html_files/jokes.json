@@ -1,0 +1,33 @@
+[
+  {
+    "me": "I finally understand the difference between null and undefined!",
+    "JavaScript": "Hold my beer."
+  },
+  {
+    "...": [
+      {
+        "me": " 0=='0' ",
+        "JavaScript": "true"
+      },
+      {
+        "me": " 0==[] ",
+        "JavaScript": "true"
+      },
+      {
+        "me": "Ok so '0'==[] right? Makes sense to me..",
+        "JavaScript": "false"
+      },
+      {
+        "me": "GET OUT!..",
+        "JavaScript": null
+      }
+    ]
+  },
+  {
+    "me": "What is NaN",
+    "Google": "NaN means Not a Number",
+    "me": "Ohhh interesting. Hey Javascript `typeof Nan`",
+    "JavaScript": "number",
+    "me": "...bruh..."
+  }
+]
