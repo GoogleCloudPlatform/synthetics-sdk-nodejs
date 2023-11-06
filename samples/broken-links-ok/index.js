@@ -15,12 +15,6 @@
 const functions = require('@google-cloud/functions-framework');
 const GcmSynthetics = require('@google-cloud/synthetics-sdk-broken-links');
 
-/*
- * This is the server template that is required to run a synthetic monitor in
- * Google Cloud Functions.
- */
-
-
 const options = {
   origin_uri: "https://example.com",
   // link_limit: 10,
