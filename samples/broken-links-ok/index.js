@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START monitoring_synthetic_monitoring_broken_links_invocation]
+
 const functions = require('@google-cloud/functions-framework');
 const GcmSynthetics = require('@google-cloud/synthetics-sdk-broken-links');
 
@@ -40,3 +42,5 @@ const options = {
 };
 
 functions.http('BrokenLinkChecker', GcmSynthetics.runBrokenLinksHandler(options));
+
+// [END monitoring_synthetic_monitoring_broken_links_invocation]
