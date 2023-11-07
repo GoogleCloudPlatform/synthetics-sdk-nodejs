@@ -303,5 +303,13 @@ export const getGenericSyntheticResult = (
   synthetic_generic_result_v1: getGenericError(genericErrorMessage),
   runtime_metadata: getRuntimeMetadata(),
   start_time: startTime,
-  end_time: new Date().toISOString(),
+  end_time: getEndTime(startTime),
 });
+
+const getEndTime = (startTime: string): string => {
+  const endDate = new Date();
+  if (endDate.toISOString() === startTime) {
+    endDate.setMilliseconds(endDate.getMilliseconds() + 1);
+  }
+  return endDate.toISOString();
+};

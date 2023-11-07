@@ -24,6 +24,7 @@ import { LinkOrder, StatusClass } from '../../src/broken_links';
 import {
   checkStatusPassing,
   createSyntheticResult,
+  getGenericSyntheticResult,
   LinkIntermediate,
   shuffleAndTruncate,
 } from '../../src/link_utils';
@@ -185,5 +186,18 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       // (this is to account for the origin_uri being included in link_limit)
       expect(truncatedLinks).to.have.lengthOf(link_limit - 1);
     });
+  });
+
+  it('getGenericSyntheticResult returns a minimum of 1 millisecond difference between start and end time', () => {
+    const genericResult = getGenericSyntheticResult(
+      new Date().toISOString(),
+      ''
+    );
+    const startTime = new Date(genericResult.start_time).getTime();
+    const endTime = new Date(genericResult.end_time).getTime();
+    const milliDifference = endTime - startTime;
+
+    expect(startTime).to.be.lessThan(endTime);
+    expect(milliDifference).to.be.greaterThan(0);
   });
 });
