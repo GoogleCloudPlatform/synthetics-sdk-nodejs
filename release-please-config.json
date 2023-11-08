@@ -2,7 +2,8 @@
   "initial-version": "0.1.0",
   "packages": {
     "packages/synthetics-sdk-api": {},
-    "packages/synthetics-sdk-mocha": {}
+    "packages/synthetics-sdk-mocha": {},
+    "packages/synthetics-sdk-broken-links": {}
   },
   "plugins": [
     {
