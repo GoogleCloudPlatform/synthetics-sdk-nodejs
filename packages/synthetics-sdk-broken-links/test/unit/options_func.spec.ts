@@ -406,7 +406,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         max_retries: undefined,
         wait_for_selector: undefined,
         per_link_options: undefined,
-        total_synthetic_timeout_millis: undefined
+        total_synthetic_timeout_millis: undefined,
       } as BrokenLinkCheckerOptions;
 
       expect(() => {

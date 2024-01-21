@@ -15,6 +15,9 @@
 import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 import { Request, Response } from 'express';
 
+const syntheticExecutionIdHeader = 'Synthetic-Execution-Id';
+const checkIdHeader = 'Check-Id';
+
 /**
  * Middleware for easy invocation of SyntheticSDK broken links, and may be used to
  * register a GoogleCloudFunction http function, or express js compatible handler.
@@ -24,7 +27,30 @@ import { Request, Response } from 'express';
  * returns the results via res.send
  */
 export function runBrokenLinksHandler(options: BrokenLinkCheckerOptions) {
+  return testableRunBrokenLinksHandler(options);
+}
+
+/**
+ * Helper function to aid in testing the `runBrokenLinksHandler` middleware.
+ * Allows for the injection of a mock or stubbed `runBrokenLinks` implementation.
+ *
+ * @param options - Options for running GCM Synthetics Broken Links.
+ * @param runBrokenLinksOverride - (Optional) An alternative implementation of
+ *                                 the `runBrokenLinks` function.  Defaults to the
+ *                                 standard `runBrokenLinks` if not provided.
+ * @returns ExpressJS compatible middleware that invokes the specified
+ *          (or default) `runBrokenLinks` implementation.
+ */
+export function testableRunBrokenLinksHandler(
+  options: BrokenLinkCheckerOptions,
+  runBrokenLinksOverride = runBrokenLinks
+) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
-    res.send(await runBrokenLinks(options));
+    res.send(
+      await runBrokenLinksOverride(options, {
+        executionId: req.get(syntheticExecutionIdHeader),
+        checkId: req.get(checkIdHeader),
+      })
+    );
 }

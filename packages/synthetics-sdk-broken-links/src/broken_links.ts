@@ -79,7 +79,11 @@ try {
 instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
-  inputOptions: BrokenLinkCheckerOptions
+  inputOptions: BrokenLinkCheckerOptions,
+  args?: {
+    executionId: string | undefined;
+    checkId: string | undefined;
+  }
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();
