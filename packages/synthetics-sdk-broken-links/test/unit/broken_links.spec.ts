@@ -86,7 +86,7 @@ describe('runBrokenLinks', async () => {
       wait_for_selector: 'none existent',
       link_timeout_millis: 5000,
     };
-    const result = await runBrokenLinks(inputOptions, 3000);
+    const result = await runBrokenLinks(inputOptions, {total_timeout_millis: 3000});
     const broken_links_result = result.synthetic_broken_links_result_v1;
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {

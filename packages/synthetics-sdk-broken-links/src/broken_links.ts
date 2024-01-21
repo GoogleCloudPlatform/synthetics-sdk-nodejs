@@ -79,7 +79,9 @@ instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
   inputOptions: BrokenLinkCheckerOptions,
-  total_timeout_millis = 50000
+  args?: {
+    total_timeout_millis?: number;
+  }
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();
@@ -88,6 +90,7 @@ export async function runBrokenLinks(
   let browser: Browser;
   try {
     const options = processOptions(inputOptions);
+    const total_timeout_millis = args?.total_timeout_millis || 55000;
 
     // Create Promise and variables used to set and resolve the time limit
     // imposed by `total_timeout_millis`
