@@ -116,7 +116,7 @@ export interface GenericResultV1_GenericError {
    * lookup".
    */
   error_message: string;
-  /** The name of the function where the error occurred. */
+  /** The name of the function where the error occurred */
   function_name: string;
   /** The name of the file that reported the error. */
   file_path: string;
@@ -300,8 +300,6 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    * fully qualified url
    */
   per_link_options: { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption };
-  /** Timeout set for the entire Synthetic Monitor, default 53000 milliseconds */
-  total_synthetic_timeout_millis?: number | undefined;
 }
 
 /** Possible orders for checking links that have been scraped. */
@@ -1413,7 +1411,6 @@ function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksRe
     max_retries: undefined,
     wait_for_selector: "",
     per_link_options: {},
-    total_synthetic_timeout_millis: undefined,
   };
 }
 
@@ -1449,9 +1446,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
         writer.uint32(82).fork(),
       ).ldelim();
     });
-    if (message.total_synthetic_timeout_millis !== undefined) {
-      writer.uint32(88).int64(message.total_synthetic_timeout_millis);
-    }
     return writer;
   },
 
@@ -1531,13 +1525,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
             message.per_link_options[entry10.key] = entry10.value;
           }
           continue;
-        case 11:
-          if (tag !== 88) {
-            break;
-          }
-
-          message.total_synthetic_timeout_millis = longToNumber(reader.int64() as Long);
-          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1567,9 +1554,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
           return acc;
         }, {})
         : {},
-      total_synthetic_timeout_millis: isSet(object.total_synthetic_timeout_millis)
-        ? Number(object.total_synthetic_timeout_millis)
-        : undefined,
     };
   },
 
@@ -1594,8 +1578,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
         obj.per_link_options[k] = BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption.toJSON(v);
       });
     }
-    message.total_synthetic_timeout_millis !== undefined &&
-      (obj.total_synthetic_timeout_millis = Math.round(message.total_synthetic_timeout_millis));
     return obj;
   },
 
@@ -1625,7 +1607,6 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       }
       return acc;
     }, {});
-    message.total_synthetic_timeout_millis = object.total_synthetic_timeout_millis ?? undefined;
     return message;
   },
 };

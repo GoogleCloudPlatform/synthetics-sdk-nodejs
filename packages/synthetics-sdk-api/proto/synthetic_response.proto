@@ -201,9 +201,6 @@ message BrokenLinksResultV1 {
     // individual link options, default None. string must be formatted as a
     // fully qualified url
     map<string, PerLinkOption> per_link_options = 10;
-
-    // Timeout set for the entire Synthetic Monitor, default 60000 milliseconds
-    optional int64 total_synthetic_timeout_millis = 11;
   }
 
   // Options set for broken link synthetic.
