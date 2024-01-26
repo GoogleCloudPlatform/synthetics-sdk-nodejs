@@ -19,5 +19,5 @@ export {
   StatusClass,
   LinkOrder,
 } from './broken_links';
-export * from './handlers';
+export { runBrokenLinksHandler } from './handlers';
 export * from '@google-cloud/synthetics-sdk-api';

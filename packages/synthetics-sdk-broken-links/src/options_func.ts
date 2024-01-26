@@ -32,7 +32,9 @@ import {
  * @returns The sanitized input options if validation passes.
  * @throws {Error} If any of the input options fail validation.
  */
-export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
+export function validateInputOptions(
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinkCheckerOptions {
   if (!inputOptions.origin_uri) {
     throw new Error('Missing origin_uri in options');
   } else if (
@@ -116,6 +118,18 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
     throw new Error('Invalid wait_for_selector value, must be a string');
   }
 
+  // Check total_synthetic_timeout_millis
+  if (
+    inputOptions.total_synthetic_timeout_millis !== undefined &&
+    (typeof inputOptions.total_synthetic_timeout_millis !== 'number' ||
+      inputOptions.total_synthetic_timeout_millis < 30000 ||
+      inputOptions.total_synthetic_timeout_millis > 60000)
+  ) {
+    throw new Error(
+      'Invalid total_synthetic_timeout_millis value, must be a number between 30000 and 60000 inclusive'
+    );
+  }
+
   // per_link_options
   for (const [key, value] of Object.entries(
     inputOptions.per_link_options || {}
@@ -165,6 +179,7 @@ export function validateInputOptions(inputOptions: BrokenLinkCheckerOptions) {
     max_retries: inputOptions.max_retries,
     wait_for_selector: inputOptions.wait_for_selector,
     per_link_options: inputOptions.per_link_options,
+    total_synthetic_timeout_millis: inputOptions.total_synthetic_timeout_millis,
   };
 }
 
@@ -187,6 +202,7 @@ export function setDefaultOptions(
     max_retries: 0,
     wait_for_selector: '',
     per_link_options: {},
+    total_synthetic_timeout_millis: 60000,
   };
 
   const outputOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions =

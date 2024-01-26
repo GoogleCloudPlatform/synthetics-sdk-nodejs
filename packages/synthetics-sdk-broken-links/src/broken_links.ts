@@ -47,6 +47,7 @@ export interface BrokenLinkCheckerOptions {
   max_retries?: number | undefined;
   wait_for_selector?: string;
   per_link_options?: { [key: string]: PerLinkOption };
+  total_synthetic_timeout_millis?: number;
 }
 
 export interface PerLinkOption {
@@ -79,7 +80,10 @@ instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
   inputOptions: BrokenLinkCheckerOptions,
-  total_timeout_millis = 50000
+  args?: {
+    executionId: string | undefined;
+    checkId: string | undefined;
+  }
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();
@@ -88,11 +92,13 @@ export async function runBrokenLinks(
   let browser: Browser;
   try {
     const options = processOptions(inputOptions);
+    const adjusted_synthetic_timeout_millis =
+      options.total_synthetic_timeout_millis! - 7000;
 
     // Create Promise and variables used to set and resolve the time limit
-    // imposed by `total_timeout_millis`
+    // imposed by `adjusted_synthetic_timeout`
     const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
-      getTimeLimitPromise(startTime, total_timeout_millis);
+      getTimeLimitPromise(startTime, adjusted_synthetic_timeout_millis);
 
     const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
@@ -107,7 +113,7 @@ export async function runBrokenLinks(
           originPage,
           options,
           startTime,
-          total_timeout_millis
+          adjusted_synthetic_timeout_millis
         )
       );
 
@@ -129,7 +135,7 @@ export async function runBrokenLinks(
           linksToFollow,
           options,
           startTime,
-          total_timeout_millis
+          adjusted_synthetic_timeout_millis
         ))
       );
       return true;
@@ -174,7 +180,7 @@ async function checkOriginLink(
   originPage: Page,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
   startTime: string,
-  total_timeout_millis: number
+  adjusted_synthetic_timeout_millis: number
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
   let originLinkResult: BrokenLinksResultV1_SyntheticLinkResult;
 
@@ -182,7 +188,7 @@ async function checkOriginLink(
   const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
     getTimeLimitPromise(
       startTime,
-      total_timeout_millis,
+      adjusted_synthetic_timeout_millis,
       /*extraOffsetMillis=*/ 500
     );
 
@@ -221,7 +227,7 @@ async function checkOriginLink(
       if (!finished && originLinkResult) {
         originLinkResult.link_passed = false;
         originLinkResult.error_type = 'TimeoutError';
-        originLinkResult.error_message = `Global Timeout of 60 secs hit while waiting for selector '${options.wait_for_selector}'`;
+        originLinkResult.error_message = `Total Synthetic Timeout of ${options.total_synthetic_timeout_millis} milliseconds hit while waiting for selector '${options.wait_for_selector}'`;
         process.stderr.write(originLinkResult.error_message);
       }
 
