@@ -267,6 +267,30 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).not.to.throw();
     });
+    it('throws error if total_synthetic_timeout_millis is less than 30000', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        total_synthetic_timeout_millis: 29000,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid total_synthetic_timeout_millis value, must be a number between 30000 and 60000 inclusive'
+      );
+    });
+    it('throws error if total_synthetic_timeout_millis is more than 60000', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        total_synthetic_timeout_millis: 61000,
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid total_synthetic_timeout_millis value, must be a number between 30000 and 60000 inclusive'
+      );
+    });
     it('throws error if per_link_options contains an invalid uri', () => {
       const options = {
         origin_uri: 'http://example.com',
@@ -382,6 +406,7 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         max_retries: undefined,
         wait_for_selector: undefined,
         per_link_options: undefined,
+        total_synthetic_timeout_millis: undefined
       } as BrokenLinkCheckerOptions;
 
       expect(() => {

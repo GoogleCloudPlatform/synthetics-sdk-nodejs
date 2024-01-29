@@ -136,6 +136,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       max_retries: 0,
       wait_for_selector: '',
       per_link_options: {},
+      total_synthetic_timeout_millis: 60000,
     });
 
     expect(origin_link)
@@ -242,6 +243,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       max_retries: 0,
       wait_for_selector: '',
       per_link_options: {},
+      total_synthetic_timeout_millis: 60000,
     });
 
     expect(origin_link)
@@ -364,6 +366,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       max_retries: 0,
       wait_for_selector: '',
       per_link_options: {},
+      total_synthetic_timeout_millis: 60000,
     });
 
     expect(origin_link)

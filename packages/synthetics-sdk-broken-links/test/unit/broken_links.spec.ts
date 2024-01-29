@@ -84,9 +84,10 @@ describe('runBrokenLinks', async () => {
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
       wait_for_selector: 'none existent',
-      link_timeout_millis: 5000,
+      link_timeout_millis: 35000,
+      total_synthetic_timeout_millis: 31000,
     };
-    const result = await runBrokenLinks(inputOptions, 3000);
+    const result = await runBrokenLinks(inputOptions);
     const broken_links_result = result.synthetic_broken_links_result_v1;
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
@@ -99,7 +100,7 @@ describe('runBrokenLinks', async () => {
       status_code: 200,
       error_type: 'TimeoutError',
       error_message:
-        "Global Timeout of 60 secs hit while waiting for selector 'none existent'",
+        "Total Synthetic Timeout of 31000 milliseconds hit while waiting for selector 'none existent'",
       link_start_time: 'NA',
       link_end_time: 'NA',
       is_origin: true,
@@ -109,7 +110,7 @@ describe('runBrokenLinks', async () => {
       .excluding(['link_start_time', 'link_end_time'])
       .to.deep.equal(expectedOriginLinkResult);
     expect(broken_links_result?.followed_link_results.length).to.equal(0);
-  }).timeout(5000);
+  }).timeout(40000);
 
   it('successful execution with 1 failing link', async () => {
     const origin_uri = `file:${path.join(
@@ -136,6 +137,7 @@ describe('runBrokenLinks', async () => {
       max_retries: 0,
       wait_for_selector: '',
       per_link_options: {},
+      total_synthetic_timeout_millis: 60000,
     };
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
