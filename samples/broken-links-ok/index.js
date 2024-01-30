@@ -26,7 +26,7 @@ const options = {
   // link_timeout_millis: 30000, // timeout per link
   // max_retries: 0, // number of retries per link if it failed for any reason
   // wait_for_selector: '', // https://pptr.dev/api/puppeteer.page.waitforselector
-  // per_link_options: {}
+  // per_link_options: {},
     /*
     // example:
       per_link_options: {
@@ -39,6 +39,7 @@ const options = {
         },
       },
     */
+  // total_synthetic_timeout_millis: 60000 // Timeout set for the entire Synthetic Monitor
 };
 
 functions.http('BrokenLinkChecker', GcmSynthetics.runBrokenLinksHandler(options));
