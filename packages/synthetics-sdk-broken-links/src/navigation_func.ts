@@ -16,6 +16,7 @@ import { Browser, HTTPResponse, Page } from 'puppeteer';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
+  BaseError,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -220,6 +221,7 @@ export async function checkLink(
     link_start_time: linkStartTime,
     link_end_time: linkEndTime,
     is_origin: isOrigin,
+    screenshot_output: { screenshot_file: '', screenshot_error: {} as BaseError }, // TODO: this is temporary in an effort to make PRs more manageable
   };
 }
 

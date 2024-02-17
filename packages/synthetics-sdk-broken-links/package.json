@@ -40,7 +40,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@google-cloud/synthetics-sdk-api": "^0.5.1",
+    "@google-cloud/synthetics-sdk-api": "google-cloud-synthetics-sdk-api-0.5.1.tgz",
     "puppeteer": "21.3.6"
   }
 }
