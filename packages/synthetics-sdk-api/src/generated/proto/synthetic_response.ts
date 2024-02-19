@@ -212,6 +212,14 @@ export function responseStatusCode_StatusClassToJSON(object: ResponseStatusCode_
   }
 }
 
+/** Information on an error that occurred. */
+export interface BaseError {
+  /** The name of the error. */
+  error_type: string;
+  /** The full error message. */
+  error_message: string;
+}
+
 /** Aggregate and individual results of a Broken Link Synthetic execution */
 export interface BrokenLinksResultV1 {
   /** the total number of links checked as part of the execution */
@@ -250,12 +258,20 @@ export interface BrokenLinksResultV1 {
   options:
     | BrokenLinksResultV1_BrokenLinkCheckerOptions
     | undefined;
-  /** link result for origin_uri */
+  /** link result for origin_uri. */
   origin_link_result:
     | BrokenLinksResultV1_SyntheticLinkResult
     | undefined;
-  /** link results for all scraped and followed links */
+  /** link results for all scraped and followed links. */
   followed_link_results: BrokenLinksResultV1_SyntheticLinkResult[];
+  /**
+   * Path to the Cloud Storage folder where all artifacts (e.g. screenshots)
+   * will be stored for this execution. e.g.
+   * gs://<my_bucket_name/check-id-123/2024-01-01/123exec_id123/
+   */
+  execution_data_storage_path: string;
+  /** Errors associated with the broken link checker execution. */
+  errors: BaseError[];
 }
 
 export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
@@ -301,7 +317,11 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions {
    */
   per_link_options: { [key: string]: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption };
   /** Timeout set for the entire Synthetic Monitor, default 60000 milliseconds */
-  total_synthetic_timeout_millis?: number | undefined;
+  total_synthetic_timeout_millis?:
+    | number
+    | undefined;
+  /** Screenshot options, default to 'FAILING' and synthetic wide bucket. */
+  screenshot_options: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions | undefined;
 }
 
 /** Possible orders for checking links that have been scraped. */
@@ -369,6 +389,60 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntr
   value: BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption | undefined;
 }
 
+/** Required options for broken link checker screenshot capability. */
+export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+  /** Input bucket or folder provided by the user. */
+  storage_location: string;
+  /**
+   * Controls when to capture screenshots during broken link checks, default
+   * is FAILING.
+   */
+  screenshot_condition: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition;
+}
+
+export enum BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition {
+  NONE = 0,
+  FAILING = 1,
+  ALL = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionFromJSON(
+  object: any,
+): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition {
+  switch (object) {
+    case 0:
+    case "NONE":
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.NONE;
+    case 1:
+    case "FAILING":
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING;
+    case 2:
+    case "ALL":
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.ALL;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.UNRECOGNIZED;
+  }
+}
+
+export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionToJSON(
+  object: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+): string {
+  switch (object) {
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.NONE:
+      return "NONE";
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING:
+      return "FAILING";
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.ALL:
+      return "ALL";
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 /** Result of a single link checked / network request */
 export interface BrokenLinksResultV1_SyntheticLinkResult {
   /** Whether or not the status code is the same as "expected_status_code". */
@@ -381,7 +455,7 @@ export interface BrokenLinksResultV1_SyntheticLinkResult {
     | undefined;
   /** Source_uri from which the target_uri is navigated from. */
   source_uri: string;
-  /** target_uri navigated to from the source_uri. */
+  /** Target_uri navigated to from the source_uri. */
   target_uri: string;
   /** Anchor text on the source URI. */
   anchor_text: string;
@@ -404,7 +478,19 @@ export interface BrokenLinksResultV1_SyntheticLinkResult {
   /** The end time of the link navigation in iso format. */
   link_end_time: string;
   /** These fields only apply to the origin link. */
-  is_origin?: boolean | undefined;
+  is_origin?:
+    | boolean
+    | undefined;
+  /** Output of screenshot upload attempt. */
+  screenshot_output: BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput | undefined;
+}
+
+/** Result of Screenshot Upload to GCS. */
+export interface BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+  /** Name of screenshot_file. */
+  screenshot_file: string;
+  /** Error that occurred throughout screenshot workflow. */
+  screenshot_error: BaseError | undefined;
 }
 
 export interface SyntheticResult {
@@ -1180,6 +1266,77 @@ export const ResponseStatusCode = {
   },
 };
 
+function createBaseBaseError(): BaseError {
+  return { error_type: "", error_message: "" };
+}
+
+export const BaseError = {
+  encode(message: BaseError, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.error_type !== "") {
+      writer.uint32(10).string(message.error_type);
+    }
+    if (message.error_message !== "") {
+      writer.uint32(18).string(message.error_message);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BaseError {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBaseError();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.error_type = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.error_message = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BaseError {
+    return {
+      error_type: isSet(object.error_type) ? String(object.error_type) : "",
+      error_message: isSet(object.error_message) ? String(object.error_message) : "",
+    };
+  },
+
+  toJSON(message: BaseError): unknown {
+    const obj: any = {};
+    message.error_type !== undefined && (obj.error_type = message.error_type);
+    message.error_message !== undefined && (obj.error_message = message.error_message);
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BaseError>, I>>(base?: I): BaseError {
+    return BaseError.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BaseError>, I>>(object: I): BaseError {
+    const message = createBaseBaseError();
+    message.error_type = object.error_type ?? "";
+    message.error_message = object.error_message ?? "";
+    return message;
+  },
+};
+
 function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
   return {
     link_count: undefined,
@@ -1193,6 +1350,8 @@ function createBaseBrokenLinksResultV1(): BrokenLinksResultV1 {
     options: undefined,
     origin_link_result: undefined,
     followed_link_results: [],
+    execution_data_storage_path: "",
+    errors: [],
   };
 }
 
@@ -1230,6 +1389,12 @@ export const BrokenLinksResultV1 = {
     }
     for (const v of message.followed_link_results) {
       BrokenLinksResultV1_SyntheticLinkResult.encode(v!, writer.uint32(90).fork()).ldelim();
+    }
+    if (message.execution_data_storage_path !== "") {
+      writer.uint32(98).string(message.execution_data_storage_path);
+    }
+    for (const v of message.errors) {
+      BaseError.encode(v!, writer.uint32(106).fork()).ldelim();
     }
     return writer;
   },
@@ -1318,6 +1483,20 @@ export const BrokenLinksResultV1 = {
 
           message.followed_link_results.push(BrokenLinksResultV1_SyntheticLinkResult.decode(reader, reader.uint32()));
           continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.execution_data_storage_path = reader.string();
+          continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.errors.push(BaseError.decode(reader, reader.uint32()));
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1346,6 +1525,10 @@ export const BrokenLinksResultV1 = {
       followed_link_results: Array.isArray(object?.followed_link_results)
         ? object.followed_link_results.map((e: any) => BrokenLinksResultV1_SyntheticLinkResult.fromJSON(e))
         : [],
+      execution_data_storage_path: isSet(object.execution_data_storage_path)
+        ? String(object.execution_data_storage_path)
+        : "",
+      errors: Array.isArray(object?.errors) ? object.errors.map((e: any) => BaseError.fromJSON(e)) : [],
     };
   },
 
@@ -1373,6 +1556,13 @@ export const BrokenLinksResultV1 = {
     } else {
       obj.followed_link_results = [];
     }
+    message.execution_data_storage_path !== undefined &&
+      (obj.execution_data_storage_path = message.execution_data_storage_path);
+    if (message.errors) {
+      obj.errors = message.errors.map((e) => e ? BaseError.toJSON(e) : undefined);
+    } else {
+      obj.errors = [];
+    }
     return obj;
   },
 
@@ -1398,6 +1588,8 @@ export const BrokenLinksResultV1 = {
       : undefined;
     message.followed_link_results =
       object.followed_link_results?.map((e) => BrokenLinksResultV1_SyntheticLinkResult.fromPartial(e)) || [];
+    message.execution_data_storage_path = object.execution_data_storage_path ?? "";
+    message.errors = object.errors?.map((e) => BaseError.fromPartial(e)) || [];
     return message;
   },
 };
@@ -1414,6 +1606,7 @@ function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions(): BrokenLinksRe
     wait_for_selector: "",
     per_link_options: {},
     total_synthetic_timeout_millis: undefined,
+    screenshot_options: undefined,
   };
 }
 
@@ -1451,6 +1644,12 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     });
     if (message.total_synthetic_timeout_millis !== undefined) {
       writer.uint32(88).int64(message.total_synthetic_timeout_millis);
+    }
+    if (message.screenshot_options !== undefined) {
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.encode(
+        message.screenshot_options,
+        writer.uint32(98).fork(),
+      ).ldelim();
     }
     return writer;
   },
@@ -1538,6 +1737,16 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
 
           message.total_synthetic_timeout_millis = longToNumber(reader.int64() as Long);
           continue;
+        case 12:
+          if (tag !== 98) {
+            break;
+          }
+
+          message.screenshot_options = BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.decode(
+            reader,
+            reader.uint32(),
+          );
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1570,6 +1779,9 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       total_synthetic_timeout_millis: isSet(object.total_synthetic_timeout_millis)
         ? Number(object.total_synthetic_timeout_millis)
         : undefined,
+      screenshot_options: isSet(object.screenshot_options)
+        ? BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.fromJSON(object.screenshot_options)
+        : undefined,
     };
   },
 
@@ -1596,6 +1808,9 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     }
     message.total_synthetic_timeout_millis !== undefined &&
       (obj.total_synthetic_timeout_millis = Math.round(message.total_synthetic_timeout_millis));
+    message.screenshot_options !== undefined && (obj.screenshot_options = message.screenshot_options
+      ? BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.toJSON(message.screenshot_options)
+      : undefined);
     return obj;
   },
 
@@ -1626,6 +1841,9 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions = {
       return acc;
     }, {});
     message.total_synthetic_timeout_millis = object.total_synthetic_timeout_millis ?? undefined;
+    message.screenshot_options = (object.screenshot_options !== undefined && object.screenshot_options !== null)
+      ? BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.fromPartial(object.screenshot_options)
+      : undefined;
     return message;
   },
 };
@@ -1802,6 +2020,95 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = 
   },
 };
 
+function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions(): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+  return { storage_location: "", screenshot_condition: 0 };
+}
+
+export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
+  encode(
+    message: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.storage_location !== "") {
+      writer.uint32(10).string(message.storage_location);
+    }
+    if (message.screenshot_condition !== 0) {
+      writer.uint32(16).int32(message.screenshot_condition);
+    }
+    return writer;
+  },
+
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number,
+  ): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.storage_location = reader.string();
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.screenshot_condition = reader.int32() as any;
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+    return {
+      storage_location: isSet(object.storage_location) ? String(object.storage_location) : "",
+      screenshot_condition: isSet(object.screenshot_condition)
+        ? brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionFromJSON(
+          object.screenshot_condition,
+        )
+        : 0,
+    };
+  },
+
+  toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions): unknown {
+    const obj: any = {};
+    message.storage_location !== undefined && (obj.storage_location = message.storage_location);
+    message.screenshot_condition !== undefined &&
+      (obj.screenshot_condition =
+        brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionToJSON(
+          message.screenshot_condition,
+        ));
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions>, I>>(
+    base?: I,
+  ): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+    return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions>, I>>(
+    object: I,
+  ): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
+    const message = createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions();
+    message.storage_location = object.storage_location ?? "";
+    message.screenshot_condition = object.screenshot_condition ?? 0;
+    return message;
+  },
+};
+
 function createBaseBrokenLinksResultV1_SyntheticLinkResult(): BrokenLinksResultV1_SyntheticLinkResult {
   return {
     link_passed: undefined,
@@ -1816,6 +2123,7 @@ function createBaseBrokenLinksResultV1_SyntheticLinkResult(): BrokenLinksResultV
     link_start_time: "",
     link_end_time: "",
     is_origin: undefined,
+    screenshot_output: undefined,
   };
 }
 
@@ -1856,6 +2164,12 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     }
     if (message.is_origin !== undefined) {
       writer.uint32(96).bool(message.is_origin);
+    }
+    if (message.screenshot_output !== undefined) {
+      BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.encode(
+        message.screenshot_output,
+        writer.uint32(106).fork(),
+      ).ldelim();
     }
     return writer;
   },
@@ -1951,6 +2265,16 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
 
           message.is_origin = reader.bool();
           continue;
+        case 13:
+          if (tag !== 106) {
+            break;
+          }
+
+          message.screenshot_output = BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.decode(
+            reader,
+            reader.uint32(),
+          );
+          continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -1976,6 +2300,9 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
       link_start_time: isSet(object.link_start_time) ? String(object.link_start_time) : "",
       link_end_time: isSet(object.link_end_time) ? String(object.link_end_time) : "",
       is_origin: isSet(object.is_origin) ? Boolean(object.is_origin) : undefined,
+      screenshot_output: isSet(object.screenshot_output)
+        ? BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.fromJSON(object.screenshot_output)
+        : undefined,
     };
   },
 
@@ -1995,6 +2322,9 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     message.link_start_time !== undefined && (obj.link_start_time = message.link_start_time);
     message.link_end_time !== undefined && (obj.link_end_time = message.link_end_time);
     message.is_origin !== undefined && (obj.is_origin = message.is_origin);
+    message.screenshot_output !== undefined && (obj.screenshot_output = message.screenshot_output
+      ? BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.toJSON(message.screenshot_output)
+      : undefined);
     return obj;
   },
 
@@ -2022,6 +2352,90 @@ export const BrokenLinksResultV1_SyntheticLinkResult = {
     message.link_start_time = object.link_start_time ?? "";
     message.link_end_time = object.link_end_time ?? "";
     message.is_origin = object.is_origin ?? undefined;
+    message.screenshot_output = (object.screenshot_output !== undefined && object.screenshot_output !== null)
+      ? BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.fromPartial(object.screenshot_output)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseBrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput(): BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+  return { screenshot_file: "", screenshot_error: undefined };
+}
+
+export const BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput = {
+  encode(
+    message: BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput,
+    writer: _m0.Writer = _m0.Writer.create(),
+  ): _m0.Writer {
+    if (message.screenshot_file !== "") {
+      writer.uint32(10).string(message.screenshot_file);
+    }
+    if (message.screenshot_error !== undefined) {
+      BaseError.encode(message.screenshot_error, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseBrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.screenshot_file = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.screenshot_error = BaseError.decode(reader, reader.uint32());
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+    return {
+      screenshot_file: isSet(object.screenshot_file) ? String(object.screenshot_file) : "",
+      screenshot_error: isSet(object.screenshot_error) ? BaseError.fromJSON(object.screenshot_error) : undefined,
+    };
+  },
+
+  toJSON(message: BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput): unknown {
+    const obj: any = {};
+    message.screenshot_file !== undefined && (obj.screenshot_file = message.screenshot_file);
+    message.screenshot_error !== undefined &&
+      (obj.screenshot_error = message.screenshot_error ? BaseError.toJSON(message.screenshot_error) : undefined);
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput>, I>>(
+    base?: I,
+  ): BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+    return BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput.fromPartial(base ?? {});
+  },
+
+  fromPartial<I extends Exact<DeepPartial<BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput>, I>>(
+    object: I,
+  ): BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput {
+    const message = createBaseBrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput();
+    message.screenshot_file = object.screenshot_file ?? "";
+    message.screenshot_error = (object.screenshot_error !== undefined && object.screenshot_error !== null)
+      ? BaseError.fromPartial(object.screenshot_error)
+      : undefined;
     return message;
   },
 };
