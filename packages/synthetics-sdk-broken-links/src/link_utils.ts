@@ -153,6 +153,8 @@ function parseFollowedLinks(
     options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
     origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
     followed_link_results: [],
+    execution_data_storage_path: '', // TODO: make sure that when this is set it begins with gs://
+    errors: [],
   };
 
   for (const link of followed_links) {

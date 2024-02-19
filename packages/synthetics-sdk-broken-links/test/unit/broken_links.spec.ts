@@ -18,8 +18,11 @@ use(chaiExclude);
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
+  BaseError,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
 import {
@@ -32,6 +35,12 @@ describe('runBrokenLinks', async () => {
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
+  const default_screenshot_options: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions =
+    {
+      screenshot_condition:
+        BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING,
+      storage_location: '',
+    };
 
   it('returns generic_result with appropriate error information if error thrown', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
@@ -104,6 +113,10 @@ describe('runBrokenLinks', async () => {
       link_start_time: 'NA',
       link_end_time: 'NA',
       is_origin: true,
+      screenshot_output: {
+        screenshot_file: '',
+        screenshot_error: {} as BaseError,
+      },
     };
 
     expect(broken_links_result?.origin_link_result)
@@ -138,6 +151,7 @@ describe('runBrokenLinks', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
+      screenshot_options: default_screenshot_options,
     };
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
@@ -153,6 +167,10 @@ describe('runBrokenLinks', async () => {
       link_start_time: 'NA',
       link_end_time: 'NA',
       is_origin: true,
+      screenshot_output: {
+        screenshot_file: '',
+        screenshot_error: {} as BaseError,
+      },
     };
 
     const file_doesnt_exist_path = `file://${path.join(
@@ -176,6 +194,10 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
+          screenshot_output: {
+            screenshot_file: '',
+            screenshot_error: {} as BaseError,
+          },
         },
         {
           link_passed: false,
@@ -190,6 +212,10 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
+          screenshot_output: {
+            screenshot_file: '',
+            screenshot_error: {} as BaseError,
+          },
         },
       ];
 
