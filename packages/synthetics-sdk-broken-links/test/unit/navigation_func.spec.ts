@@ -20,6 +20,7 @@ import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 import sinon from 'sinon';
 import {
   BrokenLinksResultV1_SyntheticLinkResult,
+  BaseError,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -135,6 +136,10 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
+        screenshot_output: {
+          screenshot_file: '',
+          screenshot_error: {} as BaseError,
+        },
       };
 
       expect(synLinkResult)
@@ -174,6 +179,10 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
+        screenshot_output: {
+          screenshot_file: '',
+          screenshot_error: {} as BaseError,
+        },
       };
 
       expect(synLinkResult)
@@ -216,6 +225,10 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
+        screenshot_output: {
+          screenshot_file: '',
+          screenshot_error: {} as BaseError,
+        },
       };
 
       expect(synLinkResult)
@@ -271,6 +284,10 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
+        screenshot_output: {
+          screenshot_file: '',
+          screenshot_error: {} as BaseError,
+        },
       };
 
       expect(synLinkResult)

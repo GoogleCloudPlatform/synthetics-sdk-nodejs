@@ -16,6 +16,8 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -23,7 +25,21 @@ import {
   BrokenLinkCheckerOptions,
   LinkOrder,
   StatusClass,
+  ScreenshotCondition,
 } from './broken_links';
+
+/**
+ * Validates input options and sets defaults in `options`.
+ *
+ * @param inputOptions - The input options for the broken link checker.
+ * @returns The processed broken link checker options.
+ */
+export function processOptions(
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinksResultV1_BrokenLinkCheckerOptions {
+  const validOptions = validateInputOptions(inputOptions);
+  return setDefaultOptions(validOptions);
+}
 
 /**
  * Validates the input options for the Broken Link Checker.
@@ -130,6 +146,26 @@ export function validateInputOptions(
     );
   }
 
+  // Check storage_location
+  if (
+    inputOptions.screenshot_options?.storage_location !== undefined &&
+    typeof inputOptions.screenshot_options?.storage_location !== 'string'
+  ) {
+    throw new Error('Invalid storage_location value, must be a string');
+  }
+
+  // check storage_condition
+  if (
+    inputOptions.screenshot_options?.screenshot_condition !== undefined &&
+    !Object.values(ScreenshotCondition).includes(
+      inputOptions.screenshot_options?.screenshot_condition
+    )
+  ) {
+    throw new Error(
+      'Invalid screenshot_condition value, must be `ALL`, `FAILING`, OR `NONE`'
+    );
+  }
+
   // per_link_options
   for (const [key, value] of Object.entries(
     inputOptions.per_link_options || {}
@@ -180,6 +216,11 @@ export function validateInputOptions(
     wait_for_selector: inputOptions.wait_for_selector,
     per_link_options: inputOptions.per_link_options,
     total_synthetic_timeout_millis: inputOptions.total_synthetic_timeout_millis,
+    screenshot_options: {
+      screenshot_condition:
+        inputOptions.screenshot_options?.screenshot_condition,
+      storage_location: inputOptions.screenshot_options?.storage_location,
+    },
   };
 }
 
@@ -192,7 +233,7 @@ export function validateInputOptions(
 export function setDefaultOptions(
   inputOptions: BrokenLinkCheckerOptions
 ): BrokenLinksResultV1_BrokenLinkCheckerOptions {
-  const defaulOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
+  const defaultOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions = {
     origin_uri: '',
     link_limit: 10,
     query_selector_all: 'a',
@@ -203,17 +244,26 @@ export function setDefaultOptions(
     wait_for_selector: '',
     per_link_options: {},
     total_synthetic_timeout_millis: 60000,
+    screenshot_options: {
+      screenshot_condition:
+        BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING,
+      storage_location: '',
+    },
   };
 
   const outputOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions =
     {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
 
-  const optionsKeys = Object.keys(defaulOptions) as Array<
+  const optionsKeys = Object.keys(defaultOptions) as Array<
     keyof BrokenLinksResultV1_BrokenLinkCheckerOptions
   >;
   for (const optionName of optionsKeys) {
     // per_link_options and linkorder are handled below
-    if (optionName === 'per_link_options' || optionName === 'link_order')
+    if (
+      optionName === 'per_link_options' ||
+      optionName === 'link_order' ||
+      optionName === 'screenshot_options'
+    )
       continue;
 
     if (
@@ -222,11 +272,33 @@ export function setDefaultOptions(
       (inputOptions as any)[optionName] === undefined
     ) {
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
-      (outputOptions as any)[optionName] = defaulOptions[optionName];
+      (outputOptions as any)[optionName] = defaultOptions[optionName];
     } else {
       // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       (outputOptions as any)[optionName] = inputOptions[optionName];
     }
+  }
+
+  // converting inputOptions.screenshot_options to
+  // BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions
+  outputOptions.screenshot_options =
+    {} as BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions;
+  if (inputOptions.screenshot_options?.screenshot_condition) {
+    outputOptions.screenshot_options!.screenshot_condition =
+      BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition[
+        inputOptions.screenshot_options.screenshot_condition
+      ];
+  } else {
+    outputOptions.screenshot_options!.screenshot_condition =
+      defaultOptions.screenshot_options!.screenshot_condition;
+  }
+
+  if (outputOptions.screenshot_options?.storage_location) {
+    outputOptions.screenshot_options.storage_location =
+      inputOptions.screenshot_options!.storage_location!;
+  } else {
+    outputOptions.screenshot_options.storage_location =
+      defaultOptions.screenshot_options!.storage_location!;
   }
 
   // converting inputOptions.link_order, type: LinkOrder to
@@ -237,7 +309,7 @@ export function setDefaultOptions(
         inputOptions.link_order
       ];
   } else {
-    outputOptions.link_order = defaulOptions.link_order;
+    outputOptions.link_order = defaultOptions.link_order;
   }
 
   // Convert `inputOptions.per_link_options`, type: {[key: string]: PerLinkOption}

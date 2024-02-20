@@ -138,6 +138,8 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       options: options,
       origin_link_result: origin_link,
       followed_link_results: followed_links,
+      execution_data_storage_path: '',
+      errors: []
     });
 
     expect(

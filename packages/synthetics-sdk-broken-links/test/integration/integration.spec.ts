@@ -13,8 +13,12 @@
 // limitations under the License.
 
 import {
-  ResponseStatusCode_StatusClass,
+  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+  BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput,
+  ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 
@@ -29,6 +33,17 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
   const status_class_2xx = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
+  const default_screenshot_options: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions =
+    {
+      screenshot_condition:
+        BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING,
+      storage_location: '',
+    };
+
+  const default_screenshot_output : BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput = {
+      screenshot_file: '',
+      screenshot_error: {} as BaseError,
+    }
 
   it('Handles error when trying to visit page that does not exist', async () => {
     const server = getTestServer('BrokenLinksPageDoesNotExist');
@@ -79,6 +94,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
+        screenshot_output : default_screenshot_output
       });
 
     expect(followed_links).to.deep.equal([]);
@@ -137,6 +153,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
+      screenshot_options: default_screenshot_options,
     });
 
     expect(origin_link)
@@ -154,6 +171,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
+        screenshot_output : default_screenshot_output
       });
 
     expect(followed_links).to.deep.equal([]);
@@ -244,6 +262,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
+      screenshot_options: default_screenshot_options,
     });
 
     expect(origin_link)
@@ -261,6 +280,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
+        screenshot_output : default_screenshot_output
       });
 
     const sorted_followed_links = followed_links?.sort((a, b) =>
@@ -289,6 +309,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
+          screenshot_output : default_screenshot_output
         },
         {
           link_passed: false,
@@ -302,6 +323,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
+          screenshot_output : default_screenshot_output
         },
       ]);
 
@@ -367,6 +389,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
+      screenshot_options: default_screenshot_options,
     });
 
     expect(origin_link)
@@ -384,6 +407,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
+        screenshot_output : default_screenshot_output
       });
 
     expect(followed_links)
@@ -402,6 +426,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
+          screenshot_output : default_screenshot_output
         },
       ]);
 

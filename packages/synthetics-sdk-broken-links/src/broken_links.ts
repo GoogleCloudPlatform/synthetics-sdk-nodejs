@@ -35,7 +35,7 @@ import {
   retrieveLinksFromPage,
   openNewPage,
 } from './navigation_func';
-import { setDefaultOptions, validateInputOptions } from './options_func';
+import { processOptions } from './options_func';
 
 export interface BrokenLinkCheckerOptions {
   origin_uri: string;
@@ -48,6 +48,7 @@ export interface BrokenLinkCheckerOptions {
   wait_for_selector?: string;
   per_link_options?: { [key: string]: PerLinkOption };
   total_synthetic_timeout_millis?: number;
+  screenshot_options?: ScreenshotOptions;
 }
 
 export interface PerLinkOption {
@@ -68,6 +69,17 @@ export enum StatusClass {
   STATUS_CLASS_4XX = 'STATUS_CLASS_4XX',
   STATUS_CLASS_5XX = 'STATUS_CLASS_5XX',
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
+}
+
+export interface ScreenshotOptions {
+  storage_location?: string;
+  screenshot_condition?: ScreenshotCondition;
+}
+
+export enum ScreenshotCondition {
+  NONE = 'NONE',
+  FAILING = 'FAILING',
+  ALL = 'ALL',
 }
 
 let synthetics_sdk_broken_links_package;
@@ -262,17 +274,4 @@ async function scrapeLinks(
     options.link_limit!,
     options.link_order
   );
-}
-
-/**
- * Validates input options and sets defaults in `options`.
- *
- * @param inputOptions - The input options for the broken link checker.
- * @returns The processed broken link checker options.
- */
-function processOptions(
-  inputOptions: BrokenLinkCheckerOptions
-): BrokenLinksResultV1_BrokenLinkCheckerOptions {
-  const validOptions = validateInputOptions(inputOptions);
-  return setDefaultOptions(validOptions);
 }
