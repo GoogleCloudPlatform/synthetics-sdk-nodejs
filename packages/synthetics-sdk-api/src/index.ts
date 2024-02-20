@@ -25,5 +25,6 @@ export {
 export {
   instantiateAutoInstrumentation,
   getInstrumentedLogger,
+  resolveProjectId,
 } from './auto_instrumentation';
 export { getExecutionRegion } from './cloud_region_resolver';
