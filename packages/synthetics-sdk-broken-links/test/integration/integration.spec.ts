@@ -40,10 +40,11 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       storage_location: '',
     };
 
-  const default_screenshot_output : BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput = {
+  const default_screenshot_output: BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput =
+    {
       screenshot_file: '',
       screenshot_error: {} as BaseError,
-    }
+    };
 
   it('Handles error when trying to visit page that does not exist', async () => {
     const server = getTestServer('BrokenLinksPageDoesNotExist');
@@ -94,7 +95,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output : default_screenshot_output
+        screenshot_output: default_screenshot_output,
       });
 
     expect(followed_links).to.deep.equal([]);
@@ -171,7 +172,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output : default_screenshot_output
+        screenshot_output: default_screenshot_output,
       });
 
     expect(followed_links).to.deep.equal([]);
@@ -280,7 +281,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output : default_screenshot_output
+        screenshot_output: default_screenshot_output,
       });
 
     const sorted_followed_links = followed_links?.sort((a, b) =>
@@ -309,7 +310,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output : default_screenshot_output
+          screenshot_output: default_screenshot_output,
         },
         {
           link_passed: false,
@@ -323,7 +324,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output : default_screenshot_output
+          screenshot_output: default_screenshot_output,
         },
       ]);
 
@@ -407,7 +408,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output : default_screenshot_output
+        screenshot_output: default_screenshot_output,
       });
 
     expect(followed_links)
@@ -426,7 +427,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output : default_screenshot_output
+          screenshot_output: default_screenshot_output,
         },
       ]);
 

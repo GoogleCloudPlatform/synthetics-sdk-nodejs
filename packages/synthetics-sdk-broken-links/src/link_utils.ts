@@ -14,6 +14,7 @@
 
 import { HTTPResponse } from 'puppeteer';
 import {
+  BaseError,
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
@@ -218,12 +219,14 @@ export function createSyntheticResult(
   start_time: string,
   runtime_metadata: { [key: string]: string },
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[],
+  errors: BaseError[]
 ): SyntheticResult {
   // Create BrokenLinksResultV1 by parsing followed links and setting options
   const broken_links_result: BrokenLinksResultV1 =
     parseFollowedLinks(followed_links);
   broken_links_result.options = options;
+  broken_links_result.errors = errors;
 
   // Create SyntheticResult object
   const synthetic_result: SyntheticResult = {

@@ -14,6 +14,7 @@
 
 import { expect } from 'chai';
 import {
+  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_SyntheticLinkResult,
@@ -48,6 +49,9 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
   const status_class_5xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_5XX,
   };
+  const default_errors: BaseError[] = [
+    { error_type: 'fake-error-type', error_message: 'fake-error-message' },
+  ];
 
   it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
     // expecting success
@@ -120,7 +124,8 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       start_time,
       runtime_metadata,
       options,
-      all_links
+      all_links,
+      default_errors
     );
 
     // BrokenLinkResultV1 expectations (testing `parseFollowedLinks`)
@@ -139,7 +144,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       origin_link_result: origin_link,
       followed_link_results: followed_links,
       execution_data_storage_path: '',
-      errors: []
+      errors: default_errors,
     });
 
     expect(
