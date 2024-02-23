@@ -28,7 +28,7 @@ import {
   validateInputOptions,
 } from '../../src/options_func';
 
-describe('GCM Synthetics Broken Links  options_func suite testing', () => {
+describe('GCM Synthetics Broken Links options_func suite testing', () => {
   const status_value_304: ResponseStatusCode = { status_value: 304 };
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
