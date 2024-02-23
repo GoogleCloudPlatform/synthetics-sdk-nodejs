@@ -13,7 +13,9 @@
 // limitations under the License.
 
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { Bucket } from '@google-cloud/storage';
 import {
+  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
   instantiateMetadata,
@@ -36,6 +38,10 @@ import {
   openNewPage,
 } from './navigation_func';
 import { processOptions } from './options_func';
+import {
+  createStorageClientIfStorageSelected,
+  getOrCreateStorageBucket,
+} from './storage_func';
 
 export interface BrokenLinkCheckerOptions {
   origin_uri: string;
@@ -103,6 +109,23 @@ export async function runBrokenLinks(
     const adjusted_synthetic_timeout_millis =
       options.total_synthetic_timeout_millis! - 7000;
 
+    const errors: BaseError[] = [];
+
+    // Initialize Storage Client with Error Handling. Set to `null` if
+    // screenshot_condition is 'None'
+    const storageClient = createStorageClientIfStorageSelected(
+      errors,
+      options.screenshot_options!.screenshot_condition
+    );
+
+    // TODO. Just to show where this will be called. uncommented in next PR
+    // Bucket Validation
+    // const bucket: Bucket | null = await getOrCreateStorageBucket(
+    //   storageClient,
+    //   options.screenshot_options!.storage_location,
+    //   errors
+    // );
+
     // Create Promise and variables used to set and resolve the time limit
     // imposed by `adjusted_synthetic_timeout`
     const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
@@ -161,7 +184,8 @@ export async function runBrokenLinks(
       startTime,
       runtime_metadata,
       options,
-      followed_links
+      followed_links,
+      errors
     );
   } catch (err) {
     const errorMessage =
