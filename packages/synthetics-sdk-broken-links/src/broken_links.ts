@@ -40,6 +40,7 @@ import { processOptions } from './options_func';
 import {
   createStorageClientIfStorageSelected,
   getOrCreateStorageBucket,
+  StorageParameters,
 } from './storage_func';
 
 // External Dependencies
@@ -117,17 +118,24 @@ export async function runBrokenLinks(
     // Initialize Storage Client with Error Handling. Set to `null` if
     // capture_condition is 'None'
     const storageClient = createStorageClientIfStorageSelected(
+      // : Storage | null
       errors,
       options.screenshot_options!.capture_condition
     );
 
-    // TODO. Just to show where this will be called. uncommented in next PR
-    // Bucket Validation
-    // const bucket: Bucket | null = await getOrCreateStorageBucket(
-    //   storageClient,
-    //   options.screenshot_options!.storage_location,
-    //   errors
-    // );
+    // // Bucket Validation
+    const bucket: Bucket | null = await getOrCreateStorageBucket(
+      storageClient,
+      options.screenshot_options!.storage_location,
+      errors
+    );
+
+    const storageParams: StorageParameters = {
+      storageClient: storageClient,
+      bucket: bucket,
+      uptimeId: '',
+      executionId: '',
+    };
 
     // Create Promise and variables used to set and resolve the time limit
     // imposed by `adjusted_synthetic_timeout`
@@ -147,7 +155,8 @@ export async function runBrokenLinks(
           originPage,
           options,
           startTime,
-          adjusted_synthetic_timeout_millis
+          adjusted_synthetic_timeout_millis,
+          storageParams
         )
       );
 
@@ -169,7 +178,8 @@ export async function runBrokenLinks(
           linksToFollow,
           options,
           startTime,
-          adjusted_synthetic_timeout_millis
+          adjusted_synthetic_timeout_millis,
+          storageParams
         ))
       );
       return true;
@@ -215,7 +225,8 @@ async function checkOriginLink(
   originPage: Page,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
   startTime: string,
-  adjusted_synthetic_timeout_millis: number
+  adjusted_synthetic_timeout_millis: number,
+  storageParams: StorageParameters
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
   let originLinkResult: BrokenLinksResultV1_SyntheticLinkResult;
 
@@ -232,6 +243,7 @@ async function checkOriginLink(
       originPage,
       { target_uri: options.origin_uri, anchor_text: '', html_element: '' },
       options,
+      storageParams,
       true
     );
 

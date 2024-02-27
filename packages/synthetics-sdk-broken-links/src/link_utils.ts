@@ -18,6 +18,7 @@ import {
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   BrokenLinksResultV1_SyntheticLinkResult,
   GenericResultV1,
   getRuntimeMetadata,
@@ -270,6 +271,25 @@ export function shuffleAndTruncate(
 
   // Truncate the processed array to match the link_limit
   return linksToFollow.slice(0, link_limit! - 1);
+}
+
+/**
+ * Determines whether a screenshot should be taken based on screenshot options and link result.
+ *
+ * @param options - BrokenLinksResultV1_BrokenLinkCheckerOptions
+ * @param passed -  boolean indicating whether the link navigation succeeded
+ * @returns true if a screenshot should be taken, false otherwise
+ */
+export function shouldTakeScreenshot(
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  passed: boolean
+): boolean {
+  return (
+    options.screenshot_options!.capture_condition === ApiCaptureCondition.ALL ||
+    (options.screenshot_options!.capture_condition ===
+      ApiCaptureCondition.FAILING &&
+      !passed)
+  );
 }
 
 export function getTimeLimitPromise(

@@ -164,7 +164,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     let storageClientStub: sinon.SinonStubbedInstance<Storage>;
     let bucketStub: sinon.SinonStubbedInstance<Bucket>;
 
-    const screenshotData = 'encoded-image-data';
+    const screenshotData = Buffer.from('encoded-image-data', 'utf-8');
     const filename = 'test-screenshot.png';
 
     beforeEach(() => {
@@ -238,7 +238,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     });
 
     describe('Invalid Storage Configuration', () => {
-      const emptyScreenshotData = '';
+      const emptyScreenshotData = Buffer.from('', 'utf-8');
       const emptyFilename = '';
       const emptyOptions = {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
       it('should return an empty result if storageClient is null', async () => {

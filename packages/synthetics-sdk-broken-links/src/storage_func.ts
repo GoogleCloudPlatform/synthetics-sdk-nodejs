@@ -139,7 +139,7 @@ export function createStorageClientIfStorageSelected(
  * @returns An ApiScreenshotOutput object indicating success or a screenshot_error.
  */
 export async function uploadScreenshotToGCS(
-  screenshot: string,
+  screenshot: Buffer,
   filename: string,
   storageParams: StorageParameters,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions

@@ -34,34 +34,63 @@ import {
   retrieveLinksFromPage,
 } from '../../src/navigation_func';
 import { setDefaultOptions } from '../../src/options_func';
+import * as storageFunc from '../../src/storage_func';
+
+// External Dependencies
+import { Bucket, Storage } from '@google-cloud/storage';
+const path = require('path');
+const proxyquire = require('proxyquire');
 
 // External Dependencies
 import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 
 describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
-  // constants
+  // Constants
   const link: LinkIntermediate = {
     target_uri: 'https://example.com',
     anchor_text: '',
     html_element: '',
   };
-  const input_options: BrokenLinkCheckerOptions = {
+  const defaultOptions: BrokenLinkCheckerOptions = {
     origin_uri: 'http://origin.com',
     max_retries: 2,
     link_timeout_millis: 5000,
   };
-  const options = setDefaultOptions(input_options);
+  const options = setDefaultOptions(defaultOptions);
 
   const response2xx: Partial<HTTPResponse> = { status: () => 200 };
   const response4xx: Partial<HTTPResponse> = { status: () => 404 };
-  const status_class_2xx: ResponseStatusCode = {
+  const statusClass2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
-  const status_class_4xx: ResponseStatusCode = {
+  const statusClass4xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_4XX,
   };
+  const emptyScreenshotOutput: ApiScreenshotOutput = {
+    screenshot_file: '',
+    screenshot_error: {} as BaseError,
+  };
+  const successfulScreenshotOuput: ApiScreenshotOutput = {
+    screenshot_file: 'bucket/folder/file.png',
+    screenshot_error: {} as BaseError,
+  };
 
-  // Puppeteer constants
+  const storageParams: storageFunc.StorageParameters = {
+    storageClient: sinon.createStubInstance(Storage),
+    bucket: sinon.createStubInstance(Bucket),
+    uptimeId: '',
+    executionId: '',
+  };
+
+  // Use proxyquire to replace uploadScreenshotToGCS
+  const navigStorageUploadSuccMocked = proxyquire('../../src/navigation_func', {
+    './storage_func': {
+      ...storageFunc,
+      uploadScreenshotToGCS: () => successfulScreenshotOuput,
+    },
+  });
+
+  // Puppeteer Setup
   let browser: Browser;
   let page: Page;
   before(async () => {
@@ -74,6 +103,15 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     // Create a new page for each test
     page = await browser.newPage();
     page.setCacheEnabled(false);
+
+    // Stub the page.screenshot function
+    sinon
+      .stub(page, 'screenshot')
+      .resolves(Buffer.from('encoded-image-data', 'utf-8'));
+  });
+
+  afterEach(() => {
+    sinon.restore(); // Restore all stubs
   });
 
   after(async () => {
@@ -82,10 +120,18 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   });
 
   describe('navigate', async () => {
-    it('should pass after retries', async () => {
-      const pageStub = sinon.createStubInstance(Page);
-      pageStub.url.returns('fake-current-uri');
+    let pageStub: sinon.SinonStubbedInstance<Page>;
 
+    beforeEach(() => {
+        pageStub = sinon.createStubInstance(Page);
+        pageStub.url.returns('fake-current-uri');
+    });
+
+    afterEach(() => {
+        sinon.restore();
+    });
+
+    it('should pass after retries', async () => {
       // Configure the stub to simulate a failed navigation on the first call
       // and a successful one on the second
       pageStub.goto
@@ -102,9 +148,6 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     });
 
     it('should fail after maximum retries', async () => {
-      const pageStub = sinon.createStubInstance(Page);
-      pageStub.url.returns('fake-current-uri');
-
       // Configure the stub to simulate a failed navigation on three
       // consecutive calls
       pageStub.goto
@@ -125,11 +168,11 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
   describe('checkLink', async () => {
     it('passes when navigating to real uri', async () => {
-      const synLinkResult = await checkLink(page, link, options);
+      const synLinkResult = await checkLink(page, link, options, storageParams);
 
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: true,
-        expected_status_code: status_class_2xx,
+        expected_status_code: statusClass2xx,
         source_uri: 'http://origin.com',
         target_uri: 'https://example.com',
         html_element: '',
@@ -140,10 +183,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: {
-          screenshot_file: '',
-          screenshot_error: {} as BaseError,
-        },
+        screenshot_output: emptyScreenshotOutput,
       };
 
       expect(synLinkResult)
@@ -165,11 +205,16 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         anchor_text: '',
         html_element: '',
       };
-      const synLinkResult = await checkLink(page, json_link, options);
+      const synLinkResult = await checkLink(
+        page,
+        json_link,
+        options,
+        storageParams
+      );
 
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: true,
-        expected_status_code: status_class_2xx,
+        expected_status_code: statusClass2xx,
         source_uri: 'http://origin.com',
         target_uri: `file:${path.join(
           __dirname,
@@ -183,10 +228,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: {
-          screenshot_file: '',
-          screenshot_error: {} as BaseError,
-        },
+        screenshot_output: emptyScreenshotOutput,
       };
 
       expect(synLinkResult)
@@ -210,15 +252,16 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         html_element: 'img',
       };
 
-      const synLinkResult = await checkLink(
+      const synLinkResult = await navigStorageUploadSuccMocked.checkLink(
         page,
         timeout_link,
-        options_with_timeout
+        options_with_timeout,
+        storageParams
       );
 
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: false,
-        expected_status_code: status_class_2xx,
+        expected_status_code: statusClass2xx,
         source_uri: 'http://origin.com',
         target_uri: target_uri,
         html_element: 'img',
@@ -229,10 +272,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: {
-          screenshot_file: '',
-          screenshot_error: {} as BaseError,
-        },
+        screenshot_output: successfulScreenshotOuput,
       };
 
       expect(synLinkResult)
@@ -268,15 +308,16 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         .onThirdCall()
         .resolves(response2xx as HTTPResponse);
 
-      const synLinkResult = await checkLink(
+      const synLinkResult = await navigStorageUploadSuccMocked.checkLink(
         pageStub,
         timeoutLink,
-        optionsExp404
+        optionsExp404,
+        storageParams
       );
 
       const expectations: BrokenLinksResultV1_SyntheticLinkResult = {
         link_passed: false,
-        expected_status_code: status_class_4xx,
+        expected_status_code: statusClass4xx,
         source_uri: 'http://origin.com',
         target_uri: 'https://expecting404.com',
         html_element: 'a',
@@ -288,10 +329,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: {
-          screenshot_file: '',
-          screenshot_error: {} as BaseError,
-        },
+        screenshot_output: successfulScreenshotOuput,
       };
 
       expect(synLinkResult)
