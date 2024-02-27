@@ -47,4 +47,4 @@ functions.http('CustomPuppeteerSynthetic', runSyntheticHandler(async ({logger, e
  await browser.close();
 }));
 
-// [START monitoring_synthetic_monitoring_custom_puppeteer_script]
+// [END monitoring_synthetic_monitoring_custom_puppeteer_script]
