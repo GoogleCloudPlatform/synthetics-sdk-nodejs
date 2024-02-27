@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// [START monitoring_synthetic_monitoring_broken_links_puppeteer_cjs]
 const { join } = require('path');
 
 /**
@@ -20,3 +21,4 @@ const { join } = require('path');
 module.exports = {
   cacheDirectory: join(__dirname, '.cache', 'puppeteer'),
 };
+// [END monitoring_synthetic_monitoring_broken_links_puppeteer_cjs]
