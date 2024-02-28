@@ -12,13 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as path from 'path';
 import { Storage, Bucket } from '@google-cloud/storage';
 import {
   BaseError,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition as ApiScreenshotCondition,
   resolveProjectId,
   getExecutionRegion,
+  BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput as ApiScreenshotOutput,
 } from '@google-cloud/synthetics-sdk-api';
+
+export interface StorageParameters {
+  storageClient: Storage | null;
+  bucket: Bucket | null;
+  uptimeId: string;
+  executionId: string;
+}
 
 /**
  * Attempts to get an existing storage bucket if provided by the user OR
@@ -97,13 +107,9 @@ export async function getOrCreateStorageBucket(
  */
 export function createStorageClientIfStorageSelected(
   errors: BaseError[],
-  storage_condition: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition
+  storageCondition: ApiScreenshotCondition
 ): Storage | null {
-  if (
-    storage_condition ===
-    BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.NONE
-  )
-    return null;
+  if (storageCondition === ApiScreenshotCondition.NONE) return null;
 
   try {
     return new Storage();
@@ -116,4 +122,78 @@ export function createStorageClientIfStorageSelected(
     });
     return null;
   }
+}
+
+/**
+ * Uploads a screenshot to Google Cloud Storage.
+ *
+ * @param screenshot - Base64-encoded screenshot data.
+ * @param filename - Desired filename for the screenshot.
+ * @param storageParams - An object containing storageClient and bucket.
+ * @param options - Broken links checker options.
+ * @returns An ApiScreenshotOutput object indicating success or a screenshot_error.
+ */
+export async function uploadScreenshotToGCS(
+  screenshot: string,
+  filename: string,
+  storageParams: StorageParameters,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+): Promise<ApiScreenshotOutput> {
+  const screenshot_output: ApiScreenshotOutput = {
+    screenshot_file: '',
+    screenshot_error: {} as BaseError,
+  };
+  try {
+    // Early exit if storage is not properly configured
+    if (!storageParams.storageClient || !storageParams.bucket) {
+      return screenshot_output;
+    }
+
+    // Construct the destination path within the bucket if given
+    let writeDestination = options.screenshot_options!.storage_location
+      ? getFolderNameFromStorageLocation(
+          options.screenshot_options!.storage_location
+        )
+      : '';
+
+    // Ensure writeDestination ends with a slash for proper path joining
+    if (writeDestination && !writeDestination.endsWith('/')) {
+      writeDestination += '/';
+    }
+
+    writeDestination = path.join(
+      writeDestination,
+      storageParams.uptimeId,
+      storageParams.executionId,
+      filename
+    );
+
+    // Upload to GCS
+    await storageParams.bucket.file(writeDestination).save(screenshot, {
+      contentType: 'image/png',
+    });
+
+    screenshot_output.screenshot_file = writeDestination;
+  } catch (err) {
+    // Handle upload errors
+    if (err instanceof Error) process.stderr.write(err.message);
+    screenshot_output.screenshot_error = {
+      error_type: 'StorageFileUploadError',
+      error_message: `Failed to upload screenshot for ${filename}. Please reference server logs for further information.`,
+    };
+  }
+
+  return screenshot_output;
+}
+
+// Helper function to extract folder name for a given storage location. If there
+// is no '/' present then the storageLocation is just a folder
+export function getFolderNameFromStorageLocation(
+  storageLocation: string
+): string {
+  const firstSlashIndex = storageLocation.indexOf('/');
+  if (firstSlashIndex === -1) {
+    return '';
+  }
+  return storageLocation.substring(firstSlashIndex + 1);
 }
