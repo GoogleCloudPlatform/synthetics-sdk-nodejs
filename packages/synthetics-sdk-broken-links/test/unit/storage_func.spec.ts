@@ -14,12 +14,16 @@
 
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { Storage, Bucket } from '@google-cloud/storage';
+import { Storage, Bucket, File } from '@google-cloud/storage';
 import * as sdkApi from '@google-cloud/synthetics-sdk-api';
 import {
   createStorageClientIfStorageSelected,
+  getFolderNameFromStorageLocation,
   getOrCreateStorageBucket,
+  StorageParameters,
+  uploadScreenshotToGCS,
 } from '../../src/storage_func';
+import { BrokenLinksResultV1_BrokenLinkCheckerOptions } from '@google-cloud/synthetics-sdk-api';
 const proxyquire = require('proxyquire');
 
 // global test vars
@@ -33,6 +37,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     '@google-cloud/synthetics-sdk-api': {
       getExecutionRegion: () => 'test-region',
       resolveProjectId: () => 'test-project-id',
+      getOrCreateStorageBucket: () => getOrCreateStorageBucket,
     },
   });
 
@@ -94,10 +99,14 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
 
       const result = await storageFunc.getOrCreateStorageBucket(
         storageClientStub,
-        '',
+        TEST_BUCKET_NAME + '/fake-folder',
         []
       );
       expect(result).to.equal(bucketStub);
+      sinon.assert.calledWithExactly(
+        storageClientStub.bucket,
+        TEST_BUCKET_NAME
+      );
       sinon.assert.notCalled(bucketStub.create);
     });
 
@@ -146,6 +155,159 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
         storage_condition_failing_links
       );
       expect(result).to.be.an.instanceOf(Storage);
+    });
+  });
+
+  describe('uploadScreenshotToGCS', () => {
+    let storageClientStub: sinon.SinonStubbedInstance<Storage>;
+    let bucketStub: sinon.SinonStubbedInstance<Bucket>;
+
+    const screenshotData = 'encoded-image-data';
+    const filename = 'test-screenshot.png';
+
+    beforeEach(() => {
+      storageClientStub = sinon.createStubInstance(Storage);
+      bucketStub = sinon.createStubInstance(Bucket);
+      storageClientStub.bucket.returns(bucketStub);
+    });
+
+    afterEach(() => {
+      sinon.restore();
+    });
+
+    it('should upload the screenshot and return the write_destination', async () => {
+      const storageParams = {
+        storageClient: storageClientStub,
+        bucket: bucketStub,
+        uptimeId: 'uptime123',
+        executionId: 'exec456',
+      };
+      const options = {
+        screenshot_options: { storage_location: 'bucket/folder1/folder2' },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+      const expectedWriteDestination =
+        'folder1/folder2/uptime123/exec456/test-screenshot.png';
+
+      const successPartialFileMock: Partial<File> = {
+        save: sinon.stub().resolves(),
+      };
+      bucketStub.file.returns(successPartialFileMock as File);
+
+      const result = await uploadScreenshotToGCS(
+        screenshotData,
+        filename,
+        storageParams,
+        options
+      );
+
+      expect(result.screenshot_file).to.equal(expectedWriteDestination);
+      expect(result.screenshot_error).to.deep.equal({});
+    });
+
+    it('should handle GCS upload errors', async () => {
+      const storageParams: StorageParameters = {
+        storageClient: storageClientStub,
+        bucket: bucketStub,
+        uptimeId: '',
+        executionId: '',
+      };
+      const options = {
+        screenshot_options: {},
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      const gcsError = new Error('Simulated GCS upload error');
+      const failingPartialFileMock: Partial<File> = {
+        save: sinon.stub().throws(gcsError),
+      };
+      bucketStub.file.returns(failingPartialFileMock as File);
+
+      const result = await uploadScreenshotToGCS(
+        screenshotData,
+        filename,
+        storageParams,
+        options
+      );
+
+      expect(result.screenshot_file).to.equal('');
+      expect(result.screenshot_error).to.deep.equal({
+        error_type: 'StorageFileUploadError',
+        error_message: `Failed to upload screenshot for ${filename}. Please reference server logs for further information.`,
+      });
+    });
+
+    describe('Invalid Storage Configuration', () => {
+      const emptyScreenshotData = '';
+      const emptyFilename = '';
+      const emptyOptions = {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+      it('should return an empty result if storageClient is null', async () => {
+        // Missing storageClient
+        const storageParams = {
+          storageClient: null,
+          bucket: bucketStub,
+          uptimeId: '',
+          executionId: '',
+        };
+
+        const result = await uploadScreenshotToGCS(
+          emptyScreenshotData,
+          emptyFilename,
+          storageParams,
+          emptyOptions
+        );
+
+        expect(result).to.deep.equal({
+          screenshot_file: '',
+          screenshot_error: {},
+        });
+      });
+
+      it('should return an empty result if bucket is null', async () => {
+        // Missing bucket
+        const storageParams = {
+          storageClient: storageClientStub,
+          bucket: null,
+          uptimeId: '',
+          executionId: '',
+        };
+
+        const result = await uploadScreenshotToGCS(
+          emptyScreenshotData,
+          emptyFilename,
+          storageParams,
+          emptyOptions
+        );
+
+        expect(result).to.deep.equal({
+          screenshot_file: '',
+          screenshot_error: {},
+        });
+      });
+    });
+  });
+
+  describe('getFolderNameFromStorageLocation', () => {
+    it('should extract folder name when storage location has a slash', () => {
+      const storageLocation = 'some-bucket/folder1/folder2';
+      const expectedFolderName = 'folder1/folder2';
+
+      const result = getFolderNameFromStorageLocation(storageLocation);
+      expect(result).to.equal(expectedFolderName);
+    });
+
+    it('should return an empty string if storage location has no slash', () => {
+      const storageLocation = 'my-bucket';
+      const expectedFolderName = '';
+
+      const result = getFolderNameFromStorageLocation(storageLocation);
+      expect(result).to.equal(expectedFolderName);
+    });
+
+    it('should return an empty string if given an empty string', () => {
+      const storageLocation = '';
+      const expectedFolderName = '';
+
+      const result = getFolderNameFromStorageLocation(storageLocation);
+      expect(result).to.equal(expectedFolderName);
     });
   });
 });
