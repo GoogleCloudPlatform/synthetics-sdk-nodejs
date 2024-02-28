@@ -216,7 +216,7 @@ message BrokenLinksResultV1 {
       // Input bucket or folder provided by the user.
       string storage_location = 1;
 
-      enum ScreenshotCondition {
+      enum CaptureCondition {
         NONE = 0;
         FAILING = 1;
         ALL = 2;
@@ -224,7 +224,7 @@ message BrokenLinksResultV1 {
 
       // Controls when to capture screenshots during broken link checks, default
       // is FAILING.
-      ScreenshotCondition screenshot_condition = 2;
+      CaptureCondition capture_condition = 2;
     }
 
     // Screenshot options, default to 'FAILING' and synthetic wide bucket.

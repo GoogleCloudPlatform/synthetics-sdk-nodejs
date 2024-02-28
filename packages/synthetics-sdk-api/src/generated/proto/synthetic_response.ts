@@ -397,47 +397,47 @@ export interface BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions 
    * Controls when to capture screenshots during broken link checks, default
    * is FAILING.
    */
-  screenshot_condition: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition;
+  capture_condition: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition;
 }
 
-export enum BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition {
+export enum BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition {
   NONE = 0,
   FAILING = 1,
   ALL = 2,
   UNRECOGNIZED = -1,
 }
 
-export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionFromJSON(
+export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureConditionFromJSON(
   object: any,
-): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition {
+): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition {
   switch (object) {
     case 0:
     case "NONE":
-      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.NONE;
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.NONE;
     case 1:
     case "FAILING":
-      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING;
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.FAILING;
     case 2:
     case "ALL":
-      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.ALL;
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.ALL;
     case -1:
     case "UNRECOGNIZED":
     default:
-      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.UNRECOGNIZED;
+      return BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.UNRECOGNIZED;
   }
 }
 
-export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionToJSON(
-  object: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+export function brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureConditionToJSON(
+  object: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition,
 ): string {
   switch (object) {
-    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.NONE:
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.NONE:
       return "NONE";
-    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING:
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.FAILING:
       return "FAILING";
-    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.ALL:
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.ALL:
       return "ALL";
-    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.UNRECOGNIZED:
+    case BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -2021,7 +2021,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOptionsEntry = 
 };
 
 function createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions(): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
-  return { storage_location: "", screenshot_condition: 0 };
+  return { storage_location: "", capture_condition: 0 };
 }
 
 export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
@@ -2032,8 +2032,8 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
     if (message.storage_location !== "") {
       writer.uint32(10).string(message.storage_location);
     }
-    if (message.screenshot_condition !== 0) {
-      writer.uint32(16).int32(message.screenshot_condition);
+    if (message.capture_condition !== 0) {
+      writer.uint32(16).int32(message.capture_condition);
     }
     return writer;
   },
@@ -2060,7 +2060,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
             break;
           }
 
-          message.screenshot_condition = reader.int32() as any;
+          message.capture_condition = reader.int32() as any;
           continue;
       }
       if ((tag & 7) === 4 || tag === 0) {
@@ -2074,9 +2074,9 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
   fromJSON(object: any): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
     return {
       storage_location: isSet(object.storage_location) ? String(object.storage_location) : "",
-      screenshot_condition: isSet(object.screenshot_condition)
-        ? brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionFromJSON(
-          object.screenshot_condition,
+      capture_condition: isSet(object.capture_condition)
+        ? brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureConditionFromJSON(
+          object.capture_condition,
         )
         : 0,
     };
@@ -2085,11 +2085,10 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
   toJSON(message: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions): unknown {
     const obj: any = {};
     message.storage_location !== undefined && (obj.storage_location = message.storage_location);
-    message.screenshot_condition !== undefined &&
-      (obj.screenshot_condition =
-        brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotConditionToJSON(
-          message.screenshot_condition,
-        ));
+    message.capture_condition !== undefined &&
+      (obj.capture_condition = brokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureConditionToJSON(
+        message.capture_condition,
+      ));
     return obj;
   },
 
@@ -2104,7 +2103,7 @@ export const BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions = {
   ): BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions {
     const message = createBaseBrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions();
     message.storage_location = object.storage_location ?? "";
-    message.screenshot_condition = object.screenshot_condition ?? 0;
+    message.capture_condition = object.capture_condition ?? 0;
     return message;
   },
 };
