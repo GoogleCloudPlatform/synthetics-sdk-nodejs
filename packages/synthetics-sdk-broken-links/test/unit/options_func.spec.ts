@@ -371,19 +371,19 @@ describe('GCM Synthetics Broken Links options_func suite testing', () => {
     it('throws error if storage_condition is not a valid StorageCondition value', () => {
       const options = {
         origin_uri: 'http://example.com',
-        screenshot_options: { screenshot_condition: 'invalid' },
+        screenshot_options: { capture_condition: 'invalid' },
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
       }).to.throw(
         Error,
-        'Invalid screenshot_condition value, must be `ALL`, `FAILING`, OR `NONE`'
+        'Invalid capture_condition value, must be `ALL`, `FAILING`, OR `NONE`'
       );
     });
     it('storage_condition accepts string', () => {
       const options = {
         origin_uri: 'http://example.com',
-        screenshot_options: { screenshot_condition: 'FAILING' },
+        screenshot_options: { capture_condition: 'FAILING' },
       } as any as BrokenLinkCheckerOptions;
       expect(() => {
         validateInputOptions(options);
@@ -425,7 +425,7 @@ describe('GCM Synthetics Broken Links options_func suite testing', () => {
         },
         screenshot_options: {
           storage_location: '',
-          screenshot_condition: 'FAILING',
+          capture_condition: 'FAILING',
         },
       } as BrokenLinkCheckerOptions;
 
@@ -452,7 +452,7 @@ describe('GCM Synthetics Broken Links options_func suite testing', () => {
         total_synthetic_timeout_millis: undefined,
         screenshot_options: {
           storage_location: undefined,
-          screenshot_condition: undefined,
+          capture_condition: undefined,
         },
       } as BrokenLinkCheckerOptions;
 

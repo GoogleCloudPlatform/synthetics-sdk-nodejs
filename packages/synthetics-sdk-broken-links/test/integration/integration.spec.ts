@@ -16,7 +16,7 @@ import {
   BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput,
   ResponseStatusCode_StatusClass,
   SyntheticResult,
@@ -35,8 +35,7 @@ describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
   };
   const default_screenshot_options: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions =
     {
-      screenshot_condition:
-        BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING,
+      capture_condition: ApiCaptureCondition.FAILING,
       storage_location: '',
     };
 

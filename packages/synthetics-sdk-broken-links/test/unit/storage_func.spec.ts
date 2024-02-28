@@ -43,11 +43,11 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
 
   const storage_condition_failing_links =
     sdkApi
-      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition
+      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition
       .FAILING;
   const storage_condition_none =
     sdkApi
-      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition
+      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition
       .NONE;
 
   beforeEach(() => {
