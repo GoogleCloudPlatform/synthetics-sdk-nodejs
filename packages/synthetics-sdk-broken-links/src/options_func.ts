@@ -17,7 +17,7 @@ import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_PerLinkOption,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -25,7 +25,7 @@ import {
   BrokenLinkCheckerOptions,
   LinkOrder,
   StatusClass,
-  ScreenshotCondition,
+  CaptureCondition,
 } from './broken_links';
 
 /**
@@ -156,13 +156,13 @@ export function validateInputOptions(
 
   // check storage_condition
   if (
-    inputOptions.screenshot_options?.screenshot_condition !== undefined &&
-    !Object.values(ScreenshotCondition).includes(
-      inputOptions.screenshot_options?.screenshot_condition
+    inputOptions.screenshot_options?.capture_condition !== undefined &&
+    !Object.values(CaptureCondition).includes(
+      inputOptions.screenshot_options?.capture_condition
     )
   ) {
     throw new Error(
-      'Invalid screenshot_condition value, must be `ALL`, `FAILING`, OR `NONE`'
+      'Invalid capture_condition value, must be `ALL`, `FAILING`, OR `NONE`'
     );
   }
 
@@ -217,8 +217,7 @@ export function validateInputOptions(
     per_link_options: inputOptions.per_link_options,
     total_synthetic_timeout_millis: inputOptions.total_synthetic_timeout_millis,
     screenshot_options: {
-      screenshot_condition:
-        inputOptions.screenshot_options?.screenshot_condition,
+      capture_condition: inputOptions.screenshot_options?.capture_condition,
       storage_location: inputOptions.screenshot_options?.storage_location,
     },
   };
@@ -245,8 +244,7 @@ export function setDefaultOptions(
     per_link_options: {},
     total_synthetic_timeout_millis: 60000,
     screenshot_options: {
-      screenshot_condition:
-        BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition.FAILING,
+      capture_condition: ApiCaptureCondition.FAILING,
       storage_location: '',
     },
   };
@@ -283,14 +281,12 @@ export function setDefaultOptions(
   // BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions
   outputOptions.screenshot_options =
     {} as BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions;
-  if (inputOptions.screenshot_options?.screenshot_condition) {
-    outputOptions.screenshot_options!.screenshot_condition =
-      BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition[
-        inputOptions.screenshot_options.screenshot_condition
-      ];
+  if (inputOptions.screenshot_options?.capture_condition) {
+    outputOptions.screenshot_options!.capture_condition =
+      ApiCaptureCondition[inputOptions.screenshot_options.capture_condition];
   } else {
-    outputOptions.screenshot_options!.screenshot_condition =
-      defaultOptions.screenshot_options!.screenshot_condition;
+    outputOptions.screenshot_options!.capture_condition =
+      defaultOptions.screenshot_options!.capture_condition;
   }
 
   if (outputOptions.screenshot_options?.storage_location) {

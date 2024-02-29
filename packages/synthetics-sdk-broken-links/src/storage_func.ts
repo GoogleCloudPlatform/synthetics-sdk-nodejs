@@ -17,7 +17,7 @@ import { Storage, Bucket } from '@google-cloud/storage';
 import {
   BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_ScreenshotCondition as ApiScreenshotCondition,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   resolveProjectId,
   getExecutionRegion,
   BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput as ApiScreenshotOutput,
@@ -107,9 +107,9 @@ export async function getOrCreateStorageBucket(
  */
 export function createStorageClientIfStorageSelected(
   errors: BaseError[],
-  storageCondition: ApiScreenshotCondition
+  captureCondition: ApiCaptureCondition
 ): Storage | null {
-  if (storageCondition === ApiScreenshotCondition.NONE) return null;
+  if (captureCondition === ApiCaptureCondition.NONE) return null;
 
   try {
     return new Storage();
