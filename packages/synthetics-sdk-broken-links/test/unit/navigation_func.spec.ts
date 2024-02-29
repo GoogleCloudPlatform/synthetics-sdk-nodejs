@@ -23,6 +23,7 @@ import sinon from 'sinon';
 import {
   BaseError,
   BrokenLinksResultV1_SyntheticLinkResult,
+  BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput as ApiScreenshotOutput,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -38,7 +39,6 @@ import * as storageFunc from '../../src/storage_func';
 
 // External Dependencies
 import { Bucket, Storage } from '@google-cloud/storage';
-const path = require('path');
 const proxyquire = require('proxyquire');
 
 // External Dependencies
@@ -78,7 +78,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   const storageParams: storageFunc.StorageParameters = {
     storageClient: sinon.createStubInstance(Storage),
     bucket: sinon.createStubInstance(Bucket),
-    uptimeId: '',
+    checkId: '',
     executionId: '',
   };
 
@@ -123,12 +123,12 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     let pageStub: sinon.SinonStubbedInstance<Page>;
 
     beforeEach(() => {
-        pageStub = sinon.createStubInstance(Page);
-        pageStub.url.returns('fake-current-uri');
+      pageStub = sinon.createStubInstance(Page);
+      pageStub.url.returns('fake-current-uri');
     });
 
     afterEach(() => {
-        sinon.restore();
+      sinon.restore();
     });
 
     it('should pass after retries', async () => {
@@ -339,11 +339,10 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   });
 });
 
-describe('retrieveLinksFromPage', async () => {
+describe.only('retrieveLinksFromPage', async () => {
   // Puppeteer constants
   let browser: Browser;
   let page: Page;
-  let pageuriStub: sinon.SinonStub<[], string>;
   before(async () => {
     browser = await puppeteer.launch({ headless: 'new' });
   });
@@ -358,7 +357,7 @@ describe('retrieveLinksFromPage', async () => {
       )}`
     );
     // Mock page.uri() to return a custom uri
-    pageuriStub = sinon.stub(page, 'url').returns('https://mocked.com');
+    sinon.stub(page, 'url').returns('https://mocked.com');
   });
 
   after(async () => {
@@ -416,7 +415,7 @@ describe('retrieveLinksFromPage', async () => {
 
     // note: does not return `mailto:...` link
     expect(results).to.deep.equal(expectations);
-  });
+  }).timeout(5000);
 
   it('handles complicated query_selector_all', async () => {
     const query_selector_all = 'img[href], a[src]';

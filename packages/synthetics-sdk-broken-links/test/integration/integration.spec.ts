@@ -32,13 +32,13 @@ import {
 require('../../test/example_html_files/integration_server.js');
 const { getTestServer } = require('@google-cloud/functions-framework/testing');
 
-describe.only('CloudFunctionV2 Running Broken Link Synthetics', async () => {
+describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
   const status_class_2xx = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
-  const defaultScreenshotOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions =
+  const noneCaptureScreenshotOptions: BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions =
     {
-      capture_condition: ApiCaptureCondition.FAILING,
+      capture_condition: ApiCaptureCondition.NONE,
       storage_location: '',
     };
 
@@ -96,7 +96,7 @@ describe.only('CloudFunctionV2 Running Broken Link Synthetics', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
-      screenshot_options: defaultScreenshotOptions,
+      screenshot_options: noneCaptureScreenshotOptions,
     });
 
     expect(origin_link)

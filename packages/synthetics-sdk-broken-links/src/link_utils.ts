@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
+import * as path from 'path';
+
 // Internal Project Files
 import {
   BaseError,
@@ -29,6 +32,7 @@ import {
 
 // External Dependencies
 import { HTTPResponse } from 'puppeteer';
+import { StorageParameters } from './storage_func';
 
 /**
  * Represents an intermediate link with its properties.
@@ -224,6 +228,7 @@ export function createSyntheticResult(
   runtime_metadata: { [key: string]: string },
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
   followed_links: BrokenLinksResultV1_SyntheticLinkResult[],
+  storageParams: StorageParameters,
   errors: BaseError[]
 ): SyntheticResult {
   // Create BrokenLinksResultV1 by parsing followed links and setting options
@@ -231,6 +236,8 @@ export function createSyntheticResult(
     parseFollowedLinks(followed_links);
   broken_links_result.options = options;
   broken_links_result.errors = errors;
+  broken_links_result.execution_data_storage_path =
+    'gs://' + getStoragePathToExecution(storageParams, options);
 
   // Create SyntheticResult object
   const synthetic_result: SyntheticResult = {
@@ -290,6 +297,68 @@ export function shouldTakeScreenshot(
       ApiCaptureCondition.FAILING &&
       !passed)
   );
+}
+
+/**
+ * Sanitizes an object name string for safe use, ensuring compliance with
+ * naming restrictions.
+ *
+ * @param {string} inputString - The original object name string.
+ * @returns {string} The sanitized object name.
+ *
+ * **Sanitization Rules:**
+ * * Removes control characters ([\u007F-\u009F]).
+ * * Removes disallowed characters (#, [, ], *, ?, ", <, >, |, /).
+ * * Replaces the forbidden prefix ".well-known/acme-challenge/" with an underscore.
+ * * Replaces standalone occurrences of "." or ".." with an underscore.
+ */
+export function sanitizeObjectName(
+  inputString: string | null | undefined
+): string {
+  if (!inputString || inputString === '.' || inputString === '..') return '_';
+
+  // Regular expressions for:
+  /*eslint no-useless-escape: "off"*/
+  const invalidCharactersRegex = /[\r\n\u007F-\u009F#\[\]*?:"<>|/]/g; // Control characters, special characters, path separator
+  const wellKnownPrefixRegex = /^\.well-known\/acme-challenge\//;
+
+  // Core sanitization:
+  return inputString
+    .replace(wellKnownPrefixRegex, '_') // Replace forbidden prefix
+    .replace(invalidCharactersRegex, '_') // replace invalid characters
+    .trim() // Clean up any leading/trailing spaces
+    .replace(/\s+/g, '_'); // Replace one or more spaces with underscores
+}
+
+export function getStoragePathToExecution(
+  storageParams: StorageParameters,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+) {
+  try {
+    const storageLocation = options.screenshot_options!.storage_location;
+    let writeDestination = '';
+
+    // extract folder name for a given storage location. If there is no '/'
+    // present then the storageLocation is just a folder
+    const firstSlashIndex = storageLocation.indexOf('/');
+    if (firstSlashIndex !== -1)
+      writeDestination = storageLocation.substring(firstSlashIndex + 1);
+
+    // Ensure writeDestination ends with a slash for proper path joining
+    if (writeDestination && !writeDestination.endsWith('/')) {
+      writeDestination += '/';
+    }
+
+    writeDestination = path.join(
+      writeDestination,
+      storageParams.checkId,
+      storageParams.executionId
+    );
+
+    return writeDestination;
+  } catch (err) {
+    return '';
+  }
 }
 
 export function getTimeLimitPromise(

@@ -31,7 +31,6 @@ import {
   shouldTakeScreenshot,
 } from './link_utils';
 import { StorageParameters, uploadScreenshotToGCS } from './storage_func';
-import { CaptureCondition } from './broken_links';
 
 // External Dependencies
 import { Browser, HTTPResponse, Page } from 'puppeteer';
@@ -198,11 +197,8 @@ export async function checkLink(
     screenshot_error: {} as BaseError,
   };
   if (shouldTakeScreenshot(options, passed)) {
-    const screenshot: Buffer = await page.screenshot({ encoding: 'binary' });
-    const filename = 'test file name'; // TODO pending YAQs
     screenshotOutput = await uploadScreenshotToGCS(
-      screenshot,
-      filename,
+      page,
       storageParams,
       options
     );

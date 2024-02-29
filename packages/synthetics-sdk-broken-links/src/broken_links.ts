@@ -113,12 +113,16 @@ export async function runBrokenLinks(
     const adjusted_synthetic_timeout_millis =
       options.total_synthetic_timeout_millis! - 7000;
 
+    // Create Promise and variables used to set and resolve the time limit
+    // imposed by `adjusted_synthetic_timeout`
+    const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
+      getTimeLimitPromise(startTime, adjusted_synthetic_timeout_millis);
+
     const errors: BaseError[] = [];
 
     // Initialize Storage Client with Error Handling. Set to `null` if
     // capture_condition is 'None'
     const storageClient = createStorageClientIfStorageSelected(
-      // : Storage | null
       errors,
       options.screenshot_options!.capture_condition
     );
@@ -130,17 +134,13 @@ export async function runBrokenLinks(
       errors
     );
 
+    // TODO
     const storageParams: StorageParameters = {
       storageClient: storageClient,
       bucket: bucket,
-      uptimeId: '',
-      executionId: '',
+          checkId: 'fake-check-id',
+            executionId: 'fake-execution-id',
     };
-
-    // Create Promise and variables used to set and resolve the time limit
-    // imposed by `adjusted_synthetic_timeout`
-    const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
-      getTimeLimitPromise(startTime, adjusted_synthetic_timeout_millis);
 
     const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
@@ -198,6 +198,7 @@ export async function runBrokenLinks(
       runtime_metadata,
       options,
       followed_links,
+      storageParams,
       errors
     );
   } catch (err) {

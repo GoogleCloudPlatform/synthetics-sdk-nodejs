@@ -18,8 +18,8 @@ const functions = require('@google-cloud/functions-framework');
 const GcmSynthetics = require('@google-cloud/synthetics-sdk-broken-links');
 
 const options = {
-  origin_uri: "https://example.com",
-  // link_limit: 10,
+  origin_uri: "https://en.wikipedia.org/wiki/World_War_II",
+  link_limit: 50,
   // query_selector_all: "a", // https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelectorAll
   // get_attributes: ['href'], // https://developer.mozilla.org/en-US/docs/Web/API/Element/getAttribute
   // link_order: "FIRST_N", // "FIRST_N" or "RANDOM"
