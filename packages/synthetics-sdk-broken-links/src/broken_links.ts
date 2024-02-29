@@ -79,10 +79,10 @@ export enum StatusClass {
 
 export interface ScreenshotOptions {
   storage_location?: string;
-  screenshot_condition?: ScreenshotCondition;
+  capture_condition?: CaptureCondition;
 }
 
-export enum ScreenshotCondition {
+export enum CaptureCondition {
   NONE = 'NONE',
   FAILING = 'FAILING',
   ALL = 'ALL',
@@ -112,10 +112,10 @@ export async function runBrokenLinks(
     const errors: BaseError[] = [];
 
     // Initialize Storage Client with Error Handling. Set to `null` if
-    // screenshot_condition is 'None'
+    // capture_condition is 'None'
     const storageClient = createStorageClientIfStorageSelected(
       errors,
-      options.screenshot_options!.screenshot_condition
+      options.screenshot_options!.capture_condition
     );
 
     // TODO. Just to show where this will be called. uncommented in next PR
