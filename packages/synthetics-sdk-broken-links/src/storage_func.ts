@@ -12,16 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
 import * as path from 'path';
-import { Storage, Bucket } from '@google-cloud/storage';
+
+// Internal Project Files
 import {
   BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
-  resolveProjectId,
-  getExecutionRegion,
   BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput as ApiScreenshotOutput,
+  getExecutionRegion,
+  resolveProjectId,
 } from '@google-cloud/synthetics-sdk-api';
+
+// External Dependencies
+import { Storage, Bucket } from '@google-cloud/storage';
 
 export interface StorageParameters {
   storageClient: Storage | null;
