@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPResponse } from 'puppeteer';
+// Internal Project Files
 import {
   BaseError,
   BrokenLinksResultV1,
@@ -25,6 +25,9 @@ import {
   ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
+
+// External Dependencies
+import { HTTPResponse } from 'puppeteer';
 
 /**
  * Represents an intermediate link with its properties.

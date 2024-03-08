@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
+// Standard Libraries
 import { Request, Response } from 'express';
+
+// Internal Project Files
+import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 
 /**
  * Middleware for easy invocation of SyntheticSDK broken links, and may be used to

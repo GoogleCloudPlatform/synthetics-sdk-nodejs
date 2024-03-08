@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { Storage, Bucket, File } from '@google-cloud/storage';
-import * as sdkApi from '@google-cloud/synthetics-sdk-api';
+
+// Internal Project Files
+import {
+  BaseError,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
+} from '@google-cloud/synthetics-sdk-api';
 import {
   createStorageClientIfStorageSelected,
   getFolderNameFromStorageLocation,
@@ -23,7 +29,9 @@ import {
   StorageParameters,
   uploadScreenshotToGCS,
 } from '../../src/storage_func';
-import { BrokenLinksResultV1_BrokenLinkCheckerOptions } from '@google-cloud/synthetics-sdk-api';
+
+// External Dependencies
+import { Bucket, File, Storage } from '@google-cloud/storage';
 const proxyquire = require('proxyquire');
 
 // global test vars
@@ -41,14 +49,8 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     },
   });
 
-  const storage_condition_failing_links =
-    sdkApi
-      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition
-      .FAILING;
-  const storage_condition_none =
-    sdkApi
-      .BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition
-      .NONE;
+  const storage_condition_failing_links = ApiCaptureCondition.FAILING;
+  const storage_condition_none = ApiCaptureCondition.NONE;
 
   beforeEach(() => {
     // Stub a storage bucket
@@ -113,7 +115,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     it('should handle errors during bucket.exists()', async () => {
       bucketStub.exists.throws(new Error('Simulated exists() error'));
 
-      const errors: sdkApi.BaseError[] = [];
+      const errors: BaseError[] = [];
       const result = await storageFunc.getOrCreateStorageBucket(
         storageClientStub,
         'user-bucket',
@@ -128,7 +130,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     it('should handle errors during bucket creation', async () => {
       bucketStub.create.throws(new Error('Simulated creation error')); // Force an error
 
-      const errors: sdkApi.BaseError[] = [];
+      const errors: BaseError[] = [];
       const result = await storageFunc.getOrCreateStorageBucket(
         storageClientStub,
         '',
