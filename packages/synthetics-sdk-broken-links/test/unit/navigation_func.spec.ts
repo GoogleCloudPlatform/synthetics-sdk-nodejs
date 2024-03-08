@@ -12,27 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
 import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
-
-import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
+const path = require('path');
 import sinon from 'sinon';
+
+// Internal Project Files
 import {
-  BrokenLinksResultV1_SyntheticLinkResult,
   BaseError,
+  BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import { LinkIntermediate } from '../../src/link_utils';
 import { BrokenLinkCheckerOptions } from '../../src/broken_links';
-const path = require('path');
+import { LinkIntermediate } from '../../src/link_utils';
 import {
   checkLink,
   navigate,
   retrieveLinksFromPage,
 } from '../../src/navigation_func';
 import { setDefaultOptions } from '../../src/options_func';
+
+// External Dependencies
+import puppeteer, { Browser, HTTPResponse, Page } from 'puppeteer';
 
 describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   // constants

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Browser, HTTPResponse, Page } from 'puppeteer';
+// Internal Project Files
 import {
+  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
-  BaseError,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -28,6 +28,9 @@ import {
   NavigateResponse,
   getTimeLimitPromise,
 } from './link_utils';
+
+// External Dependencies
+import { Browser, HTTPResponse, Page } from 'puppeteer';
 
 /**
  * Retrieves all links on the page using Puppeteer, handling relative and

@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Internal Project Files
+import {
+  BrokenLinkCheckerOptions,
+  CaptureCondition,
+  LinkOrder,
+  StatusClass,
+} from './broken_links';
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
@@ -21,12 +28,6 @@ import {
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
-import {
-  BrokenLinkCheckerOptions,
-  LinkOrder,
-  StatusClass,
-  CaptureCondition,
-} from './broken_links';
 
 /**
  * Validates input options and sets defaults in `options`.

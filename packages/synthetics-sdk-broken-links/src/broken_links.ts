@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import puppeteer, { Browser, Page } from 'puppeteer';
-import { Bucket } from '@google-cloud/storage';
+// Internal Project Files
 import {
   BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
-  instantiateMetadata,
   getRuntimeMetadata,
+  instantiateMetadata,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
@@ -34,14 +33,18 @@ import {
   checkLinks,
   closeBrowser,
   closePagePool,
-  retrieveLinksFromPage,
   openNewPage,
+  retrieveLinksFromPage,
 } from './navigation_func';
 import { processOptions } from './options_func';
 import {
   createStorageClientIfStorageSelected,
   getOrCreateStorageBucket,
 } from './storage_func';
+
+// External Dependencies
+import { Bucket } from '@google-cloud/storage';
+import puppeteer, { Browser, Page } from 'puppeteer';
 
 export interface BrokenLinkCheckerOptions {
   origin_uri: string;

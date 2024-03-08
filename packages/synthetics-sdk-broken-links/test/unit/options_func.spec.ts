@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
 import { expect } from 'chai';
+
+// Internal Project Files
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   ResponseStatusCode,
@@ -20,8 +23,8 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   BrokenLinkCheckerOptions,
-  StatusClass,
   LinkOrder,
+  StatusClass,
 } from '../../src/broken_links';
 import {
   setDefaultOptions,
