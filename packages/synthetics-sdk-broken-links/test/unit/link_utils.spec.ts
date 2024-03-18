@@ -30,6 +30,7 @@ import {
   createSyntheticResult,
   getGenericSyntheticResult,
   LinkIntermediate,
+  sanitizeObjectName,
   shuffleAndTruncate,
 } from '../../src/link_utils';
 import { setDefaultOptions } from '../../src/options_func';
@@ -209,5 +210,35 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
     expect(startTime).to.be.lessThan(endTime);
     expect(milliDifference).to.be.greaterThan(0);
+  });
+
+  describe('sanitizeObjectName', () => {
+    it('should remove invalid characters', () => {
+      const input = "test/\@#$%^&*()/_+\-=[]{};':\"\|,.<>/?\r\n\t";
+      const expectedOutput = "test_@_$%^&_()__+-=__{};'__\_,.______";
+      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
+    });
+
+    it('should replace the forbidden prefix', () => {
+      const input = ".well-known/acme-challenge/test";
+      const expectedOutput = "_test";
+      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
+    });
+
+    it('should handle standalone "." and ".."', () => {
+      expect(sanitizeObjectName(".")).to.equal("_");
+      expect(sanitizeObjectName("..")).to.equal("_");
+    });
+
+    it('should handle null and undefined', () => {
+      expect(sanitizeObjectName(null)).to.equal("_");
+      expect(sanitizeObjectName(undefined)).to.equal("_");
+    })
+
+    it('should trim leading and trailing whitespace', () => {
+      const input = "  test name  ";
+      const expectedOutput = "test_name";
+      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
+    });
   });
 });

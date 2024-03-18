@@ -32,7 +32,7 @@ import {
 require('../../test/example_html_files/integration_server.js');
 const { getTestServer } = require('@google-cloud/functions-framework/testing');
 
-describe.only('CloudFunctionV2 Running Broken Link Synthetics', async () => {
+describe('CloudFunctionV2 Running Broken Link Synthetics', async () => {
   const status_class_2xx = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
