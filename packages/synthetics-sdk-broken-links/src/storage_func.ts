@@ -156,7 +156,10 @@ export async function uploadScreenshotToGCS(
       return screenshot_output;
     }
 
-    const screenshot: Buffer = await page.screenshot({ encoding: 'binary' });
+    const screenshot: Buffer = await page.screenshot({
+      fullPage: true,
+      encoding: 'binary',
+    });
     const filename = 'screenshot_' + storageParams.screenshotNumber + '.png';
 
     const writeDestination = path.join(

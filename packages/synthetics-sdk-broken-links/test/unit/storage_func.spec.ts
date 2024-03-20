@@ -24,7 +24,6 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   createStorageClientIfStorageSelected,
-  getOrCreateStorageBucket,
   StorageParameters,
   uploadScreenshotToGCS,
 } from '../../src/storage_func';
@@ -35,7 +34,7 @@ const proxyquire = require('proxyquire');
 import { Page } from 'puppeteer';
 
 // global test vars
-const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
+export const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
 
 describe('GCM Synthetics Broken Links storage_func suite testing', () => {
   let storageClientStub: sinon.SinonStubbedInstance<Storage>;

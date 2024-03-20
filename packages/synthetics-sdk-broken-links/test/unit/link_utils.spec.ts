@@ -14,7 +14,7 @@
 
 // Standard Libraries
 import { expect } from 'chai';
-import * as path from 'path';
+import sinon from 'sinon';
 
 // Internal Project Files
 import {
@@ -42,6 +42,7 @@ import { setDefaultOptions } from '../../src/options_func';
 // External Dependencies
 import { Bucket, Storage } from '@google-cloud/storage';
 import { StorageParameters } from '../../src/storage_func';
+import { TEST_BUCKET_NAME } from './storage_func.spec';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
   const status_value_200: ResponseStatusCode = { status_value: 200 };
@@ -64,9 +65,12 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
   const default_errors: BaseError[] = [
     { error_type: 'fake-error-type', error_message: 'fake-error-message' },
   ];
+  const bucketStub: sinon.SinonStubbedInstance<Bucket> =
+    sinon.createStubInstance(Bucket);
+  bucketStub.name = TEST_BUCKET_NAME;
   const storageParams = {
     storageClient: {} as Storage,
-    bucket: {} as Bucket,
+    bucket: bucketStub,
     checkId: 'uptime123',
     executionId: 'exec456',
     screenshotNumber: 1,
@@ -163,7 +167,8 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       options: options,
       origin_link_result: origin_link,
       followed_link_results: followed_links,
-      execution_data_storage_path: 'gs://uptime123/exec456',
+      execution_data_storage_path:
+        'gs://gcm-test-project-id-synthetics-test-region/uptime123/exec456',
       errors: default_errors,
     });
 

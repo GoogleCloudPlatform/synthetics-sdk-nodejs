@@ -60,6 +60,7 @@ describe('runBrokenLinks', async () => {
     screenshot_file: 'bucket/folder/file.png',
     screenshot_error: {} as BaseError,
   };
+  const args = { checkId: 'test-check-id', executionId: 'test-execution-id' };
 
   const mockedstorageFunc = proxyquire('../../src/storage_func', {
     '@google-cloud/synthetics-sdk-api': {
@@ -103,7 +104,7 @@ describe('runBrokenLinks', async () => {
       origin_uri: 'uri-does-not-start-with-http',
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await runBrokenLinks(inputOptions, args);
 
     const genericResult = result.synthetic_generic_result_v1;
 
@@ -137,7 +138,7 @@ describe('runBrokenLinks', async () => {
       screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
 
-    const result = await mockedBlc.runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const origin_link = broken_links_result?.origin_link_result;
@@ -174,7 +175,7 @@ describe('runBrokenLinks', async () => {
       total_synthetic_timeout_millis: 31000,
       screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
-    const result = await mockedBlc.runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
     const broken_links_result = result.synthetic_broken_links_result_v1;
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
@@ -210,7 +211,7 @@ describe('runBrokenLinks', async () => {
       screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const origin_link = broken_links_result?.origin_link_result;
@@ -274,7 +275,7 @@ describe('runBrokenLinks', async () => {
       },
     };
 
-    const result = await mockedBlc.runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const options = broken_links_result?.options;

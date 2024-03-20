@@ -162,7 +162,7 @@ function parseFollowedLinks(
     options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
     origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
     followed_link_results: [],
-    execution_data_storage_path: '', // TODO: make sure that when this is set it begins with gs://
+    execution_data_storage_path: '',
     errors: [],
   };
 
@@ -236,8 +236,12 @@ export function createSyntheticResult(
     parseFollowedLinks(followed_links);
   broken_links_result.options = options;
   broken_links_result.errors = errors;
-  broken_links_result.execution_data_storage_path =
-    'gs://' + getStoragePathToExecution(storageParams, options);
+  broken_links_result.execution_data_storage_path = storageParams.bucket
+    ? 'gs://' +
+      storageParams.bucket.name +
+      '/' +
+      getStoragePathToExecution(storageParams, options)
+    : '';
 
   // Create SyntheticResult object
   const synthetic_result: SyntheticResult = {
