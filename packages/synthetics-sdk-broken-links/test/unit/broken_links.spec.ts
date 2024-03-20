@@ -35,7 +35,7 @@ import {
   BrokenLinkCheckerOptions,
 } from '../../src/broken_links';
 
-describe.only('runBrokenLinks', async () => {
+describe('runBrokenLinks', async () => {
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
