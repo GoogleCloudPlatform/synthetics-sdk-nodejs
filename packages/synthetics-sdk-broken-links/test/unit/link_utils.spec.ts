@@ -229,8 +229,8 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('sanitizeObjectName', () => {
     it('should remove invalid characters', () => {
-      const input = 'test/@#$%^&*()/_+-=[]{};\':"|,.<>/?\r\n\t';
-      const expectedOutput = "test_@_$%^&_()__+-=__{};'___,.______";
+      const input = "test/\@#$%^&*()/_+\-=[]{};':\"\|,.<>/?\r\n\t";
+      const expectedOutput = "test_@_$%^&_()__+-=__{};'__\_,.______";
       expect(sanitizeObjectName(input)).to.equal(expectedOutput);
     });
 

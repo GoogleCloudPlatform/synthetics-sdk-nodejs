@@ -300,6 +300,7 @@ export function shouldTakeScreenshot(
 }
 
 /**
+
  * Sanitizes an object name string for safe use, ensuring compliance with
  * naming restrictions.
  *
@@ -330,7 +331,7 @@ export function sanitizeObjectName(
     .replace(/\s+/g, '_'); // Replace one or more spaces with underscores
 }
 
-export function getStoragePathToExecution(
+export function getStoragePagetStoragePathToExecutionthToExecution(
   storageParams: StorageParameters,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ) {
