@@ -272,6 +272,37 @@ export function shuffleAndTruncate(
   return linksToFollow.slice(0, link_limit! - 1);
 }
 
+/**
+ * Sanitizes an object name string for safe use, ensuring compliance with
+ * naming restrictions.
+ *
+ * @param {string} inputString - The original object name string.
+ * @returns {string} The sanitized object name.
+ *
+ * **Sanitization Rules:**
+ * * Removes control characters ([\u007F-\u009F]).
+ * * Removes disallowed characters (#, [, ], *, ?, ", <, >, |, /).
+ * * Replaces the forbidden prefix ".well-known/acme-challenge/" with an underscore.
+ * * Replaces standalone occurrences of "." or ".." with an underscore.
+ */
+export function sanitizeObjectName(
+  inputString: string | null | undefined
+): string {
+  if (!inputString || inputString === '.' || inputString === '..') return '_';
+
+  // Regular expressions for:
+  /*eslint no-useless-escape: "off"*/
+  const invalidCharactersRegex = /[\r\n\u007F-\u009F#\[\]*?:"<>|/]/g; // Control characters, special characters, path separator
+  const wellKnownPrefixRegex = /^\.well-known\/acme-challenge\//;
+
+  // Core sanitization:
+  return inputString
+    .replace(wellKnownPrefixRegex, '_') // Replace forbidden prefix
+    .replace(invalidCharactersRegex, '_') // replace invalid characters
+    .trim() // Clean up any leading/trailing spaces
+    .replace(/\s+/g, '_'); // Replace one or more spaces with underscores
+}
+
 export function getTimeLimitPromise(
   startTime: string,
   totalTimeoutMillis: number,

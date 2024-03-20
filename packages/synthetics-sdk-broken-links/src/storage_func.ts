@@ -24,6 +24,7 @@ import {
   getExecutionRegion,
   resolveProjectId,
 } from '@google-cloud/synthetics-sdk-api';
+import { sanitizeObjectName } from './link_utils';
 
 // External Dependencies
 import { Storage, Bucket } from '@google-cloud/storage';
@@ -55,14 +56,14 @@ export async function getOrCreateStorageBucket(
   let bucketName = '';
 
   try {
-    const projectId = await resolveProjectId();
-    const region = await getExecutionRegion();
+    if (!storageClient) return null;
 
-    // if storageClient was not properly initialized OR the user chose to
-    // use/create the default bucket but we were not able to resolve projectId
-    // or cloudRegion
-    if (!storageClient || (!storageLocation && (!projectId || !region)))
-      return null;
+    const projectId = sanitizeObjectName(await resolveProjectId());
+    const region = sanitizeObjectName(await getExecutionRegion());
+
+    // if the user chose to use/create the default bucket but we were not able
+    // to resolve projectId or cloudRegion
+    if (!storageLocation && (!projectId || !region)) return null;
 
     bucketName = storageLocation
       ? storageLocation.split('/')[0]
