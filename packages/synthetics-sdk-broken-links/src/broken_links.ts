@@ -134,12 +134,12 @@ export async function runBrokenLinks(
       errors
     );
 
-    // TODO
     const storageParams: StorageParameters = {
       storageClient: storageClient,
       bucket: bucket,
-          checkId: 'fake-check-id',
-            executionId: 'fake-execution-id',
+      checkId: 'fake-check-id',
+      executionId: 'fake-execution-id',
+      screenshotNumber: 1,
     };
 
     const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];

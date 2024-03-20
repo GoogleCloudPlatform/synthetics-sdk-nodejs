@@ -7,7 +7,7 @@
     "gcp-build": "node node_modules/puppeteer/install.mjs"
   },
   "dependencies": {
-    "@google-cloud/synthetics-sdk-broken-links": "google-cloud-synthetics-sdk-broken-links-0.2.0.tgz",
+    "@google-cloud/synthetics-sdk-broken-links": "^0.1.0",
     "@google-cloud/functions-framework": "^3.1.2"
   },
   "author": "Google Inc.",

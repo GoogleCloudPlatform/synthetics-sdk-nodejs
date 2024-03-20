@@ -69,6 +69,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
     bucket: {} as Bucket,
     checkId: 'uptime123',
     executionId: 'exec456',
+    screenshotNumber: 1,
   };
 
   it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
@@ -229,8 +230,8 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('sanitizeObjectName', () => {
     it('should remove invalid characters', () => {
-      const input = "test/\@#$%^&*()/_+\-=[]{};':\"\|,.<>/?\r\n\t";
-      const expectedOutput = "test_@_$%^&_()__+-=__{};'__\_,.______";
+      const input = 'test/@#$%^&*()/_+-=[]{};\':"|,.<>/?\r\n\t';
+      const expectedOutput = "test_@_$%^&_()__+-=__{};'___,.______";
       expect(sanitizeObjectName(input)).to.equal(expectedOutput);
     });
 
