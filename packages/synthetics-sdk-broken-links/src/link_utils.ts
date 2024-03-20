@@ -331,7 +331,7 @@ export function sanitizeObjectName(
     .replace(/\s+/g, '_'); // Replace one or more spaces with underscores
 }
 
-export function getStoragePagetStoragePathToExecutionthToExecution(
+export function getStoragePathToExecution(
   storageParams: StorageParameters,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ) {

@@ -184,6 +184,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           bucket: bucketStub,
           checkId: 'uptime123',
           executionId: 'exec456',
+          screenshotNumber: 1,
         };
         const options = {
           screenshot_options: { storage_location: 'bucket/folder1/folder2' },
@@ -225,6 +226,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           bucket: bucketStub,
           checkId: '',
           executionId: '',
+          screenshotNumber: 1,
         };
         const options = {
           screenshot_options: {},
@@ -267,6 +269,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           bucket: bucketStub,
           checkId: '',
           executionId: '',
+          screenshotNumber: 1,
         };
 
         const result = await uploadScreenshotToGCS(
@@ -288,7 +291,8 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           bucket: null,
           checkId: '',
           executionId: '',
-        };
+          screenshotNumber: 1,
+        } as StorageParameters;
 
         const result = await uploadScreenshotToGCS(
           pageStub,

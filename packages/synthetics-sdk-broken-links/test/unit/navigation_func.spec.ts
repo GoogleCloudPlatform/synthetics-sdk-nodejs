@@ -80,6 +80,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     bucket: sinon.createStubInstance(Bucket),
     checkId: '',
     executionId: '',
+    screenshotNumber: 1,
   };
 
   // Use proxyquire to replace uploadScreenshotToGCS
@@ -339,7 +340,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   });
 });
 
-describe.only('retrieveLinksFromPage', async () => {
+describe('retrieveLinksFromPage', async () => {
   // Puppeteer constants
   let browser: Browser;
   let page: Page;

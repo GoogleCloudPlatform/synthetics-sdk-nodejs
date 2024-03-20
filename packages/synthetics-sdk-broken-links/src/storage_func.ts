@@ -35,9 +35,8 @@ export interface StorageParameters {
   bucket: Bucket | null;
   checkId: string;
   executionId: string;
+  screenshotNumber: number;
 }
-
-let SCREENSHOT_NUMBER = 1;
 
 /**
  * Attempts to get an existing storage bucket if provided by the user OR
@@ -56,7 +55,6 @@ export async function getOrCreateStorageBucket(
   storageLocation: string,
   errors: BaseError[]
 ): Promise<Bucket | null> {
-  SCREENSHOT_NUMBER = 1;
   let bucketName = '';
 
   try {
@@ -64,7 +62,6 @@ export async function getOrCreateStorageBucket(
 
     const projectId = sanitizeObjectName(await resolveProjectId());
     const region = sanitizeObjectName(await getExecutionRegion());
-    // const region = "us-east4"
 
     // if the user chose to use/create the default bucket but we were not able
     // to resolve projectId or cloudRegion
@@ -160,7 +157,7 @@ export async function uploadScreenshotToGCS(
     }
 
     const screenshot: Buffer = await page.screenshot({ encoding: 'binary' });
-    const filename = 'screenshot_' + SCREENSHOT_NUMBER + '.png';
+    const filename = 'screenshot_' + storageParams.screenshotNumber + '.png';
 
     const writeDestination = path.join(
       getStoragePathToExecution(storageParams, options),
@@ -172,7 +169,7 @@ export async function uploadScreenshotToGCS(
       contentType: 'image/png',
     });
 
-    SCREENSHOT_NUMBER += 1;
+    storageParams.screenshotNumber += 1;
     screenshot_output.screenshot_file = filename;
   } catch (err) {
     // Handle upload errors
