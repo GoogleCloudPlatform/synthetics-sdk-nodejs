@@ -14,12 +14,14 @@
 
 // Standard Libraries
 import { expect } from 'chai';
+import * as path from 'path';
 
 // Internal Project Files
 import {
   BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -29,11 +31,17 @@ import {
   checkStatusPassing,
   createSyntheticResult,
   getGenericSyntheticResult,
+  getStoragePathToExecution,
   LinkIntermediate,
   sanitizeObjectName,
   shuffleAndTruncate,
+  shouldTakeScreenshot,
 } from '../../src/link_utils';
 import { setDefaultOptions } from '../../src/options_func';
+
+// External Dependencies
+import { Bucket, Storage } from '@google-cloud/storage';
+import { StorageParameters } from '../../src/storage_func';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
   const status_value_200: ResponseStatusCode = { status_value: 200 };
@@ -56,6 +64,13 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
   const default_errors: BaseError[] = [
     { error_type: 'fake-error-type', error_message: 'fake-error-message' },
   ];
+  const storageParams = {
+    storageClient: {} as Storage,
+    bucket: {} as Bucket,
+    checkId: 'uptime123',
+    executionId: 'exec456',
+    screenshotNumber: 1,
+  };
 
   it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
     // expecting success
@@ -129,6 +144,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       runtime_metadata,
       options,
       all_links,
+      storageParams,
       default_errors
     );
 
@@ -147,7 +163,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       options: options,
       origin_link_result: origin_link,
       followed_link_results: followed_links,
-      execution_data_storage_path: '',
+      execution_data_storage_path: 'gs://uptime123/exec456',
       errors: default_errors,
     });
 
@@ -214,31 +230,125 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('sanitizeObjectName', () => {
     it('should remove invalid characters', () => {
-      const input = "test/\@#$%^&*()/_+\-=[]{};':\"\|,.<>/?\r\n\t";
-      const expectedOutput = "test_@_$%^&_()__+-=__{};'__\_,.______";
+      const input = 'test/@#$%^&*()/_+-=[]{};\':"|,.<>/?\r\n\t';
+      const expectedOutput = "test_@_$%^&_()__+-=__{};'___,.______";
       expect(sanitizeObjectName(input)).to.equal(expectedOutput);
     });
 
     it('should replace the forbidden prefix', () => {
-      const input = ".well-known/acme-challenge/test";
-      const expectedOutput = "_test";
+      const input = '.well-known/acme-challenge/test';
+      const expectedOutput = '_test';
       expect(sanitizeObjectName(input)).to.equal(expectedOutput);
     });
 
     it('should handle standalone "." and ".."', () => {
-      expect(sanitizeObjectName(".")).to.equal("_");
-      expect(sanitizeObjectName("..")).to.equal("_");
+      expect(sanitizeObjectName('.')).to.equal('_');
+      expect(sanitizeObjectName('..')).to.equal('_');
     });
 
     it('should handle null and undefined', () => {
-      expect(sanitizeObjectName(null)).to.equal("_");
-      expect(sanitizeObjectName(undefined)).to.equal("_");
-    })
+      expect(sanitizeObjectName(null)).to.equal('_');
+      expect(sanitizeObjectName(undefined)).to.equal('_');
+    });
 
     it('should trim leading and trailing whitespace', () => {
-      const input = "  test name  ";
-      const expectedOutput = "test_name";
+      const input = '  test name  ';
+      const expectedOutput = 'test_name';
       expect(sanitizeObjectName(input)).to.equal(expectedOutput);
+    });
+  });
+
+  describe('shouldTakeScreenshot', () => {
+    describe('screenshot_condition: ALL', () => {
+      it('should return true when passed is true', () => {
+        const options = {
+          screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result = shouldTakeScreenshot(options, true);
+        expect(result).to.be.true;
+      });
+
+      it('should return true when passed is false', () => {
+        const options = {
+          screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result = shouldTakeScreenshot(options, false);
+        expect(result).to.be.true;
+      });
+    });
+    describe('screenshot_condition: FAILING', () => {
+      it('should return true if passed is false', () => {
+        const options = {
+          screenshot_options: {
+            capture_condition: ApiCaptureCondition.FAILING,
+          },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result = shouldTakeScreenshot(options, false);
+        expect(result).to.be.true;
+      });
+
+      it('should return false if passed is true', () => {
+        const options = {
+          screenshot_options: {
+            capture_condition: ApiCaptureCondition.FAILING,
+          },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result = shouldTakeScreenshot(options, true);
+        expect(result).to.be.false;
+      });
+    });
+
+    describe('screenshot_condition: NONE', () => {
+      it('should always return false', () => {
+        const options = {
+          screenshot_options: { capture_condition: ApiCaptureCondition.NONE },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result1 = shouldTakeScreenshot(options, true);
+        const result2 = shouldTakeScreenshot(options, false);
+        expect(result1).to.be.false;
+        expect(result2).to.be.false;
+      });
+    });
+  });
+
+  describe('getStoragePathToExecution()', () => {
+    it('returns write_destination when given folder in storage location', () => {
+      const options = {
+        screenshot_options: { storage_location: 'bucket/folder1/folder2' },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      const writeDestination = getStoragePathToExecution(
+        storageParams,
+        options
+      );
+      expect(writeDestination).to.equal('folder1/folder2/uptime123/exec456');
+    });
+
+    it('should handle no folder and just bucket in storage_location', () => {
+      const options = {
+        screenshot_options: { storage_location: 'bucket' },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      const result = getStoragePathToExecution(storageParams, options);
+      expect(result).to.equal('uptime123/exec456');
+    });
+
+    it('should handle error by returning empty string', () => {
+      const options = {
+        screenshot_options: { storage_location: 'bucket' },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      const storageParamsUndefiniedCheckId = {
+        storageClient: {} as Storage,
+        bucket: {} as Bucket,
+        executionId: 'exec456',
+      } as StorageParameters;
+
+      const result = getStoragePathToExecution(
+        storageParamsUndefiniedCheckId,
+        options
+      );
+      expect(result).to.equal('');
     });
   });
 });

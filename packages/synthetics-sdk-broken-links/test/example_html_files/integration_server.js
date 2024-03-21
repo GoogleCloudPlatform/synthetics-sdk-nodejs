@@ -14,6 +14,9 @@
 
 // Standard Libraries
 const path = require('path');
+// const proxyquire = require('proxyquire');
+
+// const brokenLinksSdkMocked = proxyquire
 
 // Internal Project Files
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
@@ -31,5 +34,8 @@ functions.http('BrokenLinksEmptyPageOk', SyntheticsSdkBrokenLinks.runBrokenLinks
   origin_uri: `file:${path.join(
     __dirname,
     '../example_html_files/200.html'
-  )}`
+  )}`,
+  screenshot_options: {
+    capture_condition: 'NONE'
+  }
 }));
