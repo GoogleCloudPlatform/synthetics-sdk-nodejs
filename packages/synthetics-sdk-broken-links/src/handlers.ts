@@ -18,6 +18,9 @@ import { Request, Response } from 'express';
 // Internal Project Files
 import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 
+const syntheticExecutionIdHeader = 'Synthetic-Execution-Id';
+const checkIdHeader = 'Check-Id';
+
 /**
  * Middleware for easy invocation of SyntheticSDK broken links, and may be used to
  * register a GoogleCloudFunction http function, or express js compatible handler.
@@ -29,5 +32,10 @@ import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
 export function runBrokenLinksHandler(options: BrokenLinkCheckerOptions) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
-    res.send(await runBrokenLinks(options));
+    res.send(
+      await runBrokenLinks(options, {
+        executionId: req.get(syntheticExecutionIdHeader),
+        checkId: req.get(checkIdHeader),
+      })
+    );
 }

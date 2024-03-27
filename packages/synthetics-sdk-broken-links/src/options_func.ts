@@ -290,7 +290,7 @@ export function setDefaultOptions(
       defaultOptions.screenshot_options!.capture_condition;
   }
 
-  if (outputOptions.screenshot_options?.storage_location) {
+  if (inputOptions.screenshot_options?.storage_location) {
     outputOptions.screenshot_options.storage_location =
       inputOptions.screenshot_options!.storage_location!;
   } else {
