@@ -14,9 +14,6 @@
 
 // Standard Libraries
 const path = require('path');
-// const proxyquire = require('proxyquire');
-
-// const brokenLinksSdkMocked = proxyquire
 
 // Internal Project Files
 const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');

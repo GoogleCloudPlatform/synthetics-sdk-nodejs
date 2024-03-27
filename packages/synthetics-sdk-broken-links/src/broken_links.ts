@@ -138,7 +138,6 @@ export async function runBrokenLinks(
       errors
     );
 
-    // TODO
     const storageParams: StorageParameters = {
       storageClient: storageClient,
       bucket: bucket,

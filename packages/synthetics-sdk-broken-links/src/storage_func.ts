@@ -91,12 +91,16 @@ export async function getOrCreateStorageBucket(
       });
     }
   } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
+    const errorType = storageLocation
+      ? 'StorageValidationError'
+      : 'BucketCreationError';
+
+    // Using console.error rather than stderr.write since err type is unknown
+    console.error(errorType, err);
+
     errors.push({
       // General error handling
-      error_type: storageLocation
-        ? 'StorageValidationError'
-        : 'BucketCreationError',
+      error_type: errorType,
       error_message: `Failed to ${
         storageLocation ? 'validate' : 'create'
       } bucket ${bucketName}. Please reference server logs for further information.`,
@@ -122,7 +126,8 @@ export function createStorageClientIfStorageSelected(
   try {
     return new Storage();
   } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
+    console.error('StorageClientInitializationError', err);
+
     errors.push({
       error_type: 'StorageClientInitializationError',
       error_message:
@@ -175,8 +180,8 @@ export async function uploadScreenshotToGCS(
     storageParams.screenshotNumber += 1;
     screenshot_output.screenshot_file = filename;
   } catch (err) {
-    // Handle upload errors
-    if (err instanceof Error) process.stderr.write(err.message);
+    console.error('ScreenshotFileUploadError', err);
+
     screenshot_output.screenshot_error = {
       error_type: 'ScreenshotFileUploadError',
       error_message: `Failed to take and/or upload screenshot for ${await page.url()}. Please reference server logs for further information.`,

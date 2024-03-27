@@ -176,7 +176,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
       sinon.restore();
     });
 
-    describe('valid Storage Configuration', () => {
+    describe('Valid Storage Configuration', () => {
       it('should upload the screenshots and return updated write_destination', async () => {
         const storageParams = {
           storageClient: storageClientStub,
@@ -211,12 +211,6 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
 
         expect(result2.screenshot_file).to.equal('screenshot_2.png');
         expect(result2.screenshot_error).to.deep.equal({});
-
-        // TODO
-        // sinon.assert.calledWithExactly(
-        //   storageClientStub.bucket,
-        //   TEST_BUCKET_NAME
-        // );
       });
 
       it('should handle GCS upload errors', async () => {
