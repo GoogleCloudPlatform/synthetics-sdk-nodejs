@@ -387,4 +387,97 @@ describe('runBrokenLinks', async () => {
       }
     );
   }).timeout(150000);
+
+  it('Completes a full passing execution', async () => {
+    const origin_uri = `file:${path.join(
+      __dirname,
+      '../example_html_files/retrieve_links_test.html'
+    )}`;
+    const inputOptions: BrokenLinkCheckerOptions = {
+      origin_uri: origin_uri,
+      query_selector_all: 'a[src]',
+      get_attributes: ['src'],
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
+    };
+
+    const result = await runBrokenLinks(inputOptions, args);
+
+    const broken_links_result = result?.synthetic_broken_links_result_v1;
+    const options = broken_links_result?.options;
+    const origin_link = broken_links_result?.origin_link_result;
+    const followed_links = broken_links_result?.followed_link_results;
+
+    expect(result.start_time).to.be.a.string;
+    expect(result.end_time).to.be.a.string;
+
+    expect(broken_links_result?.link_count).to.equal(2);
+    expect(broken_links_result?.passing_link_count).to.equal(2);
+    expect(broken_links_result?.failing_link_count).to.equal(0);
+    expect(broken_links_result?.unreachable_count).to.equal(0);
+    expect(broken_links_result?.status2xx_count).to.equal(2);
+    expect(broken_links_result?.status3xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status5xx_count).to.equal(0);
+
+    expect(options).to.deep.equal({
+      origin_uri: origin_uri,
+      link_limit: 10,
+      query_selector_all: 'a[src]',
+      get_attributes: ['src'],
+      link_order:
+        BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder.FIRST_N,
+      link_timeout_millis: 30000,
+      max_retries: 0,
+      wait_for_selector: '',
+      per_link_options: {},
+      total_synthetic_timeout_millis: 60000,
+      screenshot_options: {
+        capture_condition: ApiCaptureCondition.NONE,
+        storage_location: '',
+      },
+    });
+
+    expect(origin_link)
+      .excluding(['link_start_time', 'link_end_time'])
+      .to.deep.equal({
+        link_passed: true,
+        expected_status_code: status_class_2xx,
+        source_uri: origin_uri,
+        target_uri: origin_uri,
+        html_element: '',
+        anchor_text: '',
+        status_code: 200,
+        error_type: '',
+        error_message: '',
+        link_start_time: 'NA',
+        link_end_time: 'NA',
+        is_origin: true,
+        screenshot_output: emptyScreenshotOutput,
+      });
+
+    expect(followed_links)
+      .excluding(['target_uri', 'link_start_time', 'link_end_time'])
+      .to.deep.equal([
+        {
+          link_passed: true,
+          expected_status_code: status_class_2xx,
+          source_uri: origin_uri,
+          target_uri: 'CHECKED_BELOW',
+          html_element: 'a',
+          anchor_text: 'External Link',
+          status_code: 200,
+          error_type: '',
+          error_message: '',
+          link_start_time: 'NA',
+          link_end_time: 'NA',
+          is_origin: false,
+          screenshot_output: emptyScreenshotOutput,
+        },
+      ]);
+
+    const expectedTargetPaths = ['example_html_files/200.html'];
+    followed_links?.forEach((link, index) => {
+      expect(link.target_uri.endsWith(expectedTargetPaths[index]));
+    });
+  }).timeout(10000);
 });

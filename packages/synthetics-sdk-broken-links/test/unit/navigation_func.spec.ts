@@ -83,7 +83,6 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     screenshotNumber: 1,
   };
 
-  // Use proxyquire to replace uploadScreenshotToGCS
   const navigStorageUploadSuccMocked = proxyquire('../../src/navigation_func', {
     './storage_func': {
       ...storageFunc,
@@ -101,22 +100,19 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   });
 
   beforeEach(async () => {
-    // Create a new page for each test
     page = await browser.newPage();
     page.setCacheEnabled(false);
 
-    // Stub the page.screenshot function
     sinon
       .stub(page, 'screenshot')
       .resolves(Buffer.from('encoded-image-data', 'utf-8'));
   });
 
   afterEach(() => {
-    sinon.restore(); // Restore all stubs
+    sinon.restore();
   });
 
   after(async () => {
-    // Close the browser after all tests
     browser && (await browser.close());
   });
 
@@ -282,14 +278,14 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     }).timeout(5000);
 
     it('returns error when the actual response code does not match the expected', async () => {
-      // add expected 404 status to options of broken link checker
-      const optionsExp404 = Object.assign({}, options);
       const per_link_expected_404 = {
         expected_status_code: {
           status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_4XX,
         },
         link_timeout_millis: options.link_timeout_millis,
       };
+
+      const optionsExp404 = Object.assign({}, options);
       optionsExp404.per_link_options['https://expecting404.com'] =
         per_link_expected_404;
 
@@ -349,7 +345,6 @@ describe('retrieveLinksFromPage', async () => {
   });
 
   beforeEach(async () => {
-    // Create a new page for each test
     page = await browser.newPage();
     await page.goto(
       `file:${path.join(
@@ -362,7 +357,6 @@ describe('retrieveLinksFromPage', async () => {
   });
 
   after(async () => {
-    // Close the browser after all tests
     browser && (await browser.close());
   });
 

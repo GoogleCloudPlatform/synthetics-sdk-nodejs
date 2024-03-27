@@ -265,53 +265,52 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
   describe('shouldTakeScreenshot', () => {
     describe('screenshot_condition: ALL', () => {
+      const options = {
+        screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
       it('should return true when passed is true', () => {
-        const options = {
-          screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
-        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
         const result = shouldTakeScreenshot(options, true);
         expect(result).to.be.true;
       });
 
       it('should return true when passed is false', () => {
-        const options = {
-          screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
-        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
         const result = shouldTakeScreenshot(options, false);
         expect(result).to.be.true;
       });
     });
+
     describe('screenshot_condition: FAILING', () => {
+      const options = {
+        screenshot_options: {
+          capture_condition: ApiCaptureCondition.FAILING,
+        },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
       it('should return true if passed is false', () => {
-        const options = {
-          screenshot_options: {
-            capture_condition: ApiCaptureCondition.FAILING,
-          },
-        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
         const result = shouldTakeScreenshot(options, false);
         expect(result).to.be.true;
       });
 
       it('should return false if passed is true', () => {
-        const options = {
-          screenshot_options: {
-            capture_condition: ApiCaptureCondition.FAILING,
-          },
-        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
         const result = shouldTakeScreenshot(options, true);
         expect(result).to.be.false;
       });
     });
 
     describe('screenshot_condition: NONE', () => {
-      it('should always return false', () => {
-        const options = {
-          screenshot_options: { capture_condition: ApiCaptureCondition.NONE },
-        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-        const result1 = shouldTakeScreenshot(options, true);
-        const result2 = shouldTakeScreenshot(options, false);
-        expect(result1).to.be.false;
-        expect(result2).to.be.false;
+      const options = {
+        screenshot_options: { capture_condition: ApiCaptureCondition.NONE },
+      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      it('should retrun true if passed is false', () => {
+        const result = shouldTakeScreenshot(options, false);
+        expect(result).to.be.false;
+      });
+
+      it('should retrun true if passed is true', () => {
+        const result = shouldTakeScreenshot(options, true);
+        expect(result).to.be.false;
       });
     });
   });

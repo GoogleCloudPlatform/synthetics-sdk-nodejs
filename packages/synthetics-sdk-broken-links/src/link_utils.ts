@@ -346,8 +346,9 @@ export function getStoragePathToExecution(
     // extract folder name for a given storage location. If there is no '/'
     // present then the storageLocation is just a folder
     const firstSlashIndex = storageLocation.indexOf('/');
-    if (firstSlashIndex !== -1)
+    if (firstSlashIndex !== -1) {
       writeDestination = storageLocation.substring(firstSlashIndex + 1);
+    }
 
     // Ensure writeDestination ends with a slash for proper path joining
     if (writeDestination && !writeDestination.endsWith('/')) {
