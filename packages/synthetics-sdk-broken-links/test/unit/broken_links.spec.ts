@@ -17,11 +17,11 @@ import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
 const path = require('path');
+import sinon from 'sinon';
 
 // Internal Project Files
 import {
   BaseError,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
@@ -33,7 +33,15 @@ import {
 import {
   runBrokenLinks,
   BrokenLinkCheckerOptions,
+  CaptureCondition,
 } from '../../src/broken_links';
+
+// External Dependencies
+const proxyquire = require('proxyquire');
+import { Page } from 'puppeteer';
+import { Bucket, Storage } from '@google-cloud/storage';
+
+const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
 
 describe('runBrokenLinks', async () => {
   const status_class_2xx: ResponseStatusCode = {
@@ -44,19 +52,59 @@ describe('runBrokenLinks', async () => {
       capture_condition: ApiCaptureCondition.FAILING,
       storage_location: '',
     };
+  const emptyScreenshotOutput: ApiScreenshotOutput = {
+    screenshot_file: '',
+    screenshot_error: {} as BaseError,
+  };
+  const successfulScreenshotOuput: ApiScreenshotOutput = {
+    screenshot_file: 'bucket/folder/file.png',
+    screenshot_error: {} as BaseError,
+  };
+  const args = { checkId: 'test-check-id', executionId: 'test-execution-id' };
 
-    const defaultScreenshotOutput: ApiScreenshotOutput =
-    {
-      screenshot_file: '',
-      screenshot_error: {} as BaseError,
-    };
+  const mockedstorageFunc = proxyquire('../../src/storage_func', {
+    '@google-cloud/synthetics-sdk-api': {
+      getExecutionRegion: () => 'test-region',
+      resolveProjectId: () => 'test-project-id',
+    },
+  });
+
+  const mockedNavigationFunc = proxyquire('../../src/navigation_func', {
+    './storage_func': {
+      uploadScreenshotToGCS: () => successfulScreenshotOuput,
+    },
+  });
+
+  let storageClientStub: sinon.SinonStubbedInstance<Storage>;
+  let bucketStub: sinon.SinonStubbedInstance<Bucket>;
+  let pageStub: sinon.SinonStubbedInstance<Page>;
+  beforeEach(() => {
+    // Stub a storage bucket
+    bucketStub = sinon.createStubInstance(Bucket);
+    bucketStub.name = TEST_BUCKET_NAME;
+    bucketStub.create.resolves([bucketStub]);
+    // Simulate default_bucket not existing initially
+    bucketStub.exists.resolves([false]); // Simulate the bucket not existing initially
+
+    // Stub the storage client
+    storageClientStub = sinon.createStubInstance(Storage);
+    storageClientStub.bucket.returns(bucketStub);
+
+    // Stub a puppeteer page to return set Buffer when .screenshot() called
+    pageStub = sinon.createStubInstance(Page);
+    pageStub.screenshot.resolves(Buffer.from('screenshot-image-data', 'utf-8'));
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
 
   it('Exits early when options cannot be parsed', async () => {
     const inputOptions: BrokenLinkCheckerOptions = {
       origin_uri: 'uri-does-not-start-with-http',
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await runBrokenLinks(inputOptions, args);
 
     const genericResult = result.synthetic_generic_result_v1;
 
@@ -69,6 +117,16 @@ describe('runBrokenLinks', async () => {
   }).timeout(15000);
 
   it('returns broken_links_result with origin link failure when waitForSelector exceeds deadline', async () => {
+    const mockedBlc = proxyquire('../../src/broken_links', {
+      './storage_func': {
+        ...mockedstorageFunc,
+        createStorageClientIfStorageSelected: () => storageClientStub,
+      },
+      './navigation_func': {
+        ...mockedNavigationFunc,
+      },
+    });
+
     const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
@@ -77,9 +135,10 @@ describe('runBrokenLinks', async () => {
       origin_uri: origin_uri,
       wait_for_selector: 'not_present',
       link_timeout_millis: 3001,
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const origin_link = broken_links_result?.origin_link_result;
@@ -93,6 +152,16 @@ describe('runBrokenLinks', async () => {
   }).timeout(15000);
 
   it('Global timeout occurs during checkOriginLink waiting for `wait_for_selector', async () => {
+    const mockedBlc = proxyquire('../../src/broken_links', {
+      './storage_func': {
+        ...mockedstorageFunc,
+        createStorageClientIfStorageSelected: () => storageClientStub,
+      },
+      './navigation_func': {
+        ...mockedNavigationFunc,
+      },
+    });
+
     const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
@@ -104,8 +173,9 @@ describe('runBrokenLinks', async () => {
       wait_for_selector: 'none existent',
       link_timeout_millis: 35000,
       total_synthetic_timeout_millis: 31000,
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
-    const result = await runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
     const broken_links_result = result.synthetic_broken_links_result_v1;
 
     const expectedOriginLinkResult: BrokenLinksResultV1_SyntheticLinkResult = {
@@ -122,10 +192,7 @@ describe('runBrokenLinks', async () => {
       link_start_time: 'NA',
       link_end_time: 'NA',
       is_origin: true,
-      screenshot_output: {
-        screenshot_file: '',
-        screenshot_error: {} as BaseError,
-      },
+      screenshot_output: emptyScreenshotOutput,
     };
 
     expect(broken_links_result?.origin_link_result)
@@ -134,17 +201,17 @@ describe('runBrokenLinks', async () => {
     expect(broken_links_result?.followed_link_results.length).to.equal(0);
   }).timeout(40000);
 
-
   it('Handles error when trying to visit page that does not exist', async () => {
     const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/file_doesnt_exist.html'
     )}`;
-    const inputOptions : BrokenLinkCheckerOptions = {
-      origin_uri: origin_uri
+    const inputOptions: BrokenLinkCheckerOptions = {
+      origin_uri: origin_uri,
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const origin_link = broken_links_result?.origin_link_result;
@@ -177,14 +244,23 @@ describe('runBrokenLinks', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output: defaultScreenshotOutput,
+        screenshot_output: emptyScreenshotOutput,
       });
 
     expect(followed_links).to.deep.equal([]);
   }).timeout(10000);
 
-
   it('Completes a full failing execution (1 failing link)', async () => {
+    const mockedBlc = proxyquire('../../src/broken_links', {
+      './storage_func': {
+        ...mockedstorageFunc,
+        createStorageClientIfStorageSelected: () => storageClientStub,
+      },
+      './navigation_func': {
+        ...mockedNavigationFunc,
+      },
+    });
+
     const origin_uri = `file:${path.join(
       __dirname,
       '../example_html_files/retrieve_links_test.html'
@@ -194,9 +270,12 @@ describe('runBrokenLinks', async () => {
       query_selector_all: 'a[src], img[href]',
       get_attributes: ['href', 'src'],
       wait_for_selector: '',
+      screenshot_options: {
+        capture_condition: CaptureCondition.FAILING,
+      },
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await mockedBlc.runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const options = broken_links_result?.options;
@@ -245,11 +324,14 @@ describe('runBrokenLinks', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output: defaultScreenshotOutput,
+        screenshot_output: emptyScreenshotOutput,
       });
 
-      const sorted_followed_links = followed_links?.sort((a, b) =>
-      a.target_uri.localeCompare(b.target_uri)
+    const sorted_followed_links = followed_links?.sort(
+      (
+        a: BrokenLinksResultV1_SyntheticLinkResult,
+        b: BrokenLinksResultV1_SyntheticLinkResult
+      ) => a.target_uri.localeCompare(b.target_uri)
     );
 
     const fileDoesntExistPath = `file://${path.join(
@@ -259,7 +341,7 @@ describe('runBrokenLinks', async () => {
       .split(' ')
       .join('%20');
 
-      expect(sorted_followed_links)
+    expect(sorted_followed_links)
       .excluding(['target_uri', 'link_start_time', 'link_end_time'])
       .to.deep.equal([
         {
@@ -275,7 +357,7 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output: defaultScreenshotOutput,
+          screenshot_output: emptyScreenshotOutput,
         },
         {
           link_passed: false,
@@ -290,7 +372,7 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output: defaultScreenshotOutput,
+          screenshot_output: successfulScreenshotOuput,
         },
       ]);
 
@@ -299,9 +381,11 @@ describe('runBrokenLinks', async () => {
       '/example_html_files/200.html',
       '/example_html_files/file_doesnt_exist.html',
     ];
-    broken_links_result?.followed_link_results?.forEach((link, index) => {
-      expect(link.target_uri.endsWith(expectedTargeturis[index]));
-    });
+    broken_links_result?.followed_link_results?.forEach(
+      (link: BrokenLinksResultV1_SyntheticLinkResult, index: number) => {
+        expect(link.target_uri.endsWith(expectedTargeturis[index]));
+      }
+    );
   }).timeout(150000);
 
   it('Completes a full passing execution', async () => {
@@ -309,13 +393,14 @@ describe('runBrokenLinks', async () => {
       __dirname,
       '../example_html_files/retrieve_links_test.html'
     )}`;
-    const inputOptions : BrokenLinkCheckerOptions = {
+    const inputOptions: BrokenLinkCheckerOptions = {
       origin_uri: origin_uri,
       query_selector_all: 'a[src]',
-      get_attributes: ['src']
+      get_attributes: ['src'],
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
     };
 
-    const result = await runBrokenLinks(inputOptions);
+    const result = await runBrokenLinks(inputOptions, args);
 
     const broken_links_result = result?.synthetic_broken_links_result_v1;
     const options = broken_links_result?.options;
@@ -346,7 +431,10 @@ describe('runBrokenLinks', async () => {
       wait_for_selector: '',
       per_link_options: {},
       total_synthetic_timeout_millis: 60000,
-      screenshot_options: defaultScreenshotOptions,
+      screenshot_options: {
+        capture_condition: ApiCaptureCondition.NONE,
+        storage_location: '',
+      },
     });
 
     expect(origin_link)
@@ -364,7 +452,7 @@ describe('runBrokenLinks', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: true,
-        screenshot_output: defaultScreenshotOutput,
+        screenshot_output: emptyScreenshotOutput,
       });
 
     expect(followed_links)
@@ -383,7 +471,7 @@ describe('runBrokenLinks', async () => {
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
-          screenshot_output: defaultScreenshotOutput,
+          screenshot_output: emptyScreenshotOutput,
         },
       ]);
 

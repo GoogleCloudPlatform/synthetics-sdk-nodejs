@@ -24,8 +24,6 @@ import {
 } from '@google-cloud/synthetics-sdk-api';
 import {
   createStorageClientIfStorageSelected,
-  getFolderNameFromStorageLocation,
-  getOrCreateStorageBucket,
   StorageParameters,
   uploadScreenshotToGCS,
 } from '../../src/storage_func';
@@ -33,9 +31,10 @@ import {
 // External Dependencies
 import { Bucket, File, Storage } from '@google-cloud/storage';
 const proxyquire = require('proxyquire');
+import { Page } from 'puppeteer';
 
 // global test vars
-const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
+export const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
 
 describe('GCM Synthetics Broken Links storage_func suite testing', () => {
   let storageClientStub: sinon.SinonStubbedInstance<Storage>;
@@ -45,7 +44,6 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     '@google-cloud/synthetics-sdk-api': {
       getExecutionRegion: () => 'test-region',
       resolveProjectId: () => 'test-project-id',
-      getOrCreateStorageBucket: () => getOrCreateStorageBucket,
     },
   });
 
@@ -163,13 +161,14 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
   describe('uploadScreenshotToGCS', () => {
     let storageClientStub: sinon.SinonStubbedInstance<Storage>;
     let bucketStub: sinon.SinonStubbedInstance<Bucket>;
-
-    const screenshotData = 'encoded-image-data';
-    const filename = 'test-screenshot.png';
+    let pageStub: sinon.SinonStubbedInstance<Page>;
 
     beforeEach(() => {
       storageClientStub = sinon.createStubInstance(Storage);
       bucketStub = sinon.createStubInstance(Bucket);
+      pageStub = sinon.createStubInstance(Page);
+      pageStub.url.resolves('https://fake-url');
+
       storageClientStub.bucket.returns(bucketStub);
     });
 
@@ -177,82 +176,97 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
       sinon.restore();
     });
 
-    it('should upload the screenshot and return the write_destination', async () => {
-      const storageParams = {
-        storageClient: storageClientStub,
-        bucket: bucketStub,
-        uptimeId: 'uptime123',
-        executionId: 'exec456',
-      };
-      const options = {
-        screenshot_options: { storage_location: 'bucket/folder1/folder2' },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-      const expectedWriteDestination =
-        'folder1/folder2/uptime123/exec456/test-screenshot.png';
+    describe('Valid Storage Configuration', () => {
+      it('should upload the screenshots and return updated write_destination', async () => {
+        const storageParams = {
+          storageClient: storageClientStub,
+          bucket: bucketStub,
+          checkId: 'uptime123',
+          executionId: 'exec456',
+          screenshotNumber: 1,
+        };
+        const options = {
+          screenshot_options: { storage_location: 'bucket/folder1/folder2' },
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
 
-      const successPartialFileMock: Partial<File> = {
-        save: sinon.stub().resolves(),
-      };
-      bucketStub.file.returns(successPartialFileMock as File);
+        const successPartialFileMock: Partial<File> = {
+          save: sinon.stub().resolves(),
+        };
+        bucketStub.file.returns(successPartialFileMock as File);
 
-      const result = await uploadScreenshotToGCS(
-        screenshotData,
-        filename,
-        storageParams,
-        options
-      );
+        const result = await uploadScreenshotToGCS(
+          pageStub,
+          storageParams,
+          options
+        );
 
-      expect(result.screenshot_file).to.equal(expectedWriteDestination);
-      expect(result.screenshot_error).to.deep.equal({});
-    });
+        expect(result.screenshot_file).to.equal('screenshot_1.png');
+        expect(result.screenshot_error).to.deep.equal({});
 
-    it('should handle GCS upload errors', async () => {
-      const storageParams: StorageParameters = {
-        storageClient: storageClientStub,
-        bucket: bucketStub,
-        uptimeId: '',
-        executionId: '',
-      };
-      const options = {
-        screenshot_options: {},
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+        const result2 = await uploadScreenshotToGCS(
+          pageStub,
+          storageParams,
+          options
+        );
 
-      const gcsError = new Error('Simulated GCS upload error');
-      const failingPartialFileMock: Partial<File> = {
-        save: sinon.stub().throws(gcsError),
-      };
-      bucketStub.file.returns(failingPartialFileMock as File);
+        expect(result2.screenshot_file).to.equal('screenshot_2.png');
+        expect(result2.screenshot_error).to.deep.equal({});
+      });
 
-      const result = await uploadScreenshotToGCS(
-        screenshotData,
-        filename,
-        storageParams,
-        options
-      );
+      it('should handle GCS upload errors', async () => {
+        const storageParams: StorageParameters = {
+          storageClient: storageClientStub,
+          bucket: bucketStub,
+          checkId: '',
+          executionId: '',
+          screenshotNumber: 1,
+        };
+        const options = {
+          screenshot_options: {},
+        } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
 
-      expect(result.screenshot_file).to.equal('');
-      expect(result.screenshot_error).to.deep.equal({
-        error_type: 'StorageFileUploadError',
-        error_message: `Failed to upload screenshot for ${filename}. Please reference server logs for further information.`,
+        const gcsError = new Error('Simulated GCS upload error');
+        const failingPartialFileMock: Partial<File> = {
+          save: sinon.stub().throws(gcsError),
+        };
+        bucketStub.file.returns(failingPartialFileMock as File);
+
+        const result = await uploadScreenshotToGCS(
+          pageStub,
+          storageParams,
+          options
+        );
+
+        expect(result.screenshot_file).to.equal('');
+        expect(result.screenshot_error).to.deep.equal({
+          error_type: 'ScreenshotFileUploadError',
+          error_message:
+            'Failed to take and/or upload screenshot for https://fake-url. Please reference server logs for further information.',
+        });
       });
     });
 
     describe('Invalid Storage Configuration', () => {
-      const emptyScreenshotData = '';
-      const emptyFilename = '';
       const emptyOptions = {} as BrokenLinksResultV1_BrokenLinkCheckerOptions;
+
+      beforeEach(() => {
+        pageStub.screenshot.resolves(
+          Buffer.from('encoded-image-data', 'utf-8')
+        );
+      });
+
       it('should return an empty result if storageClient is null', async () => {
         // Missing storageClient
         const storageParams = {
           storageClient: null,
           bucket: bucketStub,
-          uptimeId: '',
+          checkId: '',
           executionId: '',
+          screenshotNumber: 1,
         };
 
         const result = await uploadScreenshotToGCS(
-          emptyScreenshotData,
-          emptyFilename,
+          pageStub,
           storageParams,
           emptyOptions
         );
@@ -268,13 +282,13 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
         const storageParams = {
           storageClient: storageClientStub,
           bucket: null,
-          uptimeId: '',
+          checkId: '',
           executionId: '',
-        };
+          screenshotNumber: 1,
+        } as StorageParameters;
 
         const result = await uploadScreenshotToGCS(
-          emptyScreenshotData,
-          emptyFilename,
+          pageStub,
           storageParams,
           emptyOptions
         );
@@ -284,32 +298,6 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           screenshot_error: {},
         });
       });
-    });
-  });
-
-  describe('getFolderNameFromStorageLocation', () => {
-    it('should extract folder name when storage location has a slash', () => {
-      const storageLocation = 'some-bucket/folder1/folder2';
-      const expectedFolderName = 'folder1/folder2';
-
-      const result = getFolderNameFromStorageLocation(storageLocation);
-      expect(result).to.equal(expectedFolderName);
-    });
-
-    it('should return an empty string if storage location has no slash', () => {
-      const storageLocation = 'my-bucket';
-      const expectedFolderName = '';
-
-      const result = getFolderNameFromStorageLocation(storageLocation);
-      expect(result).to.equal(expectedFolderName);
-    });
-
-    it('should return an empty string if given an empty string', () => {
-      const storageLocation = '';
-      const expectedFolderName = '';
-
-      const result = getFolderNameFromStorageLocation(storageLocation);
-      expect(result).to.equal(expectedFolderName);
     });
   });
 });

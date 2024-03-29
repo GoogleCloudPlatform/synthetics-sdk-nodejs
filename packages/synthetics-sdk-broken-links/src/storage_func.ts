@@ -24,16 +24,18 @@ import {
   getExecutionRegion,
   resolveProjectId,
 } from '@google-cloud/synthetics-sdk-api';
-import { sanitizeObjectName } from './link_utils';
+import { getStoragePathToExecution, sanitizeObjectName } from './link_utils';
 
 // External Dependencies
 import { Storage, Bucket } from '@google-cloud/storage';
+import { Page } from 'puppeteer';
 
 export interface StorageParameters {
   storageClient: Storage | null;
   bucket: Bucket | null;
-  uptimeId: string;
+  checkId: string;
   executionId: string;
+  screenshotNumber: number;
 }
 
 /**
@@ -89,12 +91,16 @@ export async function getOrCreateStorageBucket(
       });
     }
   } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
+    const errorType = storageLocation
+      ? 'StorageValidationError'
+      : 'BucketCreationError';
+
+    // Using console.error rather than stderr.write since err type is unknown
+    console.error(errorType, err);
+
     errors.push({
       // General error handling
-      error_type: storageLocation
-        ? 'StorageValidationError'
-        : 'BucketCreationError',
+      error_type: errorType,
       error_message: `Failed to ${
         storageLocation ? 'validate' : 'create'
       } bucket ${bucketName}. Please reference server logs for further information.`,
@@ -120,7 +126,8 @@ export function createStorageClientIfStorageSelected(
   try {
     return new Storage();
   } catch (err) {
-    if (err instanceof Error) process.stderr.write(err.message);
+    console.error('StorageClientInitializationError', err);
+
     errors.push({
       error_type: 'StorageClientInitializationError',
       error_message:
@@ -140,8 +147,7 @@ export function createStorageClientIfStorageSelected(
  * @returns An ApiScreenshotOutput object indicating success or a screenshot_error.
  */
 export async function uploadScreenshotToGCS(
-  screenshot: string,
-  filename: string,
+  page: Page,
   storageParams: StorageParameters,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions
 ): Promise<ApiScreenshotOutput> {
@@ -155,22 +161,14 @@ export async function uploadScreenshotToGCS(
       return screenshot_output;
     }
 
-    // Construct the destination path within the bucket if given
-    let writeDestination = options.screenshot_options!.storage_location
-      ? getFolderNameFromStorageLocation(
-          options.screenshot_options!.storage_location
-        )
-      : '';
+    const screenshot: Buffer = await page.screenshot({
+      fullPage: true,
+      encoding: 'binary',
+    });
+    const filename = 'screenshot_' + storageParams.screenshotNumber + '.png';
 
-    // Ensure writeDestination ends with a slash for proper path joining
-    if (writeDestination && !writeDestination.endsWith('/')) {
-      writeDestination += '/';
-    }
-
-    writeDestination = path.join(
-      writeDestination,
-      storageParams.uptimeId,
-      storageParams.executionId,
+    const writeDestination = path.join(
+      getStoragePathToExecution(storageParams, options),
       filename
     );
 
@@ -179,27 +177,16 @@ export async function uploadScreenshotToGCS(
       contentType: 'image/png',
     });
 
-    screenshot_output.screenshot_file = writeDestination;
+    storageParams.screenshotNumber += 1;
+    screenshot_output.screenshot_file = filename;
   } catch (err) {
-    // Handle upload errors
-    if (err instanceof Error) process.stderr.write(err.message);
+    console.error('ScreenshotFileUploadError', err);
+
     screenshot_output.screenshot_error = {
-      error_type: 'StorageFileUploadError',
-      error_message: `Failed to upload screenshot for ${filename}. Please reference server logs for further information.`,
+      error_type: 'ScreenshotFileUploadError',
+      error_message: `Failed to take and/or upload screenshot for ${await page.url()}. Please reference server logs for further information.`,
     };
   }
 
   return screenshot_output;
-}
-
-// Helper function to extract folder name for a given storage location. If there
-// is no '/' present then the storageLocation is just a folder
-export function getFolderNameFromStorageLocation(
-  storageLocation: string
-): string {
-  const firstSlashIndex = storageLocation.indexOf('/');
-  if (firstSlashIndex === -1) {
-    return '';
-  }
-  return storageLocation.substring(firstSlashIndex + 1);
 }
