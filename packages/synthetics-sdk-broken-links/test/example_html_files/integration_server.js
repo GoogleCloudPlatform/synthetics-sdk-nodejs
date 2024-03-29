@@ -31,5 +31,8 @@ functions.http('BrokenLinksEmptyPageOk', SyntheticsSdkBrokenLinks.runBrokenLinks
   origin_uri: `file:${path.join(
     __dirname,
     '../example_html_files/200.html'
-  )}`
+  )}`,
+  screenshot_options: {
+    capture_condition: 'NONE'
+  }
 }));

@@ -19,6 +19,7 @@ import {
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
+  BrokenLinksResultV1_SyntheticLinkResult_ScreenshotOutput as ApiScreenshotOutput,
 } from '@google-cloud/synthetics-sdk-api';
 import {
   checkStatusPassing,
@@ -27,7 +28,9 @@ import {
   LinkIntermediate,
   NavigateResponse,
   getTimeLimitPromise,
+  shouldTakeScreenshot,
 } from './link_utils';
+import { StorageParameters, uploadScreenshotToGCS } from './storage_func';
 
 // External Dependencies
 import { Browser, HTTPResponse, Page } from 'puppeteer';
@@ -104,7 +107,8 @@ export async function checkLinks(
   links: LinkIntermediate[],
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
   startTime: string,
-  total_timeout_millis: number
+  total_timeout_millis: number,
+  storageParams: StorageParameters
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult[]> {
   let timeLimitReached = false;
   const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
@@ -120,7 +124,9 @@ export async function checkLinks(
       if (timeLimitReached) return false;
 
       try {
-        followed_links.push(await checkLink(page, link, options));
+        followed_links.push(
+          await checkLink(page, link, options, storageParams)
+        );
         /** In the case of a single page app, network requests can hang and cause
          * timeout issues in following links. To ensure this does not happen we
          * need to reset the page in between every link checked
@@ -165,6 +171,7 @@ export async function checkLink(
   page: Page,
   link: LinkIntermediate,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  storageParams: StorageParameters,
   isOrigin = false
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
   // Determine the expected status code for the link, using per-link setting if
@@ -184,6 +191,18 @@ export async function checkLink(
     linkStartTime,
     linkEndTime,
   } = await navigate(page, link, options, expectedStatusCode);
+
+  let screenshotOutput: ApiScreenshotOutput = {
+    screenshot_file: '',
+    screenshot_error: {} as BaseError,
+  };
+  if (shouldTakeScreenshot(options, passed)) {
+    screenshotOutput = await uploadScreenshotToGCS(
+      page,
+      storageParams,
+      options
+    );
+  }
 
   // Initialize variables for error information
   let errorType = '';
@@ -224,10 +243,7 @@ export async function checkLink(
     link_start_time: linkStartTime,
     link_end_time: linkEndTime,
     is_origin: isOrigin,
-    screenshot_output: {
-      screenshot_file: '',
-      screenshot_error: {} as BaseError,
-    }, // TODO: this is temporary in an effort to make PRs more manageable
+    screenshot_output: screenshotOutput,
   };
 }
 
