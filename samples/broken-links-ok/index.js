@@ -40,6 +40,7 @@ const options = {
       },
     */
   // total_synthetic_timeout_millis: 60000 // Timeout set for the entire Synthetic Monitor
+  // screenshot_options: { capture_condition: 'FAILING', storage_location: '' }
 };
 
 functions.http('BrokenLinkChecker', GcmSynthetics.runBrokenLinksHandler(options));
