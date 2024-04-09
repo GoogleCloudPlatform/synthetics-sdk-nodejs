@@ -18,6 +18,7 @@ import { expect } from 'chai';
 // Internal Project Files
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
@@ -95,6 +96,10 @@ describe('GCM Synthetics Broken Links options_func suite testing', () => {
       },
     };
     expect(options.per_link_options).to.deep.equal(link_options);
+
+    expect(options.screenshot_options?.capture_condition).to.equal(
+      ApiCaptureCondition.NONE
+    );
   });
 
   describe('validateInputOptions', () => {
