@@ -245,7 +245,7 @@ export function setDefaultOptions(
     per_link_options: {},
     total_synthetic_timeout_millis: 60000,
     screenshot_options: {
-      capture_condition: ApiCaptureCondition.FAILING,
+      capture_condition: ApiCaptureCondition.NONE,
       storage_location: '',
     },
   };
