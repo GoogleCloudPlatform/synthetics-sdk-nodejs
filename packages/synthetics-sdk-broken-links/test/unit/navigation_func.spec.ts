@@ -269,7 +269,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: successfulScreenshotOuput,
+        screenshot_output: emptyScreenshotOutput,
       };
 
       expect(synLinkResult)
@@ -326,7 +326,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_start_time: 'NA',
         link_end_time: 'NA',
         is_origin: false,
-        screenshot_output: successfulScreenshotOuput,
+        screenshot_output: emptyScreenshotOutput,
       };
 
       expect(synLinkResult)
