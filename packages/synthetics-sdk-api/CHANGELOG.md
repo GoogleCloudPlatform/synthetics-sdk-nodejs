@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.5.1...synthetics-sdk-api-v0.6.0) (2024-04-18)
+
+
+### Features
+
+* Update proto to support broken link screenshot support & add getExecutionRegion() functionality ([#116](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/116)) ([be413ac](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/be413ace5d75eb2b143c606a997c0c577c7f21d3))
+
 ## [0.5.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.5.0...synthetics-sdk-api-v0.5.1) (2024-01-24)
 
 
