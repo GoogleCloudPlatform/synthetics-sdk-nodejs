@@ -53,7 +53,6 @@ message TestResult {
 
     // A list of StackFrame messages that indicate a single trace of code.
     repeated StackFrame stack_frames = 3;
-
     // The raw stack trace associated with the error.
     string stack_trace = 4;
   }
@@ -88,7 +87,6 @@ message GenericResultV1 {
     // The full error message. Eg. "The url that you are fetching failed DNS
     // lookup".
     string error_message = 2;
-
     // The name of the function where the error occurred.
     string function_name = 3;
     // The name of the file that reported the error.
@@ -130,6 +128,14 @@ message ResponseStatusCode {
     // A class of status codes to accept.
     StatusClass status_class = 2;
   }
+}
+
+// Information on an error that occurred.
+message BaseError {
+  // The name of the error.
+  string error_type = 1;
+  // The full error message.
+  string error_message = 2;
 }
 
 // Aggregate and individual results of a Broken Link Synthetic execution
@@ -198,12 +204,31 @@ message BrokenLinksResultV1 {
       // the given specified link passed in "per_link_options" map.
       optional int64 link_timeout_millis = 2;
     }
+
     // individual link options, default None. string must be formatted as a
     // fully qualified url
     map<string, PerLinkOption> per_link_options = 10;
-
     // Timeout set for the entire Synthetic Monitor, default 60000 milliseconds
     optional int64 total_synthetic_timeout_millis = 11;
+
+    // Required options for broken link checker screenshot capability.
+    message ScreenshotOptions {
+      // Input bucket or folder provided by the user.
+      string storage_location = 1;
+
+      enum CaptureCondition {
+        NONE = 0;
+        FAILING = 1;
+        ALL = 2;
+      }
+
+      // Controls when to capture screenshots during broken link checks, default
+      // is FAILING.
+      CaptureCondition capture_condition = 2;
+    }
+
+    // Screenshot options, default to 'FAILING' and synthetic wide bucket.
+    ScreenshotOptions screenshot_options = 12;
   }
 
   // Options set for broken link synthetic.
@@ -217,7 +242,7 @@ message BrokenLinksResultV1 {
     ResponseStatusCode expected_status_code = 2;
     // Source_uri from which the target_uri is navigated from.
     string source_uri = 3;
-    // target_uri navigated to from the source_uri.
+    // Target_uri navigated to from the source_uri.
     string target_uri = 4;
     // Anchor text on the source URI.
     string anchor_text = 5;
@@ -235,15 +260,34 @@ message BrokenLinksResultV1 {
     string link_start_time = 10;
     // The end time of the link navigation in iso format.
     string link_end_time = 11;
-
     // These fields only apply to the origin link.
     optional bool is_origin = 12;
+
+    // Result of Screenshot Upload to GCS.
+    message ScreenshotOutput {
+      // Name of screenshot_file.
+      string screenshot_file = 1;
+
+      // Error that occurred throughout screenshot workflow.
+      BaseError screenshot_error = 2;
+    }
+
+    // Output of screenshot upload attempt.
+    ScreenshotOutput screenshot_output = 13;
   }
 
-  // link result for origin_uri
+  // link result for origin_uri.
   SyntheticLinkResult origin_link_result = 10;
-  // link results for all scraped and followed links
+  // link results for all scraped and followed links.
   repeated SyntheticLinkResult followed_link_results = 11;
+
+  // Path to the Cloud Storage folder where all artifacts (e.g. screenshots)
+  // will be stored for this execution. e.g.
+  // gs://<my_bucket_name/check-id-123/2024-01-01/123exec_id123/
+  string execution_data_storage_path = 12;
+
+  // Errors associated with the broken link checker execution.
+  repeated BaseError errors = 13;
 }
 
 message SyntheticResult {
@@ -257,7 +301,6 @@ message SyntheticResult {
   // synthetic is running in, such as K_SERVICE, and K_REVISION for cloud run,
   // SYNTHETIC_SDK_NPM_PACKAGE_VERSION for nodejs package.
   map<string, string> runtime_metadata = 4;
-
   // The start time of the synthetic in iso format.
   string start_time = 5;
   // The end time of the synthetic in iso format.
