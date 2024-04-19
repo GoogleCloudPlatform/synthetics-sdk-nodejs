@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.6.0...synthetics-sdk-api-v0.7.0) (2024-04-19)
+
+
+### Features
+
+* Add screenshot storage support to broken link checker ([#123](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/123)) ([cd34e35](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/cd34e35da4d97d7af27caa4ebfe5fb7f95311aaa))
+
 ## [0.6.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.5.1...synthetics-sdk-api-v0.6.0) (2024-04-18)
 
 
