@@ -12,27 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Standard Libraries
-const path = require('path');
-
-// Internal Project Files
-const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
-
-// External Dependencies
 const functions = require('@google-cloud/functions-framework');
+const SyntheticsSdkBrokenLinks = require('synthetics-sdk-broken-links');
+const path = require('path');
 
 /*
  * This is the server template that is required to run a synthetic monitor in
  * Google Cloud Functions.
  */
 
+// Handles error when trying to visit page that does not exist
+functions.http('BrokenLinksPageDoesNotExist', SyntheticsSdkBrokenLinks.runBrokenLinksHandler({
+  origin_uri: `file:${path.join(
+    __dirname,
+    '../example_html_files/file_doesnt_exist.html'
+  )}`
+}));
+
 // Visits and checks empty page with no links
 functions.http('BrokenLinksEmptyPageOk', SyntheticsSdkBrokenLinks.runBrokenLinksHandler({
   origin_uri: `file:${path.join(
     __dirname,
     '../example_html_files/200.html'
+  )}`
+}));
+
+// Exits early when options cannot be parsed
+functions.http('BrokenLinksInvalidOptionsNotOk', SyntheticsSdkBrokenLinks.runBrokenLinksHandler({
+  origin_uri: `file:${path.join(
+    __dirname,
+    '../example_html_files/retrieve_links_test.html'
   )}`,
-  screenshot_options: {
-    capture_condition: 'NONE'
-  }
+  link_order: 'incorrect'
+}));
+
+// Completes full failing execution
+functions.http('BrokenLinksFailingOk', SyntheticsSdkBrokenLinks.runBrokenLinksHandler({
+  origin_uri: `file:${path.join(
+    __dirname,
+    '../example_html_files/retrieve_links_test.html'
+  )}`,
+  query_selector_all: 'a[src], img[href]',
+  get_attributes: ['href', 'src']
+}));
+
+// Completes full passing execution
+functions.http('BrokenLinksPassingOk', SyntheticsSdkBrokenLinks.runBrokenLinksHandler({
+  origin_uri: `file:${path.join(
+    __dirname,
+    '../example_html_files/retrieve_links_test.html'
+  )}`,
+  query_selector_all: 'a[src]',
+  get_attributes: ['src']
 }));

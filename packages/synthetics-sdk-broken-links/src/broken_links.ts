@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Internal Project Files
+import puppeteer, { Browser, Page } from 'puppeteer';
 import {
-  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_SyntheticLinkResult,
-  getRuntimeMetadata,
   instantiateMetadata,
+  getRuntimeMetadata,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
 import {
@@ -33,19 +32,10 @@ import {
   checkLinks,
   closeBrowser,
   closePagePool,
-  openNewPage,
   retrieveLinksFromPage,
+  openNewPage,
 } from './navigation_func';
-import { processOptions } from './options_func';
-import {
-  createStorageClientIfStorageSelected,
-  getOrCreateStorageBucket,
-  StorageParameters,
-} from './storage_func';
-
-// External Dependencies
-import { Bucket } from '@google-cloud/storage';
-import puppeteer, { Browser, Page } from 'puppeteer';
+import { setDefaultOptions, validateInputOptions } from './options_func';
 
 export interface BrokenLinkCheckerOptions {
   origin_uri: string;
@@ -58,7 +48,6 @@ export interface BrokenLinkCheckerOptions {
   wait_for_selector?: string;
   per_link_options?: { [key: string]: PerLinkOption };
   total_synthetic_timeout_millis?: number;
-  screenshot_options?: ScreenshotOptions;
 }
 
 export interface PerLinkOption {
@@ -81,17 +70,6 @@ export enum StatusClass {
   STATUS_CLASS_ANY = 'STATUS_CLASS_ANY',
 }
 
-export interface ScreenshotOptions {
-  storage_location?: string;
-  capture_condition?: CaptureCondition;
-}
-
-export enum CaptureCondition {
-  NONE = 'NONE',
-  FAILING = 'FAILING',
-  ALL = 'ALL',
-}
-
 let synthetics_sdk_broken_links_package;
 try {
   synthetics_sdk_broken_links_package = require('../package.json');
@@ -101,11 +79,7 @@ try {
 instantiateMetadata(synthetics_sdk_broken_links_package);
 
 export async function runBrokenLinks(
-  inputOptions: BrokenLinkCheckerOptions,
-  args: {
-    executionId: string | undefined;
-    checkId: string | undefined;
-  }
+  inputOptions: BrokenLinkCheckerOptions
 ): Promise<SyntheticResult> {
   // init
   const startTime = new Date().toISOString();
@@ -122,30 +96,6 @@ export async function runBrokenLinks(
     const [timeLimitPromise, timeLimitTimeout, timeLimitresolver] =
       getTimeLimitPromise(startTime, adjusted_synthetic_timeout_millis);
 
-    const errors: BaseError[] = [];
-
-    // Initialize Storage Client with Error Handling. Set to `null` if
-    // capture_condition is 'None'
-    const storageClient = createStorageClientIfStorageSelected(
-      errors,
-      options.screenshot_options!.capture_condition
-    );
-
-    // // Bucket Validation
-    const bucket: Bucket | null = await getOrCreateStorageBucket(
-      storageClient,
-      options.screenshot_options!.storage_location,
-      errors
-    );
-
-    const storageParams: StorageParameters = {
-      storageClient: storageClient,
-      bucket: bucket,
-      checkId: args.checkId || '_',
-      executionId: args.executionId || '_',
-      screenshotNumber: 1,
-    };
-
     const followed_links: BrokenLinksResultV1_SyntheticLinkResult[] = [];
 
     const checkLinksPromise = async () => {
@@ -159,8 +109,7 @@ export async function runBrokenLinks(
           originPage,
           options,
           startTime,
-          adjusted_synthetic_timeout_millis,
-          storageParams
+          adjusted_synthetic_timeout_millis
         )
       );
 
@@ -182,8 +131,7 @@ export async function runBrokenLinks(
           linksToFollow,
           options,
           startTime,
-          adjusted_synthetic_timeout_millis,
-          storageParams
+          adjusted_synthetic_timeout_millis
         ))
       );
       return true;
@@ -201,9 +149,7 @@ export async function runBrokenLinks(
       startTime,
       runtime_metadata,
       options,
-      followed_links,
-      storageParams,
-      errors
+      followed_links
     );
   } catch (err) {
     const errorMessage =
@@ -230,8 +176,7 @@ async function checkOriginLink(
   originPage: Page,
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
   startTime: string,
-  adjusted_synthetic_timeout_millis: number,
-  storageParams: StorageParameters
+  adjusted_synthetic_timeout_millis: number
 ): Promise<BrokenLinksResultV1_SyntheticLinkResult> {
   let originLinkResult: BrokenLinksResultV1_SyntheticLinkResult;
 
@@ -248,7 +193,6 @@ async function checkOriginLink(
       originPage,
       { target_uri: options.origin_uri, anchor_text: '', html_element: '' },
       options,
-      storageParams,
       true
     );
 
@@ -318,4 +262,17 @@ async function scrapeLinks(
     options.link_limit!,
     options.link_order
   );
+}
+
+/**
+ * Validates input options and sets defaults in `options`.
+ *
+ * @param inputOptions - The input options for the broken link checker.
+ * @returns The processed broken link checker options.
+ */
+function processOptions(
+  inputOptions: BrokenLinkCheckerOptions
+): BrokenLinksResultV1_BrokenLinkCheckerOptions {
+  const validOptions = validateInputOptions(inputOptions);
+  return setDefaultOptions(validOptions);
 }

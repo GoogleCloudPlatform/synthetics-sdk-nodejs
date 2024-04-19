@@ -12,16 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Standard Libraries
 import { expect } from 'chai';
-import sinon from 'sinon';
-
-// Internal Project Files
 import {
-  BaseError,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
-  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   BrokenLinksResultV1_SyntheticLinkResult,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
@@ -31,18 +25,10 @@ import {
   checkStatusPassing,
   createSyntheticResult,
   getGenericSyntheticResult,
-  getStoragePathToExecution,
   LinkIntermediate,
-  sanitizeObjectName,
   shuffleAndTruncate,
-  shouldTakeScreenshot,
 } from '../../src/link_utils';
 import { setDefaultOptions } from '../../src/options_func';
-
-// External Dependencies
-import { Bucket, Storage } from '@google-cloud/storage';
-import { StorageParameters } from '../../src/storage_func';
-import { TEST_BUCKET_NAME } from './storage_func.spec';
 
 describe('GCM Synthetics Broken Links Utilies', async () => {
   const status_value_200: ResponseStatusCode = { status_value: 200 };
@@ -61,19 +47,6 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
   };
   const status_class_5xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_5XX,
-  };
-  const default_errors: BaseError[] = [
-    { error_type: 'fake-error-type', error_message: 'fake-error-message' },
-  ];
-  const bucketStub: sinon.SinonStubbedInstance<Bucket> =
-    sinon.createStubInstance(Bucket);
-  bucketStub.name = TEST_BUCKET_NAME;
-  const storageParams = {
-    storageClient: {} as Storage,
-    bucket: bucketStub,
-    checkId: 'uptime123',
-    executionId: 'exec456',
-    screenshotNumber: 1,
   };
 
   it('checkStatusPassing returns correctly when passed a number as ResponseStatusCode', () => {
@@ -147,9 +120,7 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       start_time,
       runtime_metadata,
       options,
-      all_links,
-      storageParams,
-      default_errors
+      all_links
     );
 
     // BrokenLinkResultV1 expectations (testing `parseFollowedLinks`)
@@ -167,9 +138,6 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
       options: options,
       origin_link_result: origin_link,
       followed_link_results: followed_links,
-      execution_data_storage_path:
-        'gs://gcm-test-project-id-synthetics-test-region/uptime123/exec456',
-      errors: default_errors,
     });
 
     expect(
@@ -231,128 +199,5 @@ describe('GCM Synthetics Broken Links Utilies', async () => {
 
     expect(startTime).to.be.lessThan(endTime);
     expect(milliDifference).to.be.greaterThan(0);
-  });
-
-  describe('sanitizeObjectName', () => {
-    it('should remove invalid characters', () => {
-      const input = 'test/@#$%^&*()/_+-=[]{};\':"|,.<>/?\r\n\t';
-      const expectedOutput = "test_@_$%^&_()__+-=__{};'___,.______";
-      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
-    });
-
-    it('should replace the forbidden prefix', () => {
-      const input = '.well-known/acme-challenge/test';
-      const expectedOutput = '_test';
-      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
-    });
-
-    it('should handle standalone "." and ".."', () => {
-      expect(sanitizeObjectName('.')).to.equal('_');
-      expect(sanitizeObjectName('..')).to.equal('_');
-    });
-
-    it('should handle null and undefined', () => {
-      expect(sanitizeObjectName(null)).to.equal('_');
-      expect(sanitizeObjectName(undefined)).to.equal('_');
-    });
-
-    it('should trim leading and trailing whitespace', () => {
-      const input = '  test name  ';
-      const expectedOutput = 'test_name';
-      expect(sanitizeObjectName(input)).to.equal(expectedOutput);
-    });
-  });
-
-  describe('shouldTakeScreenshot', () => {
-    describe('screenshot_condition: ALL', () => {
-      const options = {
-        screenshot_options: { capture_condition: ApiCaptureCondition.ALL },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      it('should return true when passed is true', () => {
-        const result = shouldTakeScreenshot(options, true);
-        expect(result).to.be.true;
-      });
-
-      it('should return true when passed is false', () => {
-        const result = shouldTakeScreenshot(options, false);
-        expect(result).to.be.true;
-      });
-    });
-
-    describe('screenshot_condition: FAILING', () => {
-      const options = {
-        screenshot_options: {
-          capture_condition: ApiCaptureCondition.FAILING,
-        },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      it('should return true if passed is false', () => {
-        const result = shouldTakeScreenshot(options, false);
-        expect(result).to.be.true;
-      });
-
-      it('should return false if passed is true', () => {
-        const result = shouldTakeScreenshot(options, true);
-        expect(result).to.be.false;
-      });
-    });
-
-    describe('screenshot_condition: NONE', () => {
-      const options = {
-        screenshot_options: { capture_condition: ApiCaptureCondition.NONE },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      it('should retrun true if passed is false', () => {
-        const result = shouldTakeScreenshot(options, false);
-        expect(result).to.be.false;
-      });
-
-      it('should retrun true if passed is true', () => {
-        const result = shouldTakeScreenshot(options, true);
-        expect(result).to.be.false;
-      });
-    });
-  });
-
-  describe('getStoragePathToExecution()', () => {
-    it('returns write_destination when given folder in storage location', () => {
-      const options = {
-        screenshot_options: { storage_location: 'bucket/folder1/folder2' },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      const writeDestination = getStoragePathToExecution(
-        storageParams,
-        options
-      );
-      expect(writeDestination).to.equal('folder1/folder2/uptime123/exec456');
-    });
-
-    it('should handle no folder and just bucket in storage_location', () => {
-      const options = {
-        screenshot_options: { storage_location: 'bucket' },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      const result = getStoragePathToExecution(storageParams, options);
-      expect(result).to.equal('uptime123/exec456');
-    });
-
-    it('should handle error by returning empty string', () => {
-      const options = {
-        screenshot_options: { storage_location: 'bucket' },
-      } as BrokenLinksResultV1_BrokenLinkCheckerOptions;
-
-      const storageParamsUndefiniedCheckId = {
-        storageClient: {} as Storage,
-        bucket: {} as Bucket,
-        executionId: 'exec456',
-      } as StorageParameters;
-
-      const result = getStoragePathToExecution(
-        storageParamsUndefiniedCheckId,
-        options
-      );
-      expect(result).to.equal('');
-    });
   });
 });
