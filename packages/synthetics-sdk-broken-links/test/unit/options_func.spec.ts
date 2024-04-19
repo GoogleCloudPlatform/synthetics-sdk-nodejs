@@ -12,23 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Standard Libraries
 import { expect } from 'chai';
+
+// Internal Project Files
 import {
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   ResponseStatusCode,
   ResponseStatusCode_StatusClass,
 } from '@google-cloud/synthetics-sdk-api';
 import {
   BrokenLinkCheckerOptions,
-  StatusClass,
   LinkOrder,
+  StatusClass,
 } from '../../src/broken_links';
 import {
   setDefaultOptions,
   validateInputOptions,
 } from '../../src/options_func';
 
-describe('GCM Synthetics Broken Links  options_func suite testing', () => {
+describe('GCM Synthetics Broken Links options_func suite testing', () => {
   const status_value_304: ResponseStatusCode = { status_value: 304 };
   const status_class_2xx: ResponseStatusCode = {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
@@ -92,6 +96,10 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
       },
     };
     expect(options.per_link_options).to.deep.equal(link_options);
+
+    expect(options.screenshot_options?.capture_condition).to.equal(
+      ApiCaptureCondition.NONE
+    );
   });
 
   describe('validateInputOptions', () => {
@@ -368,6 +376,45 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         validateInputOptions(options);
       }).to.not.throw();
     });
+    it('throws error if storage_condition is not a valid StorageCondition value', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        screenshot_options: { capture_condition: 'invalid' },
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(
+        Error,
+        'Invalid capture_condition value, must be `ALL`, `FAILING`, OR `NONE`'
+      );
+    });
+    it('storage_condition accepts string', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        screenshot_options: { capture_condition: 'FAILING' },
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.not.throw();
+    });
+    it('throws error if storage_location is not a string', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        screenshot_options: { storage_location: 123 },
+      } as any as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).to.throw(Error, 'Invalid storage_location value, must be a string');
+    });
+    it('storage_location can be  an empty string', () => {
+      const options = {
+        origin_uri: 'http://example.com',
+        screenshot_options: { storage_location: '' },
+      } as BrokenLinkCheckerOptions;
+      expect(() => {
+        validateInputOptions(options);
+      }).not.to.throw();
+    });
     it('validates input options when all values are valid', () => {
       const options = {
         origin_uri: 'http://example.com',
@@ -383,6 +430,10 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
             link_timeout_millis: 3000,
             expected_status_code: StatusClass.STATUS_CLASS_2XX,
           },
+        },
+        screenshot_options: {
+          storage_location: '',
+          capture_condition: 'FAILING',
         },
       } as BrokenLinkCheckerOptions;
 
@@ -406,7 +457,11 @@ describe('GCM Synthetics Broken Links  options_func suite testing', () => {
         max_retries: undefined,
         wait_for_selector: undefined,
         per_link_options: undefined,
-        total_synthetic_timeout_millis: undefined
+        total_synthetic_timeout_millis: undefined,
+        screenshot_options: {
+          storage_location: undefined,
+          capture_condition: undefined,
+        },
       } as BrokenLinkCheckerOptions;
 
       expect(() => {

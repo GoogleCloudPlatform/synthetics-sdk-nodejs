@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPResponse } from 'puppeteer';
+// Standard Libraries
+import * as path from 'path';
+
+// Internal Project Files
 import {
+  BaseError,
   BrokenLinksResultV1,
   BrokenLinksResultV1_BrokenLinkCheckerOptions,
   BrokenLinksResultV1_BrokenLinkCheckerOptions_LinkOrder,
+  BrokenLinksResultV1_BrokenLinkCheckerOptions_ScreenshotOptions_CaptureCondition as ApiCaptureCondition,
   BrokenLinksResultV1_SyntheticLinkResult,
   GenericResultV1,
   getRuntimeMetadata,
@@ -24,6 +29,10 @@ import {
   ResponseStatusCode_StatusClass,
   SyntheticResult,
 } from '@google-cloud/synthetics-sdk-api';
+
+// External Dependencies
+import { HTTPResponse } from 'puppeteer';
+import { StorageParameters } from './storage_func';
 
 /**
  * Represents an intermediate link with its properties.
@@ -153,6 +162,8 @@ function parseFollowedLinks(
     options: {} as BrokenLinksResultV1_BrokenLinkCheckerOptions,
     origin_link_result: {} as BrokenLinksResultV1_SyntheticLinkResult,
     followed_link_results: [],
+    execution_data_storage_path: '',
+    errors: [],
   };
 
   for (const link of followed_links) {
@@ -216,12 +227,21 @@ export function createSyntheticResult(
   start_time: string,
   runtime_metadata: { [key: string]: string },
   options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
-  followed_links: BrokenLinksResultV1_SyntheticLinkResult[]
+  followed_links: BrokenLinksResultV1_SyntheticLinkResult[],
+  storageParams: StorageParameters,
+  errors: BaseError[]
 ): SyntheticResult {
   // Create BrokenLinksResultV1 by parsing followed links and setting options
   const broken_links_result: BrokenLinksResultV1 =
     parseFollowedLinks(followed_links);
   broken_links_result.options = options;
+  broken_links_result.errors = errors;
+  broken_links_result.execution_data_storage_path = storageParams.bucket
+    ? 'gs://' +
+      storageParams.bucket.name +
+      '/' +
+      getStoragePathToExecution(storageParams, options)
+    : '';
 
   // Create SyntheticResult object
   const synthetic_result: SyntheticResult = {
@@ -262,6 +282,89 @@ export function shuffleAndTruncate(
 
   // Truncate the processed array to match the link_limit
   return linksToFollow.slice(0, link_limit! - 1);
+}
+
+/**
+ * Determines whether a screenshot should be taken based on screenshot options and link result.
+ *
+ * @param options - BrokenLinksResultV1_BrokenLinkCheckerOptions
+ * @param passed -  boolean indicating whether the link navigation succeeded
+ * @returns true if a screenshot should be taken, false otherwise
+ */
+export function shouldTakeScreenshot(
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions,
+  passed: boolean
+): boolean {
+  return (
+    options.screenshot_options!.capture_condition === ApiCaptureCondition.ALL ||
+    (options.screenshot_options!.capture_condition ===
+      ApiCaptureCondition.FAILING &&
+      !passed)
+  );
+}
+
+/**
+
+ * Sanitizes an object name string for safe use, ensuring compliance with
+ * naming restrictions.
+ *
+ * @param {string} inputString - The original object name string.
+ * @returns {string} The sanitized object name.
+ *
+ * **Sanitization Rules:**
+ * * Removes control characters ([\u007F-\u009F]).
+ * * Removes disallowed characters (#, [, ], *, ?, ", <, >, |, /).
+ * * Replaces the forbidden prefix ".well-known/acme-challenge/" with an underscore.
+ * * Replaces standalone occurrences of "." or ".." with an underscore.
+ */
+export function sanitizeObjectName(
+  inputString: string | null | undefined
+): string {
+  if (!inputString || inputString === '.' || inputString === '..') return '_';
+
+  // Regular expressions for:
+  /*eslint no-useless-escape: "off"*/
+  const invalidCharactersRegex = /[\r\n\u007F-\u009F#\[\]*?:"<>|/]/g; // Control characters, special characters, path separator
+  const wellKnownPrefixRegex = /^\.well-known\/acme-challenge\//;
+
+  // Core sanitization:
+  return inputString
+    .replace(wellKnownPrefixRegex, '_') // Replace forbidden prefix
+    .replace(invalidCharactersRegex, '_') // replace invalid characters
+    .trim() // Clean up any leading/trailing spaces
+    .replace(/\s+/g, '_'); // Replace one or more spaces with underscores
+}
+
+export function getStoragePathToExecution(
+  storageParams: StorageParameters,
+  options: BrokenLinksResultV1_BrokenLinkCheckerOptions
+) {
+  try {
+    const storageLocation = options.screenshot_options!.storage_location;
+    let writeDestination = '';
+
+    // extract folder name for a given storage location. If there is no '/'
+    // present then the storageLocation is just a folder
+    const firstSlashIndex = storageLocation.indexOf('/');
+    if (firstSlashIndex !== -1) {
+      writeDestination = storageLocation.substring(firstSlashIndex + 1);
+    }
+
+    // Ensure writeDestination ends with a slash for proper path joining
+    if (writeDestination && !writeDestination.endsWith('/')) {
+      writeDestination += '/';
+    }
+
+    writeDestination = path.join(
+      writeDestination,
+      storageParams.checkId,
+      storageParams.executionId
+    );
+
+    return writeDestination;
+  } catch (err) {
+    return '';
+  }
 }
 
 export function getTimeLimitPromise(
