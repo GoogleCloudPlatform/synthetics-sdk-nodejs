@@ -31,3 +31,15 @@ npm install --save @google-cloud/synthetics-sdk-mocha
 The Synthetics SDK Mocha is a framework that runs a provided mocha test suite, and returns a response that may be consumed by the Google Cloud Monitoring Synthetics.
 
 See [README.md](packages/synthetics-sdk-mocha/README.md) for installation and usage information.
+
+## Synthetics SDK Broken Links
+
+[![npm version](https://img.shields.io/npm/v/@google-cloud/synthetics-sdk-broken-links.svg)](https://www.npmjs.com/package/@google-cloud/synthetics-sdk-broken-links)
+
+```
+npm install --save @google-cloud/synthetics-sdk-broken-links
+```
+
+The Synthetics SDK Broken Links is a syntheitc template that makes it possible for application owners to easily detect and get alerted on broken links within their webiste, and returns a response that may be consumed by the Google Cloud Monitoring Synthetics.
+
+See [README.md](packages/synthetics-sdk-broken-links/README.md) for installation and usage information.
