@@ -12,8 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
+// Standard Libraries
 import { Request, Response } from 'express';
+
+// Internal Project Files
+import { runBrokenLinks, BrokenLinkCheckerOptions } from './broken_links';
+
+const syntheticExecutionIdHeader = 'Synthetic-Execution-Id';
+const checkIdHeader = 'Check-Id';
 
 /**
  * Middleware for easy invocation of SyntheticSDK broken links, and may be used to
@@ -26,5 +32,10 @@ import { Request, Response } from 'express';
 export function runBrokenLinksHandler(options: BrokenLinkCheckerOptions) {
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return async (req: Request, res: Response): Promise<any> =>
-    res.send(await runBrokenLinks(options));
+    res.send(
+      await runBrokenLinks(options, {
+        executionId: req.get(syntheticExecutionIdHeader),
+        checkId: req.get(checkIdHeader),
+      })
+    );
 }
