@@ -1,5 +1,5 @@
 {
-  "packages/synthetics-sdk-api": "0.6.0",
+  "packages/synthetics-sdk-api": "0.7.0",
   "packages/synthetics-sdk-mocha": "0.1.1",
   "packages/synthetics-sdk-broken-links": "0.3.0"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@google-cloud/synthetics-sdk-api",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "NodeJS distribution of the API Specification that must be complied with for integrating with Google Cloud Monitoring Synthetics",
   "repository": "GoogleCloudPlatform/synthetics-sdk-nodejs",
   "main": "build/src/index.js",
