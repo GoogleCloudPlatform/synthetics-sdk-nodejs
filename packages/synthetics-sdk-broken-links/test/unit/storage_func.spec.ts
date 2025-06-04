@@ -168,6 +168,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
       bucketStub = sinon.createStubInstance(Bucket);
       pageStub = sinon.createStubInstance(Page);
       pageStub.url.resolves('https://fake-url');
+      pageStub.screenshot.resolves(new Uint8Array(0));
 
       storageClientStub.bucket.returns(bucketStub);
     });

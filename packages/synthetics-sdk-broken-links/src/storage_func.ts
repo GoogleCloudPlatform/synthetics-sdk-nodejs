@@ -161,10 +161,10 @@ export async function uploadScreenshotToGCS(
       return screenshot_output;
     }
 
-    const screenshot: Buffer = await page.screenshot({
+    const screenshot: Uint8Array = await page.screenshot({
       fullPage: true,
-      encoding: 'binary',
     });
+    const screenshot_buffer = Buffer.from(screenshot);
     const filename = 'screenshot_' + storageParams.screenshotNumber + '.png';
 
     const writeDestination = path.join(
@@ -173,7 +173,7 @@ export async function uploadScreenshotToGCS(
     );
 
     // Upload to GCS
-    await storageParams.bucket.file(writeDestination).save(screenshot, {
+    await storageParams.bucket.file(writeDestination).save(screenshot_buffer, {
       contentType: 'image/png',
     });
 

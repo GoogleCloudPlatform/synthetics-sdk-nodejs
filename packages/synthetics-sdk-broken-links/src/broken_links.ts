@@ -151,7 +151,7 @@ export async function runBrokenLinks(
     const checkLinksPromise = async () => {
       // create Browser & origin page then navigate to origin_uri, w/ origin
       // specific settings
-      browser = await puppeteer.launch({ headless: 'new' });
+      browser = await puppeteer.launch({ headless: true });
       const originPage = await openNewPage(browser);
 
       followed_links.push(
