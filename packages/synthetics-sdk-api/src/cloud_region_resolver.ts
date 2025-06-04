@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import axios, { AxiosResponse } from 'axios';
-
 /**
- *
  * @public
  *
  * Retrieves the region in which the current Google Cloud Function (v2) is
@@ -24,24 +21,28 @@ import axios, { AxiosResponse } from 'axios';
 export async function getExecutionRegion(): Promise<string | null> {
   const metadataServerUrl =
     'http://metadata.google.internal/computeMetadata/v1/instance/region';
-  const headers = { 'Metadata-Flavor': 'Google' };
+  const options = {
+    headers: {
+      'Metadata-Flavor': 'Google',
+    },
+  };
 
   try {
-    const response: AxiosResponse = await axios.get(metadataServerUrl, {
-      headers,
-    });
+    const response = await fetch(metadataServerUrl, options);
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    const body = await response.text();
 
     // Extract region from the response (e.g., 'us-east1')
-    const regions = response.data.split('/');
+    const regions = body.split('/');
     const region = regions[regions.length - 1];
 
     return region;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error('Error fetching region from metadata server:', error);
-    } else {
-      console.error('Unexpected error:', error);
-    }
+    console.error('Error fetching region from metadata server:', error);
   }
 
   return null;

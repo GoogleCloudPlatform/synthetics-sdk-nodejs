@@ -12,34 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import axios from 'axios';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { getExecutionRegion } from '../../src/cloud_region_resolver';
 
-describe('getExecutionRegion', () => {
-  let axiosGetStub: sinon.SinonStub;
+describe('getExecutionRegion (with fetch)', () => {
+  let fetchStub: sinon.SinonStub;
 
   beforeEach(() => {
-    axiosGetStub = sinon.stub(axios, 'get');
+    fetchStub = sinon.stub(global, 'fetch');
   });
 
   afterEach(() => {
-    axiosGetStub.restore();
+    fetchStub.restore();
   });
 
   it('should retrieve the region from the metadata server', async () => {
-    axiosGetStub.resolves({ data: 'projects/123456789/regions/us-east1' });
+    const mockResponse = {
+      ok: true,
+      text: () => Promise.resolve('projects/123456789/regions/us-east1'),
+    };
+    fetchStub.resolves(mockResponse as any);
 
     const region = await getExecutionRegion();
     expect(region).to.equal('us-east1');
-    expect(axiosGetStub.calledOnce).to.be.true;
+    expect(fetchStub.calledOnce).to.be.true;
   });
 
   it('should handle errors from the metadata server', async () => {
-    axiosGetStub.rejects(new Error('Metadata server error'));
+    fetchStub.rejects(new Error('Network error'));
 
     const region = await getExecutionRegion();
+    
     expect(region).to.be.null;
   });
 });
