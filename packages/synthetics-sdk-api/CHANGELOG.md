@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.6.0...synthetics-sdk-api-v0.7.0) (2025-06-09)
+
+
+### Features
+
+* Add screenshot storage support to broken link checker ([#123](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/123)) ([cd34e35](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/cd34e35da4d97d7af27caa4ebfe5fb7f95311aaa))
+
+
+### Bug Fixes
+
+* **remove-ts-proto-and-upgrade-puppeteer:** Removes unnecessary ts-proto dependency and upgrade puppeteer ([#148](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/148)) ([c3c21d7](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/c3c21d7ad93de28eb442572e97781e0d68dd4efa))
+
 ## [0.6.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-api-v0.5.1...synthetics-sdk-api-v0.6.0) (2024-04-18)
 
 

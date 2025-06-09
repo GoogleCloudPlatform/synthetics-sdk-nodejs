@@ -1,6 +1,6 @@
 {
   "name": "@google-cloud/synthetics-sdk-broken-links",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
   "main": "./build/src/index.js",
   "repository": "GoogleCloudPlatform/synthetics-sdk-nodejs",
