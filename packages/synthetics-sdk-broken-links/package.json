@@ -45,6 +45,6 @@
   "dependencies": {
     "@google-cloud/storage": "^7.7.0",
     "@google-cloud/synthetics-sdk-api": "^0.6.0",
-    "puppeteer": "21.3.6"
+    "puppeteer": "24.10.0"
   }
 }

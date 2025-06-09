@@ -95,7 +95,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   let page: Page;
   before(async () => {
     browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
     });
   });
 
@@ -341,7 +341,7 @@ describe('retrieveLinksFromPage', async () => {
   let browser: Browser;
   let page: Page;
   before(async () => {
-    browser = await puppeteer.launch({ headless: 'new' });
+    browser = await puppeteer.launch({ headless: true });
   });
 
   beforeEach(async () => {
