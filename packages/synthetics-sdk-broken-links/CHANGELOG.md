@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.3.0...synthetics-sdk-broken-links-v0.3.1) (2025-06-09)
+
+
+### Bug Fixes
+
+* **remove-ts-proto-and-upgrade-puppeteer:** Removes unnecessary ts-proto dependency and upgrade puppeteer ([#148](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/148)) ([c3c21d7](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/c3c21d7ad93de28eb442572e97781e0d68dd4efa))
+
 ## [0.3.0](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.2.0...synthetics-sdk-broken-links-v0.3.0) (2024-04-19)
 
 
