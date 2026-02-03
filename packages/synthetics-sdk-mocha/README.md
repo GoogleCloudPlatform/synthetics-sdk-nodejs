@@ -2,8 +2,6 @@
 
 # Synthetics SDK Mocha
 
-Note: This is an experimental package under active development. New releases may include breaking changes.
-
 The Synthetics SDK Mocha is a framework that runs a provided mocha test suite, and returns a response that may be consumed by the Google Cloud Monitoring Synthetics.
 
 ## Installation
