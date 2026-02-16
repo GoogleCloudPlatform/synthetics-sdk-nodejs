@@ -37,6 +37,6 @@
   "dependencies": {
     "@google-cloud/synthetics-sdk-api": "^0.1.0",
     "error-stack-parser": "^2.1.4",
-    "mocha": "^10.2.0"
+    "mocha": "^10.8.2"
   }
 }
