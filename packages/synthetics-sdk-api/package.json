@@ -40,7 +40,7 @@
     "@opentelemetry/sdk-node": "0.43.0",
     "@opentelemetry/sdk-trace-base": "1.17.0",
     "@opentelemetry/sdk-trace-node": "1.17.0",
-    "axios": "1.6.7",
+    "axios": "1.13.5",
     "error-stack-parser": "2.1.4",
     "google-auth-library": "9.0.0",
     "winston": "3.10.0"
