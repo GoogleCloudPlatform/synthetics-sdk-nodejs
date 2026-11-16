@@ -35,6 +35,7 @@ import { Page } from 'puppeteer';
 
 // global test vars
 export const TEST_BUCKET_NAME = 'gcm-test-project-id-synthetics-test-region';
+export const TEST_PROJECT_NUMBER = '123456789012';
 
 describe('GCM Synthetics Broken Links storage_func suite testing', () => {
   let storageClientStub: sinon.SinonStubbedInstance<Storage>;
@@ -44,6 +45,9 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     '@google-cloud/synthetics-sdk-api': {
       getExecutionRegion: () => 'test-region',
       resolveProjectId: () => 'test-project-id',
+    },
+    './project_number_resolver': {
+      resolveProjectNumber: async () => TEST_PROJECT_NUMBER,
     },
   });
 
@@ -55,6 +59,7 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
     bucketStub = sinon.createStubInstance(Bucket);
     bucketStub.name = TEST_BUCKET_NAME;
     bucketStub.create.resolves([bucketStub]);
+    bucketStub.getMetadata.resolves([{ projectNumber: TEST_PROJECT_NUMBER }]);
 
     // Stub the storage client
     storageClientStub = sinon.createStubInstance(Storage);
@@ -84,6 +89,9 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
           getExecutionRegion: () => 'test-region',
           resolveProjectId: () => '',
         },
+        './project_number_resolver': {
+          resolveProjectNumber: async () => TEST_PROJECT_NUMBER,
+        },
       });
 
       const result = await failingProjectId.getOrCreateStorageBucket(
@@ -92,9 +100,43 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
         []
       );
       expect(result).to.be.null;
+      sinon.assert.notCalled(storageClientStub.bucket);
     });
 
-    it('should return existing synthetics bucket if found when storage_location is not provided ', async () => {
+    it('should return existing synthetics bucket if owned by the current project when storage_location is not provided', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.resolves([{ projectNumber: TEST_PROJECT_NUMBER }]);
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        '',
+        errors
+      );
+      expect(result).to.equal(bucketStub);
+      expect(errors).to.be.empty;
+      sinon.assert.calledWithExactly(
+        storageClientStub.bucket,
+        TEST_BUCKET_NAME
+      );
+      sinon.assert.notCalled(bucketStub.create);
+    });
+
+    it('should accept numeric projectNumber metadata when owned by the current project', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.resolves([{ projectNumber: 123456789012 }]);
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        '',
+        errors
+      );
+      expect(result).to.equal(bucketStub);
+      expect(errors).to.be.empty;
+    });
+
+    it('should return existing bucket if found when storage_location is provided', async () => {
       bucketStub.exists.resolves([true]); // Simulate the bucket already exists
 
       const result = await storageFunc.getOrCreateStorageBucket(
@@ -108,6 +150,109 @@ describe('GCM Synthetics Broken Links storage_func suite testing', () => {
         TEST_BUCKET_NAME
       );
       sinon.assert.notCalled(bucketStub.create);
+    });
+
+    it('should reject default bucket squatted by another project', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.resolves([{ projectNumber: '999999999999' }]);
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        '',
+        errors
+      );
+
+      expect(result).to.be.null;
+      sinon.assert.notCalled(bucketStub.create);
+      expect(errors).to.deep.equal([
+        {
+          error_type: 'StorageValidationError',
+          error_message: `Failed to validate bucket ${TEST_BUCKET_NAME}: Bucket does not belong to the current project.`,
+        },
+      ]);
+    });
+
+    it('should reject explicit storage_location bucket owned by another project', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.resolves([{ projectNumber: '999999999999' }]);
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        'foreign-bucket/folder',
+        errors
+      );
+
+      expect(result).to.be.null;
+      expect(errors).to.deep.equal([
+        {
+          error_type: 'StorageValidationError',
+          error_message:
+            'Failed to validate bucket foreign-bucket: Bucket does not belong to the current project.',
+        },
+      ]);
+    });
+
+    it('should reject existing bucket when metadata is missing projectNumber', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.resolves([{}]);
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        '',
+        errors
+      );
+
+      expect(result).to.be.null;
+      expect(errors.length).to.equal(1);
+      expect(errors[0].error_type).to.equal('StorageValidationError');
+    });
+
+    it('should fail closed when current project number cannot be resolved', async () => {
+      const unresolvedProjectNumberStorageFunc = proxyquire(
+        '../../src/storage_func',
+        {
+          '@google-cloud/synthetics-sdk-api': {
+            getExecutionRegion: () => 'test-region',
+            resolveProjectId: () => 'test-project-id',
+          },
+          './project_number_resolver': {
+            resolveProjectNumber: async () => null,
+          },
+        }
+      );
+
+      bucketStub.exists.resolves([true]);
+
+      const errors: BaseError[] = [];
+      const result =
+        await unresolvedProjectNumberStorageFunc.getOrCreateStorageBucket(
+          storageClientStub,
+          '',
+          errors
+        );
+
+      expect(result).to.be.null;
+      expect(errors.length).to.equal(1);
+      expect(errors[0].error_type).to.equal('StorageValidationError');
+    });
+
+    it('should handle errors during bucket.getMetadata()', async () => {
+      bucketStub.exists.resolves([true]);
+      bucketStub.getMetadata.rejects(new Error('403 Forbidden'));
+
+      const errors: BaseError[] = [];
+      const result = await storageFunc.getOrCreateStorageBucket(
+        storageClientStub,
+        '',
+        errors
+      );
+
+      expect(result).to.be.null;
+      expect(errors.length).to.equal(1);
+      expect(errors[0].error_type).to.equal('StorageValidationError');
     });
 
     it('should handle errors during bucket.exists()', async () => {

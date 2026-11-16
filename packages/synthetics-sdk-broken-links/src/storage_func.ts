@@ -25,6 +25,7 @@ import {
   resolveProjectId,
 } from '@google-cloud/synthetics-sdk-api';
 import { getStoragePathToExecution, sanitizeObjectName } from './link_utils';
+import { resolveProjectNumber } from './project_number_resolver';
 
 // External Dependencies
 import { Storage, Bucket } from '@google-cloud/storage';
@@ -56,16 +57,22 @@ export async function getOrCreateStorageBucket(
   errors: BaseError[]
 ): Promise<Bucket | null> {
   let bucketName = '';
+  let validatingExistingBucket = false;
 
   try {
     if (!storageClient) return null;
 
-    const projectId = sanitizeObjectName(await resolveProjectId());
-    const region = sanitizeObjectName(await getExecutionRegion());
+    const rawProjectId = await resolveProjectId();
+    const rawRegion = await getExecutionRegion();
 
     // if the user chose to use/create the default bucket but we were not able
     // to resolve projectId or cloudRegion
-    if (!storageLocation && (!projectId || !region)) return null;
+    if (!storageLocation && (!rawProjectId || !rawRegion)) return null;
+
+    const projectId = sanitizeObjectName(rawProjectId);
+    const region = sanitizeObjectName(rawRegion);
+
+    if (!storageLocation && (projectId === '_' || region === '_')) return null;
 
     bucketName = storageLocation
       ? storageLocation.split('/')[0]
@@ -75,7 +82,40 @@ export async function getOrCreateStorageBucket(
     const [bucketExists] = await bucket.exists();
 
     if (bucketExists) {
-      return bucket; // Bucket exists, return it
+      validatingExistingBucket = true;
+      const projectNumber = await resolveProjectNumber();
+      if (!projectNumber) {
+        console.error(
+          'StorageValidationError',
+          `Unable to verify ownership of bucket ${bucketName}: current project number could not be resolved.`
+        );
+        errors.push({
+          error_type: 'StorageValidationError',
+          error_message: `Failed to validate bucket ${bucketName}: Unable to verify bucket ownership because the current project number could not be resolved.`,
+        });
+        return null;
+      }
+
+      const [metadata] = await bucket.getMetadata();
+      const bucketProjectNumber =
+        metadata?.projectNumber !== undefined &&
+        metadata?.projectNumber !== null
+          ? String(metadata.projectNumber).trim()
+          : '';
+
+      if (!bucketProjectNumber || bucketProjectNumber !== projectNumber) {
+        console.error(
+          'StorageValidationError',
+          `Bucket ${bucketName} does not belong to the current project.`
+        );
+        errors.push({
+          error_type: 'StorageValidationError',
+          error_message: `Failed to validate bucket ${bucketName}: Bucket does not belong to the current project.`,
+        });
+        return null;
+      }
+
+      return bucket; // Bucket exists and belongs to current project, return it
     } else if (!storageLocation) {
       // Create only if no location was provided
       const [newBucket] = await bucket.create({
@@ -91,7 +131,8 @@ export async function getOrCreateStorageBucket(
       });
     }
   } catch (err) {
-    const errorType = storageLocation
+    const isValidation = Boolean(storageLocation) || validatingExistingBucket;
+    const errorType = isValidation
       ? 'StorageValidationError'
       : 'BucketCreationError';
 
@@ -102,7 +143,7 @@ export async function getOrCreateStorageBucket(
       // General error handling
       error_type: errorType,
       error_message: `Failed to ${
-        storageLocation ? 'validate' : 'create'
+        isValidation ? 'validate' : 'create'
       } bucket ${bucketName}. Please reference server logs for further information.`,
     });
   }
