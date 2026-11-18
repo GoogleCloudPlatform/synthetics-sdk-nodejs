@@ -12,25 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { GoogleAuth } from 'google-auth-library';
 import { resolveProjectId } from '../../src/auto_instrumentation';
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 
 describe('Auto Instrumentation', async () => {
   describe('resolveProjectId', async () => {
-    it('resolves with the project id if its found', async () => {
-      sinon.replace(process, 'env', {GCLOUD_PROJECT: 'project-id'});
-      const projectId = await resolveProjectId(undefined, {});
-
-      expect(projectId).to.equal('project-id');
-
+    afterEach(() => {
       sinon.restore();
     });
 
+    it('resolves with the project id if its found', async () => {
+      sinon.replace(process, 'env', { GCLOUD_PROJECT: 'project-id' });
+      const projectId = await resolveProjectId(undefined, {});
+
+      expect(projectId).to.equal('project-id');
+    });
+
     it('resolves null if a project id is not found', async () => {
+      sinon
+        .stub(GoogleAuth.prototype, 'getProjectId')
+        .rejects(new Error('Unable to detect a Project Id'));
       const projectId = await resolveProjectId(undefined, {});
       expect(projectId).to.be.null;
-    }).timeout(10000);
+    });
 
     it('resolves with the cached project id if it has already resolved', async () => {
       const stringProjectId = await resolveProjectId('already-defined', {});
