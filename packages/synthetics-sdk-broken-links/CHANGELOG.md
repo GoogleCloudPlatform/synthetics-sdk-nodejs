@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.3.1...synthetics-sdk-broken-links-v0.3.2) (2026-11-18)
+
+
+### Bug Fixes
+
+* Verify bucket project ownership before storing screenshots ([#183](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/pull/183)) ([8b50476](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/8b5047688a6f0bd33caabf609dbc0bfab0fe0401))
+
 ## [0.3.1](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.3.0...synthetics-sdk-broken-links-v0.3.1) (2025-06-09)
 
 
