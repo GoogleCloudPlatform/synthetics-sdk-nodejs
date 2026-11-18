@@ -39,6 +39,16 @@ export interface StorageParameters {
   screenshotNumber: number;
 }
 
+async function isBucketOwnedByCurrentProject(bucket: Bucket): Promise<boolean> {
+  const projectNumber = await resolveProjectNumber();
+  if (!projectNumber) return false;
+
+  const [metadata] = await bucket.getMetadata();
+  const bucketProjectNumber = String(metadata?.projectNumber ?? '').trim();
+
+  return Boolean(bucketProjectNumber) && bucketProjectNumber === projectNumber;
+}
+
 /**
  * Attempts to get an existing storage bucket if provided by the user OR
  * create/use a dedicated synthetics bucket.
@@ -57,7 +67,7 @@ export async function getOrCreateStorageBucket(
   errors: BaseError[]
 ): Promise<Bucket | null> {
   let bucketName = '';
-  let validatingExistingBucket = false;
+  let bucketExists = false;
 
   try {
     if (!storageClient) return null;
@@ -79,43 +89,19 @@ export async function getOrCreateStorageBucket(
       : `gcm-${projectId}-synthetics-${region}`;
 
     const bucket = storageClient.bucket(bucketName);
-    const [bucketExists] = await bucket.exists();
+    [bucketExists] = await bucket.exists();
 
-    if (bucketExists) {
-      validatingExistingBucket = true;
-      const projectNumber = await resolveProjectNumber();
-      if (!projectNumber) {
-        console.error(
-          'StorageValidationError',
-          `Unable to verify ownership of bucket ${bucketName}: current project number could not be resolved.`
-        );
-        errors.push({
-          error_type: 'StorageValidationError',
-          error_message: `Failed to validate bucket ${bucketName}: Unable to verify bucket ownership because the current project number could not be resolved.`,
-        });
-        return null;
-      }
-
-      const [metadata] = await bucket.getMetadata();
-      const bucketProjectNumber =
-        metadata?.projectNumber !== undefined &&
-        metadata?.projectNumber !== null
-          ? String(metadata.projectNumber).trim()
-          : '';
-
-      if (!bucketProjectNumber || bucketProjectNumber !== projectNumber) {
-        console.error(
-          'StorageValidationError',
-          `Bucket ${bucketName} does not belong to the current project.`
-        );
-        errors.push({
-          error_type: 'StorageValidationError',
-          error_message: `Failed to validate bucket ${bucketName}: Bucket does not belong to the current project.`,
-        });
-        return null;
-      }
-
+    if (bucketExists && (await isBucketOwnedByCurrentProject(bucket))) {
       return bucket; // Bucket exists and belongs to current project, return it
+    } else if (bucketExists) {
+      console.error(
+        'StorageValidationError',
+        `Bucket ${bucketName} does not belong to the current project.`
+      );
+      errors.push({
+        error_type: 'StorageValidationError',
+        error_message: `Failed to validate bucket ${bucketName}: Bucket does not belong to the current project.`,
+      });
     } else if (!storageLocation) {
       // Create only if no location was provided
       const [newBucket] = await bucket.create({
@@ -131,7 +117,7 @@ export async function getOrCreateStorageBucket(
       });
     }
   } catch (err) {
-    const isValidation = Boolean(storageLocation) || validatingExistingBucket;
+    const isValidation = Boolean(storageLocation) || bucketExists;
     const errorType = isValidation
       ? 'StorageValidationError'
       : 'BucketCreationError';
