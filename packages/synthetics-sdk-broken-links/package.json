@@ -43,7 +43,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.7.0",
+    "@google-cloud/storage": "^7.19.0",
     "@google-cloud/synthetics-sdk-api": "^0.6.0",
     "puppeteer": "24.10.0"
   }
