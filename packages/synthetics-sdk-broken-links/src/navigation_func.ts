@@ -188,7 +188,7 @@ export async function checkLink(
   if (!isOrigin) {
     let parsedProtocol = '';
     try {
-      parsedProtocol = new URL(link.target_uri).protocol;
+      parsedProtocol = new URL(link.target_uri)?.protocol ?? '';
     } catch {
       parsedProtocol = '';
     }
