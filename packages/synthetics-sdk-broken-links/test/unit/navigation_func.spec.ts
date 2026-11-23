@@ -13,6 +13,9 @@
 // limitations under the License.
 
 // Standard Libraries
+import * as fs from 'fs';
+import * as http from 'http';
+import { AddressInfo } from 'net';
 import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
@@ -93,10 +96,38 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
   // Puppeteer Setup
   let browser: Browser;
   let page: Page;
+  let server: http.Server;
+  let baseUrl: string;
   before(async () => {
     browser = await puppeteer.launch({
       headless: true,
     });
+    server = http.createServer((req, res) => {
+      if (req.url === '/slow') {
+        setTimeout(() => {
+          res.writeHead(200, { 'Content-Type': 'text/plain' });
+          res.end('slow');
+        }, 200);
+        return;
+      }
+      const filePath = path.join(
+        __dirname,
+        '../example_html_files',
+        (req.url || '/').replace(/^\//, '')
+      );
+      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        res.writeHead(200);
+        fs.createReadStream(filePath).pipe(res);
+      } else {
+        res.writeHead(404);
+        res.end('Not found');
+      }
+    });
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', () => resolve());
+    });
+    const address = server.address() as AddressInfo;
+    baseUrl = `http://127.0.0.1:${address.port}`;
   });
 
   beforeEach(async () => {
@@ -114,6 +145,9 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
 
   after(async () => {
     browser && (await browser.close());
+    if (server) {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
   });
 
   describe('navigate', async () => {
@@ -194,11 +228,9 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     });
 
     it('passes when navigating to .json', async () => {
+      const targetUri = `${baseUrl}/jokes.json`;
       const json_link: LinkIntermediate = {
-        target_uri: `file:${path.join(
-          __dirname,
-          '../example_html_files/jokes.json'
-        )}`,
+        target_uri: targetUri,
         anchor_text: '',
         html_element: '',
       };
@@ -213,10 +245,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         link_passed: true,
         expected_status_code: statusClass2xx,
         source_uri: 'http://origin.com',
-        target_uri: `file:${path.join(
-          __dirname,
-          '../example_html_files/jokes.json'
-        )}`,
+        target_uri: targetUri,
         html_element: '',
         anchor_text: '',
         status_code: 200,
@@ -238,10 +267,7 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       const options_with_timeout = Object.assign({}, options);
       options_with_timeout.link_timeout_millis = 2;
 
-      const target_uri = `file:${path.join(
-        __dirname,
-        '../example_html_files/jokes.json'
-      )}`;
+      const target_uri = `${baseUrl}/slow`;
 
       const timeout_link: LinkIntermediate = {
         target_uri: target_uri,
@@ -332,6 +358,31 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
       expect(synLinkResult)
         .excluding(['link_start_time', 'link_end_time'])
         .deep.equal(expectations);
+    });
+
+    it('blocks non-HTTP(S) scraped links such as file:// without calling page.goto', async () => {
+      const pageStub = sinon.createStubInstance(Page);
+      const fileLink: LinkIntermediate = {
+        target_uri: 'file:///etc/passwd',
+        anchor_text: 'passwd',
+        html_element: 'a',
+      };
+
+      const synLinkResult = await navigStorageUploadSuccMocked.checkLink(
+        pageStub,
+        fileLink,
+        options,
+        storageParams
+      );
+
+      expect(pageStub.goto.called).to.be.false;
+      expect(synLinkResult.link_passed).to.be.false;
+      expect(synLinkResult.error_type).to.equal(
+        'BrokenLinksSynthetic_DisallowedScheme'
+      );
+      expect(synLinkResult.screenshot_output).to.deep.equal(
+        emptyScreenshotOutput
+      );
     });
   });
 });
@@ -450,5 +501,35 @@ describe('retrieveLinksFromPage', async () => {
 
     const expectations: LinkIntermediate[] = [];
     expect(results).to.deep.equal(expectations);
+  });
+
+  it('filters out file:// and other non-HTTP(S) links scraped from page', async () => {
+    await page.setContent(`
+      <html>
+        <body>
+          <a href="file:///etc/passwd">Local file</a>
+          <a href="file:///proc/self/environ">Environ</a>
+          <a href="javascript:alert(1)">JS</a>
+          <a href="data:text/html,hello">Data</a>
+          <a href="https://example.com/ok">HTTPS</a>
+          <a href="/relative">Relative</a>
+        </body>
+      </html>
+    `);
+
+    const results = await retrieveLinksFromPage(page, 'a', ['href']);
+
+    expect(results).to.deep.equal([
+      {
+        target_uri: 'https://example.com/ok',
+        anchor_text: 'HTTPS',
+        html_element: 'a',
+      },
+      {
+        target_uri: 'https://mocked.com/relative',
+        anchor_text: 'Relative',
+        html_element: 'a',
+      },
+    ]);
   });
 }).timeout(3000);

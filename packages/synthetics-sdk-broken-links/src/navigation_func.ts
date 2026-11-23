@@ -64,23 +64,26 @@ export async function retrieveLinksFromPage(
 
         return get_attributes
           .map((attr) => (link_element.getAttribute(attr) || '').toString())
-          .filter((value) => {
-            const qualifed_url = new URL(value, origin_uri).href;
-            return (
-              value &&
-              (qualifed_url.startsWith('http') ||
-                qualifed_url.startsWith('file:'))
-            );
-          })
-          .map((value) => {
-            const qualifed_url = value.startsWith('file:')
-              ? value
-              : new URL(value, origin_uri).href;
-            return {
-              target_uri: qualifed_url,
-              anchor_text: anchor_text,
-              html_element: link_element.tagName.toLocaleLowerCase(),
-            };
+          .flatMap((value) => {
+            if (!value) return [];
+            try {
+              const qualifiedUrl = new URL(value, origin_uri);
+              if (
+                qualifiedUrl.protocol !== 'http:' &&
+                qualifiedUrl.protocol !== 'https:'
+              ) {
+                return [];
+              }
+              return [
+                {
+                  target_uri: qualifiedUrl.href,
+                  anchor_text: anchor_text,
+                  html_element: link_element.tagName.toLocaleLowerCase(),
+                },
+              ];
+            } catch {
+              return [];
+            }
           });
       });
     },
@@ -181,6 +184,36 @@ export async function checkLink(
   ]?.expected_status_code ?? {
     status_class: ResponseStatusCode_StatusClass.STATUS_CLASS_2XX,
   };
+
+  if (!isOrigin) {
+    let parsedProtocol = '';
+    try {
+      parsedProtocol = new URL(link.target_uri).protocol;
+    } catch {
+      parsedProtocol = '';
+    }
+    if (parsedProtocol !== 'http:' && parsedProtocol !== 'https:') {
+      const now = new Date().toISOString();
+      return {
+        link_passed: false,
+        expected_status_code: expectedStatusCode,
+        source_uri: options.origin_uri,
+        target_uri: link.target_uri,
+        html_element: link.html_element,
+        anchor_text: link.anchor_text,
+        status_code: undefined,
+        error_type: 'BrokenLinksSynthetic_DisallowedScheme',
+        error_message: `Blocked navigation to non-HTTP(S) link: ${link.target_uri}`,
+        link_start_time: now,
+        link_end_time: now,
+        is_origin: isOrigin,
+        screenshot_output: {
+          screenshot_file: '',
+          screenshot_error: {} as BaseError,
+        },
+      };
+    }
+  }
 
   // Perform the navigation and retrieves info to return
   const {
