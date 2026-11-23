@@ -13,6 +13,9 @@
 // limitations under the License.
 
 // Standard Libraries
+import * as fs from 'fs';
+import * as http from 'http';
+import { AddressInfo } from 'net';
 import { expect, use } from 'chai';
 import chaiExclude from 'chai-exclude';
 use(chaiExclude);
@@ -78,6 +81,57 @@ describe('runBrokenLinks', async () => {
   let storageClientStub: sinon.SinonStubbedInstance<Storage>;
   let bucketStub: sinon.SinonStubbedInstance<Bucket>;
   let pageStub: sinon.SinonStubbedInstance<Page>;
+  let server: http.Server;
+  let baseUrl: string;
+
+  before(async () => {
+    const fixtureFiles: Record<string, { file: string; contentType: string }> =
+      {
+        '/retrieve_links_test.html': {
+          file: 'retrieve_links_test.html',
+          contentType: 'text/html',
+        },
+        '/200.html': { file: '200.html', contentType: 'text/html' },
+        '/jokes.json': { file: 'jokes.json', contentType: 'application/json' },
+      };
+
+    server = http.createServer((req, res) => {
+      if (req.url === '/file-link-page.html') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`<!DOCTYPE html><html><body>
+          <a href="file:///etc/passwd">Local File</a>
+          <a href="${baseUrl}/200.html">Valid Link</a>
+        </body></html>`);
+        return;
+      }
+      const entry = Object.prototype.hasOwnProperty.call(
+        fixtureFiles,
+        req.url || ''
+      )
+        ? fixtureFiles[req.url || '']
+        : undefined;
+      if (entry) {
+        const filePath = path.join(__dirname, '../example_html_files', entry.file);
+        res.writeHead(200, { 'Content-Type': entry.contentType });
+        fs.createReadStream(filePath).pipe(res);
+      } else {
+        res.writeHead(404);
+        res.end('Not Found');
+      }
+    });
+    await new Promise<void>((resolve) => {
+      server.listen(0, '127.0.0.1', () => resolve());
+    });
+    const address = server.address() as AddressInfo;
+    baseUrl = `http://127.0.0.1:${address.port}`;
+  });
+
+  after(async () => {
+    if (server) {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  });
+
   beforeEach(() => {
     // Stub a storage bucket
     bucketStub = sinon.createStubInstance(Bucket);
@@ -261,10 +315,7 @@ describe('runBrokenLinks', async () => {
       },
     });
 
-    const origin_uri = `file:${path.join(
-      __dirname,
-      '../example_html_files/retrieve_links_test.html'
-    )}`;
+    const origin_uri = `${baseUrl}/retrieve_links_test.html`;
     const inputOptions = {
       origin_uri: origin_uri,
       query_selector_all: 'a[src], img[href]',
@@ -288,10 +339,10 @@ describe('runBrokenLinks', async () => {
     expect(broken_links_result?.link_count).to.equal(3);
     expect(broken_links_result?.passing_link_count).to.equal(2);
     expect(broken_links_result?.failing_link_count).to.equal(1);
-    expect(broken_links_result?.unreachable_count).to.equal(1);
+    expect(broken_links_result?.unreachable_count).to.equal(0);
     expect(broken_links_result?.status2xx_count).to.equal(2);
     expect(broken_links_result?.status3xx_count).to.equal(0);
-    expect(broken_links_result?.status4xx_count).to.equal(0);
+    expect(broken_links_result?.status4xx_count).to.equal(1);
     expect(broken_links_result?.status5xx_count).to.equal(0);
 
     expect(options).to.deep.equal({
@@ -334,12 +385,7 @@ describe('runBrokenLinks', async () => {
       ) => a.target_uri.localeCompare(b.target_uri)
     );
 
-    const fileDoesntExistPath = `file://${path.join(
-      __dirname,
-      '../example_html_files/file_doesnt_exist.html'
-    )}`
-      .split(' ')
-      .join('%20');
+    const fileDoesntExistPath = `${baseUrl}/file_doesnt_exist.html`;
 
     expect(sorted_followed_links)
       .excluding(['target_uri', 'link_start_time', 'link_end_time'])
@@ -366,9 +412,9 @@ describe('runBrokenLinks', async () => {
           target_uri: 'CHECKED_BELOW',
           html_element: 'img',
           anchor_text: '',
-          status_code: undefined,
-          error_type: 'Error',
-          error_message: 'net::ERR_FILE_NOT_FOUND at ' + fileDoesntExistPath,
+          status_code: 404,
+          error_type: 'BrokenLinksSynthetic_IncorrectStatusCode',
+          error_message: `${fileDoesntExistPath} returned status code 404 when a 200 status class was expected.`,
           link_start_time: 'NA',
           link_end_time: 'NA',
           is_origin: false,
@@ -378,8 +424,8 @@ describe('runBrokenLinks', async () => {
 
     // these are checked separately because path and puppeteer format space differently which cause the equality assertion to fail
     const expectedTargeturis = [
-      '/example_html_files/200.html',
-      '/example_html_files/file_doesnt_exist.html',
+      '/200.html',
+      '/file_doesnt_exist.html',
     ];
     broken_links_result?.followed_link_results?.forEach(
       (link: BrokenLinksResultV1_SyntheticLinkResult, index: number) => {
@@ -389,10 +435,7 @@ describe('runBrokenLinks', async () => {
   }).timeout(150000);
 
   it('Completes a full passing execution', async () => {
-    const origin_uri = `file:${path.join(
-      __dirname,
-      '../example_html_files/retrieve_links_test.html'
-    )}`;
+    const origin_uri = `${baseUrl}/retrieve_links_test.html`;
     const inputOptions: BrokenLinkCheckerOptions = {
       origin_uri: origin_uri,
       query_selector_all: 'a[src]',
@@ -475,9 +518,26 @@ describe('runBrokenLinks', async () => {
         },
       ]);
 
-    const expectedTargetPaths = ['example_html_files/200.html'];
+    const expectedTargetPaths = ['/200.html'];
     followed_links?.forEach((link, index) => {
       expect(link.target_uri.endsWith(expectedTargetPaths[index]));
     });
+  }).timeout(10000);
+
+  it('Ignores file:// links scraped from an HTTP origin page', async () => {
+    const origin_uri = `${baseUrl}/file-link-page.html`;
+    const inputOptions: BrokenLinkCheckerOptions = {
+      origin_uri: origin_uri,
+      screenshot_options: { capture_condition: CaptureCondition.NONE },
+    };
+
+    const result = await runBrokenLinks(inputOptions, args);
+    const broken_links_result = result?.synthetic_broken_links_result_v1;
+    const followed_links = broken_links_result?.followed_link_results;
+
+    expect(broken_links_result?.link_count).to.equal(2);
+    expect(broken_links_result?.passing_link_count).to.equal(2);
+    expect(followed_links?.length).to.equal(1);
+    expect(followed_links?.[0].target_uri).to.equal(`${baseUrl}/200.html`);
   }).timeout(10000);
 });
