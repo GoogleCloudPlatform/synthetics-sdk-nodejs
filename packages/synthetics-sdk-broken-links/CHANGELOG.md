@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.3.2...synthetics-sdk-broken-links-v0.3.3) (2026-11-23)
+
+
+### Bug Fixes
+
+* **broken-links:** Restrict scraped links to http and https ([#185](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/issues/185)) ([78ed74e](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/commit/78ed74eaa450467431c1b632a63f9a142bf8c95f))
+
 ## [0.3.2](https://github.com/GoogleCloudPlatform/synthetics-sdk-nodejs/compare/synthetics-sdk-broken-links-v0.3.1...synthetics-sdk-broken-links-v0.3.2) (2026-11-18)
 
 
