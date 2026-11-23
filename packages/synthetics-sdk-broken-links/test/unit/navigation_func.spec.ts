@@ -102,6 +102,9 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
     browser = await puppeteer.launch({
       headless: true,
     });
+    const fixtureFiles: Record<string, string> = {
+      '/jokes.json': 'jokes.json',
+    };
     server = http.createServer((req, res) => {
       if (req.url === '/slow') {
         setTimeout(() => {
@@ -110,13 +113,15 @@ describe('GCM Synthetics Broken Links Navigation Functionality', async () => {
         }, 200);
         return;
       }
-      const filePath = path.join(
-        __dirname,
-        '../example_html_files',
-        (req.url || '/').replace(/^\//, '')
-      );
-      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-        res.writeHead(200);
+      const fileName = Object.prototype.hasOwnProperty.call(
+        fixtureFiles,
+        req.url || ''
+      )
+        ? fixtureFiles[req.url || '']
+        : undefined;
+      if (fileName) {
+        const filePath = path.join(__dirname, '../example_html_files', fileName);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         fs.createReadStream(filePath).pipe(res);
       } else {
         res.writeHead(404);

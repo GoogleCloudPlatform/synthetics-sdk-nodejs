@@ -85,6 +85,16 @@ describe('runBrokenLinks', async () => {
   let baseUrl: string;
 
   before(async () => {
+    const fixtureFiles: Record<string, { file: string; contentType: string }> =
+      {
+        '/retrieve_links_test.html': {
+          file: 'retrieve_links_test.html',
+          contentType: 'text/html',
+        },
+        '/200.html': { file: '200.html', contentType: 'text/html' },
+        '/jokes.json': { file: 'jokes.json', contentType: 'application/json' },
+      };
+
     server = http.createServer((req, res) => {
       if (req.url === '/file-link-page.html') {
         res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -94,16 +104,15 @@ describe('runBrokenLinks', async () => {
         </body></html>`);
         return;
       }
-      const filePath = path.join(
-        __dirname,
-        '../example_html_files',
-        (req.url || '/').replace(/^\//, '')
-      );
-      if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-        const contentType = filePath.endsWith('.html')
-          ? 'text/html'
-          : 'application/json';
-        res.writeHead(200, { 'Content-Type': contentType });
+      const entry = Object.prototype.hasOwnProperty.call(
+        fixtureFiles,
+        req.url || ''
+      )
+        ? fixtureFiles[req.url || '']
+        : undefined;
+      if (entry) {
+        const filePath = path.join(__dirname, '../example_html_files', entry.file);
+        res.writeHead(200, { 'Content-Type': entry.contentType });
         fs.createReadStream(filePath).pipe(res);
       } else {
         res.writeHead(404);
